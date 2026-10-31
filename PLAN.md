@@ -316,10 +316,10 @@ Steg 3–5 kan drivas parallellt av flera agentinstanser; steg 7 beror på 2–4
 
 Agenten kör på antagandena ovan tills Patrik säger annat. Dessa påverkar ägande och bör avgöras före steg 6.
 
-- [ ] GitHub-organisation för `openhead` (personligt konto eller HUGIN Autonomy); namnet är beslutat.
-- [ ] Apple-konto: privat eller företag. Styr Team ID, Bundle ID och vem som kan lägga till testare.
-- [ ] Apache 2.0 bekräftat, eller privat repo tills vidare.
+- [x] GitHub-organisation: personligt konto (beslutat 2026-10-31).
+- [x] Apple-konto: privat (beslutat 2026-10-31). Omvänd domän för Bundle ID återstår.
+- [x] Apache 2.0, publikt repo (beslutat 2026-10-31).
 - [ ] Ska Python-paketet publiceras på PyPI vid 0.1.0, eller installeras från Git-tagg?
 - [ ] Ska robotrepots ROS 2-bridge få ett exempel i `examples/` här, eller hållas helt separat?
-- [ ] Vilken enhet står på skrivbordet som nivå 2-testenhet: iPhone 12 eller en iPad?
-- [ ] Vem ritar halloween-temats bilder: agenten (generativt eller programmatiskt) eller Patrik?
+- [x] Nivå 2-testenheter: iPhone 12 (baslinje, tekniknivån låses hit) och iPhone 18 Pro (verifiering). iPad i mån av tillgång. Android/ARCore kan komma senare; protokoll och motor hålls plattformsneutrala.
+- [x] Halloween-temats bilder tas fram av agenten programmatiskt (beslutat 2026-10-31).
