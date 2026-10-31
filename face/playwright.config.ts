@@ -15,8 +15,8 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:4173",
     browserName: "chromium",
-    // iPhone 12 in points; device scale 1 keeps goldens small.
-    viewport: { width: 390, height: 844 },
+    // iPhone 12 in landscape (how the head is mounted), in points; scale 1 keeps goldens small.
+    viewport: { width: 844, height: 390 },
     deviceScaleFactor: 1,
   },
   webServer: {

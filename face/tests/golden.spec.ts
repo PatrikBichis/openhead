@@ -22,14 +22,20 @@ test("halloween × cackle (theme extra)", async ({ page }) => {
   await expect(page.locator("#face")).toHaveScreenshot("halloween-cackle.png");
 });
 
-test.describe("iPad landscape", () => {
-  test.use({ viewport: { width: 1024, height: 768 } });
-  for (const theme of THEMES) {
-    test(`${theme} keeps proportions`, async ({ page }) => {
-      await openFace(page, theme);
-      await page.evaluate(() => window.openhead.setEmotion("happy", 1));
-      await settle(page);
-      await expect(page.locator("#face")).toHaveScreenshot(`${theme}-happy-landscape.png`);
-    });
-  }
-});
+// The phone is normally mounted in landscape (default viewport); other shapes must still work.
+for (const [shape, viewport] of [
+  ["portrait", { width: 390, height: 844 }],
+  ["ipad", { width: 1024, height: 768 }],
+] as const) {
+  test.describe(shape, () => {
+    test.use({ viewport });
+    for (const theme of THEMES) {
+      test(`${theme} keeps proportions`, async ({ page }) => {
+        await openFace(page, theme);
+        await page.evaluate(() => window.openhead.setEmotion("happy", 1));
+        await settle(page);
+        await expect(page.locator("#face")).toHaveScreenshot(`${theme}-happy-${shape}.png`);
+      });
+    }
+  });
+}

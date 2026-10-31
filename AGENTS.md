@@ -5,7 +5,7 @@ Working rules for coding agents in this repository. `PLAN.md` (Swedish) is the s
 ## Target hardware
 
 - Baseline device is **iPhone 12** (A14, iOS 17+). Every feature must work there. Newer devices (e.g. iPhone 18 Pro used for testing) may only be used for verification, never as a requirement: no APIs, sensors (LiDAR) or performance budgets an iPhone 12 lacks.
-- `IPHONEOS_DEPLOYMENT_TARGET = 17.0`. Universal app.
+- `IPHONEOS_DEPLOYMENT_TARGET = 17.0`. Universal app. The phone is mounted in **landscape**: the face, simulator (844 × 390) and goldens default to iPhone 12 landscape; portrait and iPad are secondary checks.
 - Android/ARCore may come later; keep `protocol/` and `face/` platform-neutral.
 - ROS 2 stays out of this repo; a bridge is built separately on the `openhead` Python package if needed.
 

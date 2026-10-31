@@ -19,6 +19,7 @@ Planen utgår från följande val. De är Patriks att ändra; agenten ska inte a
 | Var MCP-servern kör | På värden (Jetson, PC), aldrig på enheten. stdio först, Streamable HTTP som tillval. |
 | ROS 2 | Utanför repot. Robotrepot bygger sin bridge på `openhead`-biblioteket. |
 | Minsta OS | iOS/iPadOS 17. Universell app, fullskärm på iPad. |
+| Montering | Telefonen sitter i **landskapsläge** på roboten (beslutat 2026-10-31). Ansiktsmotorn, simulatorn och golden-bilderna utgår från iPhone 12 liggande (844 × 390 punkter); porträtt och iPad testas som sekundära format. |
 | Språk | Kod, README och protokolldokumentation på engelska. Den här planen på svenska. |
 | Namn | **OpenHead** (beslutat 2026-10-31). Repo `openhead`, Python-paket och CLI `openhead`, Swift-mål `OpenHead`, mDNS `_openhead._tcp`, MCP-resurser `openhead://`, Bundle ID `<omvänd domän>.openhead`. Kontrollera GitHub, PyPI och npm före första push; vid krock på PyPI publiceras paketet som `openhead-head` med oförändrat importnamn. Kontrollerat 2026-10-31: `openhead` ledigt på PyPI och npm, repot skapat som `PatrikBichis/openhead`. |
 | Licens | Apache 2.0 från första commit. |
@@ -161,7 +162,7 @@ face/themes/halloween/
 
 Gemensamma uttrycksnamn, obligatoriska i varje tema: `neutral`, `happy`, `curious`, `thinking`, `surprised`, `sad`, `angry`, `sleepy`, `scared`, `mischievous`. Saknas ett faller motorn på `neutral` och loggar en varning. Teman får lägga till egna; `face.list` rapporterar dem.
 
-Layout: motorn renderar i valfri aspekt och placerar ögon och mun relativt kortaste sidan, så att iPhone i porträtt, iPad i landskap och simulatorfönstret ger samma proportioner. Teman kan ange per-aspekt-justeringar men behöver inte.
+Layout: motorn renderar i valfri aspekt och placerar ögon och mun relativt en enhet som är kortaste sidan, men som på breda skärmar får växa till 1,35 × höjden, så att ansiktet fyller en liggande telefon (huvudfallet) och ändå har samma proportioner i porträtt, på iPad och i simulatorfönstret. Teman kan ange per-aspekt-justeringar men behöver inte.
 
 Tre teman i v0.1: `cartoon` (runda ögon, tydlig mun, varm palett), `minimal` (två ljusstreck och en linje, mörk bakgrund, låg strömförbrukning) och `halloween` (bildbaserade ögon, spruckna, grön glöd, extra uttrycket `cackle`). Halloween finns för att bevisa att bildspåret fungerar, inte bara vektorspåret.
 
@@ -183,7 +184,7 @@ Lägen (`mode.set`): `sensing` (ARKit äger kamerorna, v0.2), `capture` (fri AVC
 
 Universell app:
 
-- `TARGETED_DEVICE_FAMILY = 1,2`, `UIRequiresFullScreen = YES`, alla orienteringar på iPad, porträtt och landskap på iPhone.
+- `TARGETED_DEVICE_FAMILY = 1,2`, `UIRequiresFullScreen = YES`, alla orienteringar på iPad, landskap (vänster och höger) på iPhone.
 - Layouten är motorns ansvar; skalet ger den hela ytan och rapporterar `safeAreaInsets`.
 - Statusrad och inställningar använder size classes; inga hårdkodade mått.
 

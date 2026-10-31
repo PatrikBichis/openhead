@@ -62,8 +62,9 @@ CAPTION_JS = """
   if (!c) {
     c = document.createElement("div");
     c.id = "caption";
-    c.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:3;padding:14px 16px;" +
-      "font:600 20px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.55);text-align:center";
+    c.style.cssText = "position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:3;" +
+      "padding:6px 14px;border-radius:999px;font:600 15px system-ui,sans-serif;color:#fff;" +
+      "background:rgba(0,0,0,.5);white-space:nowrap";
     document.body.append(c);
   }
   c.textContent = text ?? "";
@@ -94,7 +95,7 @@ class BrowserFace:
         self,
         dist: Path | None = None,
         *,
-        size: tuple[int, int] = (390, 844),
+        size: tuple[int, int] = (844, 390),
         headless: bool = True,
         idle: bool = True,
         on_log: Callable[[str, str], None] | None = None,

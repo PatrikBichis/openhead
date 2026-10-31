@@ -164,7 +164,7 @@ async def test_screenshot_url_needs_token(head, sim):
     png = await head.system.screenshot(0.5)
     assert png.startswith(b"\x89PNG")
     result = await head.command("system.screenshot")
-    assert result["width"] == 390 and result["height"] == 844
+    assert result["width"] == 844 and result["height"] == 390
     with pytest.raises(urllib.error.HTTPError) as err:
         await asyncio.to_thread(urllib.request.urlopen, result["url"])
     assert err.value.code == 401

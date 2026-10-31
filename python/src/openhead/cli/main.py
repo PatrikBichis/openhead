@@ -79,7 +79,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--host", default="0.0.0.0")
     p.add_argument("--name", default="openhead-sim")
     p.add_argument("--theme", default="cartoon")
-    p.add_argument("--size", default="390x844", help="viewport WxH in points")
+    p.add_argument("--size", default="844x390",
+                   help="viewport WxH in points (default iPhone 12 landscape)")
     p.add_argument("--no-dev", action="store_true", help="dev mode off (random pairing code)")
     p.add_argument("--no-mdns", action="store_true")
     p.add_argument("--tokens", type=Path, default=Path.home() / ".openhead" / "sim-device-tokens.json",

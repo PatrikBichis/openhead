@@ -13,9 +13,16 @@ const LAYOUT = { eye_spacing: 0.46, eye_size: 0.24, eye_y: 0.12, mouth_width: 0.
 type Ctx = CanvasRenderingContext2D;
 
 /**
- * Draws one frame. All sizes derive from S, the canvas's shortest side, so portrait
- * phones, landscape tablets and the simulator window get the same proportions.
+ * The unit all face sizes derive from: the shortest side, allowed to grow to 1.35 × the
+ * height on wide screens. A phone mounted in landscape (the robot's normal case) then gets
+ * a face that fills the screen instead of a small one in the middle; the face's vertical
+ * extent (about half the unit) still fits. Portrait screens are unaffected.
  */
+export function faceUnit(w: number, h: number): number {
+  return Math.min(w, h * 1.35);
+}
+
+/** Draws one frame, keeping the same proportions on every screen (see `faceUnit`). */
 export class Renderer {
   private low = document.createElement("canvas");
 
@@ -44,7 +51,7 @@ export class Renderer {
 function drawFace(ctx: Ctx, w: number, h: number, pack: ThemePack, { params: p, breath }: Frame) {
   const { theme } = pack;
   const L = { ...LAYOUT, ...theme.layout };
-  const S = Math.min(w, h);
+  const S = faceUnit(w, h);
 
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);

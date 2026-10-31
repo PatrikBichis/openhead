@@ -59,7 +59,7 @@ class SimConfig:
     dev_mode: bool = True
     headless: bool = True
     idle: bool | None = None  # default: idle motion only when windowed
-    size: tuple[int, int] = (390, 844)
+    size: tuple[int, int] = (844, 390)  # iPhone 12 in landscape, as mounted
     face_dist: Path | None = None
     theme: str = "cartoon"
     token_path: Path | None = None  # persist paired clients; None keeps them in memory

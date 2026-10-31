@@ -198,7 +198,8 @@ def mux(video: Path, audio: Path | None, out: Path) -> None:
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("-o", "--output", type=Path, default=Path("openhead-demo.mp4"))
-    parser.add_argument("--size", default="540x960", help="video size WxH")
+    parser.add_argument("--size", default="960x444",
+                        help="video size WxH (default: phone in landscape)")
     args = parser.parse_args()
     w, _, h = args.size.partition("x")
 
