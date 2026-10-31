@@ -301,7 +301,7 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 3. Face engine with three themes and golden-image tests
 - [x] 4. Simulator, Python client, CLI, smoke scenario
 - [x] 5. MCP server (stdio)
-- [ ] 6. Apple Developer setup and secrets
+- [x] 6. Apple Developer setup and secrets
 - [ ] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
 - [ ] 8. Device in the loop: smoke scenario green on simulator and device
 - [ ] 9. IMU stream and envelope-driven mouth

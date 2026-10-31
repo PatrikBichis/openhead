@@ -274,9 +274,9 @@ Ett enda workflow. All testning sker lokalt (`tools/check.py`, pre-push-hook); G
 
 | Workflow | Runner | Trigger | Gör |
 | --- | --- | --- | --- |
-| `ios-testflight.yml` | macos-15 | endast `workflow_dispatch` (manuellt, `gh workflow run`) | bygg motor, `xcodegen`, signerat arkiv, export, uppladdning till TestFlight; väntar inte på processning, skriver version och byggnummer i summeringen |
+| `ios-testflight.yml` | macos-26 | endast `workflow_dispatch` (manuellt, `gh workflow run`); `upload=false` ger en osignerad kompileringskontroll | bygg motor, `xcodegen`, signerat arkiv, export och uppladdning med `xcodebuild -exportArchive` och API-nyckeln; väntar inte på processning, skriver version och byggnummer i summeringen |
 
-Ingen körning vid push och inget schema. TestFlight-byggen går ut efter 90 dagar; ett nytt bygge startas manuellt vid behov.
+Ingen körning vid push och inget schema. TestFlight-byggen går ut efter 90 dagar; ett nytt bygge startas manuellt vid behov. Ändrat 2026-10-31: `macos-26`/Xcode 26 i stället för `macos-15`, eftersom Apple sedan april 2026 kräver iOS 26 SDK vid uppladdning; uppladdning direkt med `xcodebuild` i stället för `fastlane pilot` (ingen fastlane-installation per bygge). Processningen följs lokalt med `tools/testflight_status.py`.
 
 Apple-uppsättning, görs av Patrik en gång (detaljer i `docs/ios.md`):
 
