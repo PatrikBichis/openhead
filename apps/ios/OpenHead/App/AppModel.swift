@@ -1,0 +1,164 @@
+import ARKit
+import SwiftUI
+
+/// Everything the head is: face, display state, sensors, settings and the link.
+@MainActor
+final class AppModel: ObservableObject {
+    let logs = LogStore()
+    let settings = SettingsStore()
+    let pairing = Pairing()
+    let face = FaceController()
+    let motion = MotionService()
+    private(set) lazy var link = LinkServer(model: self)
+
+    @Published var display: DisplayContent = .face
+    @Published var overlay = "none"
+    @Published var showSettings = false
+    @Published private(set) var clients = 0
+    @Published private(set) var linkReady = false
+    @Published private(set) var thermalState = ProcessInfo.ThermalState.nominal
+    @Published private(set) var themeNames: [String] = []
+    private(set) var themes: [[String: Any]] = []
+    let started = Date()
+    private var started_ = false
+    private var fps = FrameCounter()
+    private var timers: [String: Timer] = [:]
+
+    var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        return "\(info?["CFBundleShortVersionString"] as? String ?? "?") (\(info?["CFBundleVersion"] as? String ?? "?"))"
+    }
+
+    func start() {
+        guard !started_ else { return }
+        started_ = true
+        UIApplication.shared.isIdleTimerDisabled = true
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        logs.log("info", "app", "OpenHead \(appVersion) starting on \(DeviceInfo.model)")
+        face.onLog = { [weak self] level, message in self?.logs.log(level, "face", message) }
+        face.onReady = { [weak self] in self?.faceReady() }
+        face.load(theme: settings.offlineTheme)
+        fps.start()
+        NotificationCenter.default.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification,
+                                               object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.thermalChanged() }
+        }
+        thermalChanged()
+    }
+
+    private func faceReady() {
+        logs.log("info", "face", "engine ready")
+        Task {
+            themes = (try? await face.listThemes()) ?? []
+            themeNames = themes.compactMap { $0["name"] as? String }
+            if !linkReady { link.start() }
+        }
+    }
+
+    func linkStateChanged(ready: Bool, clients: Int) {
+        linkReady = ready
+        self.clients = clients
+    }
+
+    private func thermalChanged() {
+        thermalState = ProcessInfo.processInfo.thermalState
+        if thermalState == .serious || thermalState == .critical {
+            logs.log("warning", "app", "thermal state \(thermalName)")
+        }
+    }
+
+    var thermalName: String {
+        switch thermalState {
+        case .nominal: return "nominal"
+        case .fair: return "fair"
+        case .serious: return "serious"
+        case .critical: return "critical"
+        @unknown default: return "nominal"
+        }
+    }
+
+    // MARK: - display
+
+    func show(_ content: DisplayContent, overlay: String, durationMs: Int?) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            display = content
+            self.overlay = content.name == "face" ? "none" : overlay
+        }
+        logs.log("info", "display", "view=\(content.name) overlay=\(self.overlay)")
+        schedule("display", durationMs) { [weak self] in self?.show(.face, overlay: "none", durationMs: nil) }
+    }
+
+    /// Run `action` after `ms` (replacing an earlier one with the same key); nil cancels.
+    func schedule(_ key: String, _ ms: Int?, _ action: @escaping @MainActor () -> Void) {
+        timers[key]?.invalidate()
+        timers[key] = nil
+        guard let ms else { return }
+        timers[key] = Timer.scheduledTimer(withTimeInterval: Double(ms) / 1000, repeats: false) { _ in
+            MainActor.assumeIsolated { action() }
+        }
+    }
+
+    // MARK: - status and diagnostics
+
+    func status(rttMs: Double?) async -> JSONObject {
+        let state = (try? await face.state()) ?? (theme: settings.offlineTheme, emotion: "neutral")
+        let device = UIDevice.current
+        var status: JSONObject = [
+            "charging": device.batteryState == .charging || device.batteryState == .full,
+            "thermal_state": thermalName,
+            "view": display.name,
+            "overlay": overlay,
+            "theme": state.theme,
+            "emotion": state.emotion,
+            "mode": "idle",
+            "dev_mode": settings.devMode,
+            "clients": clients,
+            "uptime_s": (Date().timeIntervalSince(started) * 10).rounded() / 10,
+        ]
+        if device.batteryLevel >= 0 { status["battery_level"] = Double(device.batteryLevel) }
+        if let rttMs { status["rtt_ms"] = rttMs }
+        return status
+    }
+
+    func diagnostics() -> JSONObject {
+        [
+            "uptime_s": (Date().timeIntervalSince(started) * 10).rounded() / 10,
+            "thermal_state": thermalName,
+            "memory_mb": DeviceInfo.memoryFootprintMB,
+            "frame_rate": fps.rate,
+            "permissions": [
+                "local_network": linkReady ? "granted" : "not_determined",
+                "motion": "not_required",
+                "camera": "not_required",
+            ],
+            "arkit": [
+                "world_tracking": ARWorldTrackingConfiguration.isSupported,
+                "face_tracking": ARWorldTrackingConfiguration.supportsUserFaceTracking,
+            ],
+        ]
+    }
+}
+
+/// Frames per second of the app's display loop, for diagnostics.
+@MainActor
+final class FrameCounter: NSObject {
+    private var link: CADisplayLink?
+    private var frames = 0
+    private var windowStart = CACurrentMediaTime()
+    private(set) var rate: Double = 0
+
+    func start() {
+        link = CADisplayLink(target: self, selector: #selector(tick))
+        link?.add(to: .main, forMode: .common)
+    }
+
+    @objc private func tick() {
+        frames += 1
+        let now = CACurrentMediaTime()
+        if now - windowStart >= 1 {
+            rate = (Double(frames) / (now - windowStart) * 10).rounded() / 10
+            frames = 0
+            windowStart = now
+        }
+    }
+}
