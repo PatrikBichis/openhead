@@ -16,7 +16,7 @@ struct UIScreenInfo {
         let bounds = window?.bounds ?? CGRect(x: 0, y: 0, width: 844, height: 390)
         let insets = window?.safeAreaInsets ?? .zero
         return UIScreenInfo(
-            width: bounds.width, height: bounds.height, scale: window?.screen.scale ?? 3,
+            width: bounds.width, height: bounds.height, scale: Double(window?.screen.scale ?? 3),
             safeArea: ["top": insets.top, "left": insets.left, "bottom": insets.bottom, "right": insets.right],
             isPad: UIDevice.current.userInterfaceIdiom == .pad,
             osVersion: UIDevice.current.systemVersion)
