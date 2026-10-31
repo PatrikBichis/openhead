@@ -42,6 +42,12 @@ struct RootView: View {
         if case .web(let url) = model.display {
             WebPageView(url: url)
         }
+        // Kept in the layout while capture runs (hidden unless the camera view shows), so the
+        // preview layer can turn face metadata into screen boxes for the HUD and `faces`.
+        if model.mode == "capture" {
+            CameraPreview(layer: model.camera.previewLayer)
+                .opacity(model.display == .camera ? 1 : 0)
+        }
     }
 
     private func face(in size: CGSize) -> some View {

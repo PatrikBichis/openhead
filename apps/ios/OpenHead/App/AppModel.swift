@@ -9,11 +9,22 @@ final class AppModel: ObservableObject {
     let pairing = Pairing()
     let face = FaceController()
     let motion = MotionService()
+    let camera = CameraService()
+    let ar = ARService()
+    let heading = HeadingService()
     private(set) lazy var link = LinkServer(model: self)
 
     @Published var display: DisplayContent = .face
     @Published var overlay = "none"
     @Published var showSettings = false
+    /// Who owns the cameras: idle, capture (front camera, faces) or sensing (ARKit). See AppModel+Sensing.
+    @Published var mode = "idle"
+    var faces: [SeenFace] = []
+    var facesSource = "vision"
+    var lastFacesToPage = 0.0
+    var tilt: (pitch: Double, roll: Double)?
+    var hudTimer: Timer?
+    let hudMotionId = UUID()
     @Published private(set) var clients = 0
     @Published private(set) var linkReady = false
     @Published private(set) var thermalState = ProcessInfo.ThermalState.nominal
@@ -38,6 +49,8 @@ final class AppModel: ObservableObject {
         face.onLog = { [weak self] level, message in self?.logs.log(level, "face", message) }
         face.onReady = { [weak self] in self?.faceReady() }
         face.onView = { [weak self] view in self?.pageChangedView(view) }
+        camera.onFaces = { [weak self] faces in self?.facesChanged(faces, source: "vision") }
+        ar.onFaces = { [weak self] faces in self?.facesChanged(faces, source: "arkit") }
         face.load(theme: settings.offlineTheme)
         fps.start()
         NotificationCenter.default.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification,
@@ -82,12 +95,14 @@ final class AppModel: ObservableObject {
 
     /// Show `content` (loaded by the web layer first, so a bad source changes nothing).
     func show(_ content: DisplayContent, source: String = "", overlay: String, loop: Bool = false,
-              muted: Bool = false, durationMs: Int?) async throws {
+              muted: Bool = false, hud: String = "hunter", durationMs: Int?) async throws {
         if content == .face {
             try await face.clearDisplay()
         } else {
-            try await face.show(content.name, source: source, overlay: overlay, loop: loop, muted: muted)
+            try await face.show(content.name, source: source, overlay: overlay, loop: loop, muted: muted, hud: hud)
         }
+        if content == .camera, display != .camera { startHudFeed() }
+        if content != .camera, display == .camera { stopHudFeed() }
         display = content
         self.overlay = content == .face ? "none" : overlay
         logs.log("info", "display", "view=\(content.name) overlay=\(self.overlay)")
@@ -102,6 +117,7 @@ final class AppModel: ObservableObject {
     private func pageChangedView(_ view: String) {
         guard view == "face", display != .face else { return }
         schedule("display", nil) {}
+        if display == .camera { stopHudFeed() }
         display = .face
         overlay = "none"
     }
@@ -128,12 +144,13 @@ final class AppModel: ObservableObject {
             "overlay": overlay,
             "theme": state.theme,
             "emotion": state.emotion,
-            "mode": "idle",
+            "mode": mode,
             "dev_mode": settings.devMode,
             "clients": clients,
             "uptime_s": (Date().timeIntervalSince(started) * 10).rounded() / 10,
         ]
         if !state.subtitle.isEmpty { status["subtitle"] = String(state.subtitle.suffix(4000)) }
+        if mode != "idle" { status["faces"] = faces.count }
         if device.batteryLevel >= 0 { status["battery_level"] = Double(device.batteryLevel) }
         if let rttMs { status["rtt_ms"] = rttMs }
         return status
@@ -148,7 +165,7 @@ final class AppModel: ObservableObject {
             "permissions": [
                 "local_network": linkReady ? "granted" : "not_determined",
                 "motion": "not_required",
-                "camera": "not_required",
+                "camera": CameraService.permission,
             ],
             "arkit": [
                 "world_tracking": ARWorldTrackingConfiguration.isSupported,

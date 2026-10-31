@@ -122,8 +122,10 @@ final class FaceController: NSObject, ObservableObject, WKScriptMessageHandler, 
 
     /// Load and show `content`; throws (screen unchanged) if it cannot be loaded. Web pages
     /// are drawn natively below the web view (`nativeWeb`), which turns transparent.
-    func show(_ content: String, source: String, overlay: String, loop: Bool, muted: Bool) async throws {
-        let opts: [String: Any] = ["overlay": overlay, "loop": loop, "muted": muted, "nativeWeb": content == "web"]
+    func show(_ content: String, source: String, overlay: String, loop: Bool, muted: Bool,
+              hud: String = "hunter") async throws {
+        let opts: [String: Any] = ["overlay": overlay, "loop": loop, "muted": muted, "nativeWeb": content == "web",
+                                   "hud": hud, "nativeCamera": true]
         try await call("await window.openhead.show(content, source, opts); return true",
                        ["content": content, "source": source, "opts": opts])
     }
@@ -137,6 +139,35 @@ final class FaceController: NSObject, ObservableObject, WKScriptMessageHandler, 
         if let position { opts["position"] = position }
         if let durationMs { opts["durationMs"] = durationMs }
         try await call("window.openhead.subtitle(text, opts); return true", ["text": text, "opts": opts])
+    }
+
+    // MARK: camera view, faces and HUD (protocol 0.2)
+
+    func setFaces(_ faces: [JSONObject]) async throws {
+        try await call("window.openhead.setFaces(faces); return true", ["faces": faces])
+    }
+
+    /// The eyes follow face `id` (nil: the locked face); `stop` ends following.
+    func followFace(_ id: Int?, stop: Bool = false) async throws {
+        if stop {
+            try await call("window.openhead.followFace(undefined); return true")
+        } else if let id {
+            try await call("window.openhead.followFace(id); return true", ["id": id])
+        } else {
+            try await call("window.openhead.followFace(null); return true")
+        }
+    }
+
+    func setHudValues(_ values: JSONObject) async throws {
+        try await call("window.openhead.setHudValues(values); return true", ["values": values])
+    }
+
+    func hudExtras(_ extras: JSONObject) async throws {
+        try await call("window.openhead.hudExtras(extras); return true", ["extras": extras])
+    }
+
+    func listHuds() async throws -> [[String: Any]] {
+        (try await call("return window.openhead.listHuds()") as? [[String: Any]]) ?? []
     }
 
     func listThemes() async throws -> [[String: Any]] {

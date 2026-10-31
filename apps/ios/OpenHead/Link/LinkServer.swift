@@ -172,7 +172,7 @@ final class LinkServer {
     // MARK: - messages
 
     private static let deviceMessages: Set<String> = ["ack", "error", "welcome", "pair_required",
-                                                      "imu", "status", "log"]
+                                                      "imu", "status", "log", "faces", "pose"]
 
     private func handle(_ session: Session, _ data: Data) {
         guard let message = (try? JSONSerialization.jsonObject(with: data)) as? JSONObject else {
@@ -288,7 +288,8 @@ final class LinkServer {
                 "screen": ["width": screen.width, "height": screen.height, "scale": screen.scale,
                            "safe_area": screen.safeArea],
             ],
-            "capabilities": ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu", "status", "log", "screenshot"],
+            "capabilities": ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
+                             "status", "log", "screenshot", "camera", "faces"] + (model.supportsSensing ? ["pose"] : []),
             "themes": model.themeNames,
             "dev_mode": model.settings.devMode,
         ])

@@ -52,11 +52,22 @@ enum Screenshot {
         format.opaque = true
         let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
             window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
+            if model.display == .camera, let frame = model.camera.lastFrame.image() {
+                frame.draw(in: aspectFill(frame.size, window.bounds))  // the preview is not captured
+            }
             faceImage?.draw(in: faceFrame)
         }
         guard let png = image.pngData() else { throw LinkError("busy", "could not encode screenshot") }
         return (png, Int(image.size.width * image.scale), Int(image.size.height * image.scale))
     }
+}
+
+/// `size` scaled to cover `bounds`, centred (like the preview's aspect fill).
+private func aspectFill(_ size: CGSize, _ bounds: CGRect) -> CGRect {
+    let scale = max(bounds.width / size.width, bounds.height / size.height)
+    let w = size.width * scale
+    let h = size.height * scale
+    return CGRect(x: bounds.midX - w / 2, y: bounds.midY - h / 2, width: w, height: h)
 }
 
 /// HTTP server on port + 1 for screenshot URLs: `GET /shot/<id>.png` with the requesting

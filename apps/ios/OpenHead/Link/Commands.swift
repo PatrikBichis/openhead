@@ -28,7 +28,18 @@ extension LinkServer {
                                       durationMs: m.int("duration_ms"))
             return nil
 
+        case "face.look_at" where m.string("frame") == "face":
+            guard model.mode != "idle" else {
+                throw LinkError("invalid_params", "look_at frame face needs mode capture or sensing")
+            }
+            try await face.followFace(m.int("face_id"))
+            model.schedule("gaze", m.int("duration_ms")) { [weak face] in
+                Task { try? await face?.followFace(nil, stop: true) }
+            }
+            return nil
+
         case "face.look_at":
+            try await face.followFace(nil, stop: true)
             let x: Double
             let y: Double
             if m.string("frame") == "screen" {
@@ -60,7 +71,8 @@ extension LinkServer {
                 for key in ["name", "version", "title", "expressions", "extras"] { t[key] = theme[key] }
                 return t
             }
-            return ["active": state.theme, "themes": themes]
+            let huds = try await face.listHuds()
+            return ["active": state.theme, "themes": themes, "huds": huds]
 
         case "display.show":
             let content = m.string("content") ?? "face"
@@ -78,6 +90,9 @@ extension LinkServer {
                 }
                 try await model.show(.video, source: source, overlay: overlay, loop: m.bool("loop") ?? false,
                                      muted: m.bool("muted") ?? false, durationMs: duration)
+            case "camera":
+                if model.mode != "capture" { try await model.setMode("capture") }
+                try await model.show(.camera, overlay: overlay, hud: m.string("hud") ?? "hunter", durationMs: duration)
             case "web":
                 guard source.hasPrefix("http://") || source.hasPrefix("https://"), let url = URL(string: source) else {
                     throw LinkError("invalid_params", "web content needs an http(s) URL")
@@ -90,6 +105,12 @@ extension LinkServer {
 
         case "display.clear":
             try await model.show(.face, overlay: "none", durationMs: nil)
+            return nil
+
+        case "display.hud":
+            var extras: JSONObject = [:]
+            for key in ["values", "blocks", "widgets", "clear"] { extras[key] = m[key] }
+            try await face.hudExtras(extras)
             return nil
 
         case "display.subtitle":
@@ -136,13 +157,15 @@ extension LinkServer {
             return ["settings": model.settings.all]
 
         case "mode.set":
-            guard m.string("mode") == "idle" else {
-                throw LinkError("unsupported", "mode \(m.string("mode") ?? "") arrives in 0.2")
+            let mode = m.string("mode") ?? "idle"
+            if mode == "sensing", !model.supportsSensing {
+                throw LinkError("unsupported", "ARKit world tracking is not supported on this device")
             }
+            try await model.setMode(mode)
             return nil
 
         case "mode.get":
-            return ["mode": "idle"]
+            return ["mode": model.mode]
 
         default:
             throw LinkError("unsupported", "\(type) is not implemented")
@@ -171,6 +194,18 @@ extension LinkServer {
                 session?.send("imu", filtered(sample.json))
             }
             session.subscriptions[topic] = (fields, nil)
+            return ["topic": topic, "rate_hz": rate]
+        case "faces", "pose":
+            let maximum = topic == "faces" ? 15.0 : 60.0
+            let rate = min(m.double("rate_hz") ?? (topic == "faces" ? 15 : 30), maximum)
+            let timer = Timer.scheduledTimer(withTimeInterval: 1 / rate, repeats: true) { [weak self, weak session] _ in
+                MainActor.assumeIsolated {
+                    guard let self, let session else { return }
+                    let payload = topic == "faces" ? self.model.facesPayload : self.model.ar.latestPose
+                    if let payload { session.send(topic, filtered(payload)) }  // nothing in other modes
+                }
+            }
+            session.subscriptions[topic] = (fields, timer)
             return ["topic": topic, "rate_hz": rate]
         case "status":
             let rate = min(m.double("rate_hz") ?? 1, 1)

@@ -54,6 +54,7 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        NSCameraUsageDescription: OpenHead shows what the head sees and finds faces so the robot can look at people. Camera images stay on this device.
         NSLocalNetworkUsageDescription: OpenHead lets robot controllers on your network connect to this head.
         NSBonjourServices:
           - _openhead._tcp
