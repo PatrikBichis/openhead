@@ -36,6 +36,22 @@ There is no Swift for the iOS SDK on Windows, but the generated models only use 
 
 An iPhone 12 (baseline) or the iPhone 18 Pro stands charged with the latest TestFlight build, app in the foreground, dev mode on, paired with the agent's machine. TestFlight automatic updates bring new builds to it without hands. The agent runs `openhead run scenarios/x.yaml --device head-01.local` or uses the MCP tools: `take_screenshot` to see, `tail_logs` to understand, `get_diagnostics` when something is wrong. This is the only way to verify the iOS shell, ARKit, cameras, performance and thermals without a Mac.
 
+### Latency and smoothness (step 9)
+
+`tools/latency.py` measures a head: command round trip, how far the mouth lags a 25 Hz envelope (a 0.5 Hz sine, read back from screenshots) and whether it follows smoothly, and frame rate and thermal state. Dev mode on.
+
+```bash
+uv run --project python python tools/latency.py --out scenario-reports/latency-<device>
+```
+
+| Device | Round trip p50 / p95 | Envelope → mouth | Correlation | Frame rate | Date |
+| --- | --- | --- | --- | --- | --- |
+| Simulator (headless) | 1.3 / 1.7 ms | ~35 ms | 0.99 | 60 fps | 2026-10-31 |
+| iPhone 18 Pro, iOS 26, weak Wi-Fi | 4.2 / 27 ms | ~70 ms | 0.99 | 60 fps, nominal | 2026-10-31 |
+| iPhone 12 (baseline) | not measured yet | | | | |
+
+The delay includes the mouth's attack smoothing (about 30 ms in the themes) and one frame; correlation near 1 means the mouth follows without jumps. The host sends at 25 Hz on average; on Windows its timer makes single gaps up to ~48 ms.
+
 ## Level 3: TestFlight build (step 7)
 
 ```bash
