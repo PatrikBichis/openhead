@@ -59,6 +59,24 @@ The project is generated from `apps/ios/project.yml`; `OpenHead.xcodeproj` and `
 
 **Status strip** (top right, only when there is something to show): link problem, number of connected clients, dev mode, thermal warning.
 
+## App Store media
+
+`tools/media.py` renders the shipped face engine in headless Chromium at Apple's exact sizes (build `face/dist` first):
+
+```bash
+cd python
+uv run --with imageio-ffmpeg python ../tools/media.py            # stills and preview
+```
+
+| Output | What |
+| --- | --- |
+| `apps/ios/appstore/screenshots/iphone-6.9/` | 6 screenshots, 2868 × 1320 (6.9" iPhone, landscape) |
+| `apps/ios/appstore/screenshots/ipad-13/` | 6 screenshots, 2752 × 2064 (13" iPad, landscape) |
+| `apps/ios/appstore/previews/iphone-6.9-landscape.mp4` | app preview, 1920 × 886, 30 fps, H.264 + stereo AAC, 28 s, with speech |
+| `docs/media/` | README GIF, mp4, theme pictures and emotion sheets |
+
+Upload them in App Store Connect under the app version (Previews and Screenshots). The 6.9" set is scaled down for smaller iPhones and the 13" set for smaller iPads. Speech uses a Windows SAPI voice; elsewhere the preview has a silent track. The settings pictures in `docs/media/settings_*.jpg` are real device screenshots.
+
 ## Running on a robot
 
 - Mount the phone in landscape (left or right); the app does not rotate to portrait on iPhone.

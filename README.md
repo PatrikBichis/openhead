@@ -6,6 +6,15 @@ OpenHead turns an iPhone or iPad into a self-contained robot head. The device re
 
 The protocol is the product. The iOS app is the first client; the desktop simulator is the second.
 
+<p align="center">
+  <img src="docs/media/openhead.gif" alt="OpenHead talking, changing emotions and switching between the cartoon, minimal and halloween themes" width="640">
+</p>
+<p align="center"><a href="docs/media/openhead-preview.mp4">Watch with sound (mp4, 28 s)</a>: speech drives the mouth, emotions are separate commands.</p>
+
+| Cartoon | Minimal | Halloween |
+| --- | --- | --- |
+| ![Cartoon theme, happy](docs/media/cartoon-happy.png) | ![Minimal theme, surprised](docs/media/minimal-surprised.png) | ![Halloween theme, cackle](docs/media/halloween-cackle.png) |
+
 ---
 
 ## Why
@@ -151,6 +160,15 @@ Shared emotion names, required in every theme (missing ones fall back to `neutra
 
 Built-in themes in v0.1: `cartoon`, `minimal`, `halloween`. Hosts discover themes and their extra expressions with `face.list`.
 
+<details>
+<summary>All 28 emotions in each theme</summary>
+
+![Cartoon emotions](docs/media/emotions-cartoon.png)
+![Minimal emotions](docs/media/emotions-minimal.png)
+![Halloween emotions, plus the extra "cackle"](docs/media/emotions-halloween.png)
+
+</details>
+
 Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voice + speaking style) is defined on the host, which is where the audio lives.
 
 ---
@@ -281,6 +299,18 @@ uv run openhead mcp --device localhost        # expose it to an agent (step 5)
 
 ---
 
+## On the phone
+
+Mount the phone in landscape and start the app: the face fills the screen. A long press (1.5 s) opens the settings; when a new client connects, a pairing code is shown for 60 s.
+
+| Connection | Head |
+| --- | --- |
+| ![Settings: name, port and addresses](docs/media/settings_connection.jpg) | ![Settings: theme when offline, IMU mounting, dev mode](docs/media/settings_head.jpg) |
+| **Dev mode and paired clients** | **About** |
+| ![Settings: dev mode and paired clients](docs/media/settings_dev_mode.jpg) | ![Settings: version, protocol and device](docs/media/settings_about.jpg) |
+
+---
+
 ## Device support
 
 | Device | Face | IMU / status | World pose (0.2) | Face tracking (0.2) |
@@ -302,8 +332,8 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 4. Simulator, Python client, CLI, smoke scenario
 - [x] 5. MCP server (stdio)
 - [x] 6. Apple Developer setup and secrets
-- [ ] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
-- [ ] 8. Device in the loop: smoke scenario green on simulator and device
+- [x] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
+- [x] 8. Device in the loop: smoke scenario green on simulator and device
 - [ ] 9. IMU stream and envelope-driven mouth
 - [ ] 10. Tag `0.1.0`
 

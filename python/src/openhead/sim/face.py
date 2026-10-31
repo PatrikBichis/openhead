@@ -100,6 +100,7 @@ class BrowserFace:
         idle: bool = True,
         on_log: Callable[[str, str], None] | None = None,
         record_video_dir: Path | None = None,
+        pixel_ratio: float = 1,
     ):
         self.dist = (dist or find_face_dist()).resolve()
         self.size = size
@@ -107,6 +108,7 @@ class BrowserFace:
         self.idle = idle
         self.on_log = on_log or (lambda level, message: None)
         self.record_video_dir = record_video_dir
+        self.pixel_ratio = pixel_ratio
         #: monotonic time when video recording started, and the file once closed
         self.video_started: float | None = None
         self.video_path: Path | None = None
@@ -125,8 +127,10 @@ class BrowserFace:
         video = {}
         if self.record_video_dir:
             video = {"record_video_dir": str(self.record_video_dir),
+                     # in CSS pixels: the screencast ignores device_scale_factor
                      "record_video_size": {"width": w, "height": h}}
         self._context = await self._browser.new_context(viewport={"width": w, "height": h},
+                                                        device_scale_factor=self.pixel_ratio,
                                                         **video)
         if self.record_video_dir:
             self.video_started = time.monotonic()

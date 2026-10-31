@@ -67,6 +67,7 @@ class SimConfig:
     mdns: bool = True
     validate_outgoing: bool = False  # tests: record outgoing messages the schema rejects
     record_video_dir: Path | None = None  # record the screen with Playwright (demos)
+    pixel_ratio: float = 1  # device pixels per point (2-3 for sharp marketing renders)
 
 
 class Session:
@@ -105,7 +106,7 @@ class SimServer:
         self.face = BrowserFace(c.face_dist, size=c.size, headless=c.headless,
                                 idle=(not c.headless) if c.idle is None else c.idle,
                                 on_log=lambda level, msg: self.log(level, "face", msg),
-                                record_video_dir=c.record_video_dir)
+                                record_video_dir=c.record_video_dir, pixel_ratio=c.pixel_ratio)
         self.shots = ShotServer()
         self.sessions: set[Session] = set()
         self.logs: deque[dict] = deque(maxlen=2000)
