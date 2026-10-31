@@ -21,10 +21,11 @@ EPILOG = """examples:
   openhead screenshot -o face.png --device localhost
   openhead run scenarios/smoke.yaml --device localhost
 
---device defaults to $OPENHEAD_DEVICE, else 'auto' (mDNS discovery)."""
+--device defaults to $OPENHEAD_DEVICE (also read from .env), else 'auto' (mDNS discovery)."""
 
 
 def main(argv: list[str] | None = None) -> int:
+    _load_dotenv()
     parser = argparse.ArgumentParser(prog="openhead", description=__doc__, epilog=EPILOG,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--device", default=os.environ.get("OPENHEAD_DEVICE", "auto"),
@@ -229,6 +230,19 @@ async def _sim(args: argparse.Namespace) -> int:
     with contextlib.suppress(asyncio.CancelledError):
         await SimServer(config).serve_forever()
     return 0
+
+
+def _load_dotenv() -> None:
+    """Take OPENHEAD_* from the nearest .env (cwd or a parent); the environment wins."""
+    for folder in (Path.cwd(), *Path.cwd().parents):
+        env = folder / ".env"
+        if env.is_file():
+            for line in env.read_text(encoding="utf-8").splitlines():
+                key, sep, value = line.partition("=")
+                key = key.strip()
+                if sep and key.startswith("OPENHEAD_") and value.strip():
+                    os.environ.setdefault(key, value.strip().strip('"'))
+            return
 
 
 def _hostname() -> str:
