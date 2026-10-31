@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy · OpenHead</title>
+  <meta name="description" content="Privacy policy for the OpenHead Robot Face app: no data is collected; everything stays on your local network.">
+  <link rel="icon" href="media/favicon.png">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="media/icon.png" alt="">OpenHead</a>
+      <nav aria-label="Main">
+        <a href="./">Home</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <h1>Privacy Policy</h1>
+      <p class="updated">OpenHead Robot Face for iOS and iPadOS · Effective 31 October 2026</p>
+
+      <div class="box">
+        <p><strong>In short:</strong> the app collects no personal data. It has no accounts, analytics, advertising or tracking, and it sends nothing to us or to any third party. It only talks to devices on your own local network that you have paired with it.</p>
+      </div>
+
+      <h2>Who we are</h2>
+      <p>OpenHead is an open-source project published on GitHub at <a href="https://github.com/PatrikBichis/openhead">github.com/PatrikBichis/openhead</a>. "We" in this policy means the developer of the OpenHead Robot Face app. Questions about this policy can be asked on the <a href="support.html">support page</a>.</p>
+
+      <h2>Data we collect</h2>
+      <p>None. The app does not collect, store on our behalf, sell or share personal data, and it contains no third-party SDKs for analytics, crash reporting or advertising.</p>
+
+      <h2>What the app does on your device and network</h2>
+      <ul>
+        <li><strong>Local network.</strong> The app runs a small server on your Wi-Fi so that a robot controller can connect, and announces itself with Bonjour (mDNS) so it can be found. iOS asks for permission to use the local network. Connections come only from devices on the same network.</li>
+        <li><strong>Pairing.</strong> A controller must type a 6-digit code shown on the screen. Each paired controller gets a random token, stored with its name and last-seen time in the device's Keychain. Nothing about it leaves the device. You can revoke any controller in the app's settings.</li>
+        <li><strong>Motion sensors.</strong> If a paired controller subscribes, the app streams the device's orientation, rotation and acceleration to that controller, on your local network only. This needs no permission and is not stored.</li>
+        <li><strong>Pictures, video and web pages.</strong> When a paired controller asks the app to show an image, a video or a web page, the app fetches it from the address the controller gives. That server sees the request as it would from any browser. The app does not keep the content after it is no longer shown.</li>
+        <li><strong>Logs and screenshots.</strong> The app keeps a short log of its own activity in memory (cleared when the app quits) for troubleshooting. With dev mode switched on in settings, a paired controller can read that log and take screenshots of what is on screen. Dev mode is off by default.</li>
+        <li><strong>Settings.</strong> Your settings (name, port, theme, mounting, dev mode) are stored on the device only.</li>
+        <li><strong>Camera and microphone.</strong> This version of the app does not use the camera or the microphone. If a future version adds a camera view, it will ask for permission first and this policy will be updated before that release.</li>
+      </ul>
+
+      <h2>Children</h2>
+      <p>The app collects no data from anyone, including children.</p>
+
+      <h2>Data retention and deletion</h2>
+      <p>Everything the app stores stays on your device. Deleting the app removes its settings and pairing tokens; revoking a controller in settings removes its token immediately.</p>
+
+      <h2>Security</h2>
+      <p>Only paired controllers can change what the app shows; five wrong pairing codes lock pairing for five minutes. Traffic on the local network is not encrypted in this version, so use the app on a network you trust.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes, the new version is published on this page with a new effective date, and the history is kept in the project's public Git repository.</p>
+
+      <h2>Contact</h2>
+      <p>Open an issue on <a href="https://github.com/PatrikBichis/openhead/issues">GitHub</a> or see the <a href="support.html">support page</a>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>OpenHead · Apache 2.0</span>
+      <nav aria-label="Footer">
+        <a href="./">Home</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

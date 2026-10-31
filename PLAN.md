@@ -25,6 +25,7 @@ Planen utgår från följande val. De är Patriks att ändra; agenten ska inte a
 | Licens | Apache 2.0 från första commit. |
 | Visning: bild, video, undertexter | Bild, SVG, animerad GIF, video och undertexter ritas i samma webblager som ansiktet (`face/src/screen.ts`), på iOS och i simulatorn. Webbsidor (`web`) visas native på iOS; webblagret blir då genomskinligt så att ansiktet i hörnet och undertexterna ligger ovanpå. En implementation, testbar med golden-bilder (beslutat 2026-10-31). |
 | Video, undertexter och kameravy | Video och undertexter ingår i v0.1, tillsammans med en testsvit för bild, video, SVG, animering och undertexter. Kameravy med HUD-teman (överlagring med ansiktsrutor, låsning, text) och ansiktsföljning blir första steget i v0.2, tillsammans med `faces`-strömmen (beslutat 2026-10-31). |
+| Webbplats och policyer | GitHub Pages från `main`, mappen `docs/` (ingen byggjobb): presentation (`index.html`), integritetspolicy (`privacy.html`) och support (`support.html`); App Store Connect pekar dit (beslutat 2026-10-31). |
 | CI och testning | All testning sker lokalt (`tools/check.py`, körs som pre-push-hook). GitHub Actions används bara för signerat iOS-bygge och uppladdning till TestFlight, startat manuellt, med så få macOS-minuter som möjligt (beslutat 2026-10-31). |
 
 ## Omfattning för v0.1
@@ -320,9 +321,9 @@ Steg 3–5 kan drivas parallellt av flera agentinstanser; steg 7 beror på 2–4
 Agenten kör på antagandena ovan tills Patrik säger annat. Dessa påverkar ägande och bör avgöras före steg 6.
 
 - [x] GitHub-organisation: personligt konto (beslutat 2026-10-31).
-- [x] Apple-konto: privat (beslutat 2026-10-31). Omvänd domän för Bundle ID återstår.
+- [x] Apple-konto: privat; Bundle ID `se.bichis.openhead` (beslutat 2026-10-31).
 - [x] Apache 2.0, publikt repo (beslutat 2026-10-31).
-- [ ] Ska Python-paketet publiceras på PyPI vid 0.1.0, eller installeras från Git-tagg?
+- [x] Python-paketet publiceras inte på PyPI; det installeras från Git-taggen, t.ex. `uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.1.0#subdirectory=python"` (beslutat 2026-10-31).
 - [x] ROS 2: inget ROS-specifikt i det här repot. En brygga byggs separat senare vid behov (beslutat 2026-10-31).
 - [x] Nivå 2-testenheter: iPhone 12 (baslinje, tekniknivån låses hit) och iPhone 18 Pro (verifiering). iPad i mån av tillgång. Android/ARCore kan komma senare; protokoll och motor hålls plattformsneutrala.
 - [x] Halloween-temats bilder tas fram av agenten programmatiskt (beslutat 2026-10-31).

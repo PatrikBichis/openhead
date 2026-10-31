@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenHead Robot Face</title>
+  <meta name="description" content="OpenHead turns an iPhone or iPad into the face of a robot: 28 expressions, a mouth that talks with the robot's voice, subtitles, images and video. Open source.">
+  <meta property="og:title" content="OpenHead Robot Face">
+  <meta property="og:description" content="A phone as your robot's face. Open source.">
+  <meta property="og:image" content="https://patrikbichis.github.io/openhead/media/cartoon-happy.png">
+  <link rel="icon" href="media/favicon.png">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="media/icon.png" alt="">OpenHead</a>
+      <nav aria-label="Main">
+        <a href="#features">Features</a>
+        <a href="#themes">Themes</a>
+        <a href="#how">How it works</a>
+        <a href="#developers">Developers</a>
+        <a href="support.html">Support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow">iPhone &amp; iPad · Open source</p>
+          <h1>A phone as your robot's face.</h1>
+          <p class="lead">OpenHead turns an iPhone or iPad into an expressive robot head. Your robot, a Python script or an AI agent makes it smile, look around, talk and show things, over your own Wi-Fi.</p>
+          <div class="buttons">
+            <a class="btn primary" href="https://github.com/PatrikBichis/openhead">View on GitHub</a>
+            <a class="btn ghost" href="#how">How it works</a>
+          </div>
+          <p class="note">The iOS app <strong>OpenHead Robot Face</strong> is in beta on TestFlight.</p>
+        </div>
+        <div class="phone">
+          <video src="media/openhead-preview.mp4" poster="media/cartoon-happy.png" autoplay muted loop playsinline
+                 aria-label="OpenHead talking, changing expressions and switching themes"></video>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <h2>Everything a robot head needs</h2>
+        <p class="sub">A phone already has the screen, sensors and radio. OpenHead makes them addressable from the rest of the robot, which needs to know nothing about iOS.</p>
+        <div class="grid">
+          <div class="card">
+            <div class="icon" aria-hidden="true">😊</div>
+            <h3>28 expressions</h3>
+            <p>Happy, curious, thinking, surprised, worried, laughing, smug and more. Blend them, hold them for a moment, or layer a quick reaction on a mood.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">👀</div>
+            <h3>Eyes that live</h3>
+            <p>Look at any point on the screen or a direction from the head. Blinking, breathing and small eye movements keep the face alive between commands.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🗣️</div>
+            <h3>A mouth that talks</h3>
+            <p>The robot streams how loud it speaks, 25 times a second, and the mouth follows within about 70 ms. Emotions are separate, so mood can change mid-sentence.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">💬</div>
+            <h3>Subtitles</h3>
+            <p>Text on top of anything, for a robot without a speaker or an AI answer streaming in word by word. The mouth can move with the text.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🖼️</div>
+            <h3>Pictures, video, web</h3>
+            <p>PNG, JPEG, animated GIF, WebP and SVG; H.264 video; web pages. Keep the face running in a corner while they show.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🧭</div>
+            <h3>Sensors and status</h3>
+            <p>Orientation, rotation and acceleration up to 100 times a second in robot conventions, plus battery, temperature and what is on screen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="themes" class="alt">
+      <div class="wrap">
+        <h2>Three looks, one set of expressions</h2>
+        <p class="sub">Themes are data, not code: shapes, colours and images in a folder. Every theme has the same 28 expressions, so the robot never has to care which one is on.</p>
+        <div class="themes">
+          <figure>
+            <img src="media/cartoon-happy.png" alt="Cartoon theme: round eyes and a wide smile" loading="lazy">
+            <figcaption>Cartoon <span>Round eyes, warm colours, a clear mouth.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="media/minimal-surprised.png" alt="Minimal theme: two glowing bars and a line" loading="lazy">
+            <figcaption>Minimal <span>Two light bars and a line; few pixels, low power.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="media/halloween-cackle.png" alt="Halloween theme: glowing green jack-o'-lantern face" loading="lazy">
+            <figcaption>Halloween <span>A glowing pumpkin grin, with an extra cackle.</span></figcaption>
+          </figure>
+        </div>
+        <details style="margin-top: 32px">
+          <summary>See all 28 expressions in every theme</summary>
+          <p><img src="media/emotions-cartoon.png" alt="All expressions in the cartoon theme" loading="lazy"></p>
+          <p><img src="media/emotions-minimal.png" alt="All expressions in the minimal theme" loading="lazy"></p>
+          <p><img src="media/emotions-halloween.png" alt="All expressions in the halloween theme" loading="lazy"></p>
+        </details>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <h2>How it works</h2>
+        <p class="sub">The phone sits on the robot in landscape. Everything stays on your local network: no accounts, no cloud.</p>
+        <ol class="steps">
+          <li><h3>Mount and open</h3><p>Put the phone on the robot in landscape and open the app. The face appears straight away.</p></li>
+          <li><h3>Pair once</h3><p>A controller on the same Wi-Fi finds the head and asks to pair; you type the 6-digit code shown on the screen.</p></li>
+          <li><h3>Drive it</h3><p>Expressions, gaze, speech, subtitles, images and video arrive as small JSON commands over a WebSocket.</p></li>
+          <li><h3>Check it</h3><p>In dev mode, screenshots and logs show exactly what the head did, for you or an AI agent.</p></li>
+        </ol>
+        <div class="split" style="margin-top: 56px">
+          <div class="settings">
+            <img src="media/settings_connection.jpg" alt="Settings: name, port and network addresses" loading="lazy">
+            <img src="media/settings_head.jpg" alt="Settings: theme when offline, motion sensor mounting, dev mode" loading="lazy">
+            <img src="media/settings_dev_mode.jpg" alt="Settings: dev mode and paired clients" loading="lazy">
+            <img src="media/settings_about.jpg" alt="Settings: version, protocol and device" loading="lazy">
+          </div>
+          <div>
+            <h3>Settings on the device</h3>
+            <ul class="list">
+              <li>Long-press the face for 1.5 seconds to open them.</li>
+              <li>Name and port, the theme shown when nothing is connected, and how the phone is mounted.</li>
+              <li>See every paired controller and revoke any of them.</li>
+              <li>Dev mode allows screenshots, logs and diagnostics over the network; leave it off on a robot in use.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="developers" class="dark">
+      <div class="wrap split">
+        <div>
+          <h2>Built for developers and AI agents</h2>
+          <p class="sub">The protocol is the product: JSON over WebSocket with a published schema. Around it:</p>
+          <ul class="list">
+            <li>A Python client and the <code>openhead</code> command line tool.</li>
+            <li>A desktop simulator that speaks the same protocol, to develop before a servo moves.</li>
+            <li>YAML scenarios with golden screenshots, run on the simulator and on the phone.</li>
+            <li>An MCP server, so an AI agent can drive the head and check its work.</li>
+            <li>Apache 2.0. <a href="https://github.com/PatrikBichis/openhead">Source on GitHub</a>.</li>
+          </ul>
+        </div>
+        <pre><span class="c"># install the tools from the Git tag</span>
+uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.1.0#subdirectory=python"
+
+<span class="c"># find the head and pair (type the code on screen)</span>
+openhead discover
+openhead pair --device 192.168.1.20
+
+<span class="c"># make it do things</span>
+openhead emotion curious
+openhead subtitle "Hello! I write when I can't speak." --mouth
+openhead show clip.mp4 --overlay face-corner</pre>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>Questions</h2>
+        <details>
+          <summary>Does the app work on its own?</summary>
+          <p>It shows the face and stays alive with blinking and breathing, but it is meant to be driven: by your robot's computer, a script or an AI agent on the same network.</p>
+        </details>
+        <details>
+          <summary>Which devices are supported?</summary>
+          <p>iPhone 12 or newer and iPads with iPadOS 17 or later. iPhone 12 is the baseline every feature is built and tested for.</p>
+        </details>
+        <details>
+          <summary>Does it collect any data?</summary>
+          <p>No. Nothing leaves your local network and there are no accounts, analytics or ads. See the <a href="privacy.html">privacy policy</a>.</p>
+        </details>
+        <details>
+          <summary>Can I use it with ROS 2?</summary>
+          <p>Yes, through a bridge built on the Python client. The head knows nothing about the robot's body; the robot owns its kinematics.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>OpenHead · Apache 2.0</span>
+      <nav aria-label="Footer">
+        <a href="privacy.html">Privacy policy</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

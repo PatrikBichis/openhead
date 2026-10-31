@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support · OpenHead</title>
+  <meta name="description" content="Help for the OpenHead Robot Face app: getting started, pairing, common problems and how to get in touch.">
+  <link rel="icon" href="media/favicon.png">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="media/icon.png" alt="">OpenHead</a>
+      <nav aria-label="Main">
+        <a href="./">Home</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <h1>Support</h1>
+      <p class="updated">OpenHead Robot Face for iOS and iPadOS</p>
+
+      <div class="box">
+        <p><strong>Need help or found a bug?</strong> Open an issue on <a href="https://github.com/PatrikBichis/openhead/issues">GitHub</a>. Please include the app version (Settings → About), your device model and what you tried. With dev mode on, <code>openhead logs</code> shows what the app did.</p>
+      </div>
+
+      <h2>Getting started</h2>
+      <ol>
+        <li>Open the app with the phone in landscape. The face appears.</li>
+        <li>On a computer on the same Wi-Fi, install the tools: <code>uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.1.0#subdirectory=python"</code></li>
+        <li>Run <code>openhead discover</code> to find the head, then <code>openhead pair --device &lt;address&gt;</code>. A 6-digit code appears on the screen for 60 seconds; type it at the prompt.</li>
+        <li>Try <code>openhead emotion happy</code> or <code>openhead subtitle "Hello" --mouth</code>.</li>
+      </ol>
+      <p>The <a href="https://github.com/PatrikBichis/openhead#readme">README</a> covers the protocol, the Python client, the simulator and the MCP server for AI agents.</p>
+
+      <h2>Common problems</h2>
+      <details>
+        <summary>The computer cannot find or reach the head</summary>
+        <p>Both must be on the same Wi-Fi network (guest networks often block devices from seeing each other). Make sure the app is open and in the foreground, and that "Local Network" is allowed for OpenHead in iOS Settings → Privacy &amp; Security → Local Network. The head's address is shown in the app's settings.</p>
+      </details>
+      <details>
+        <summary>No pairing code appears</summary>
+        <p>The code appears when an unpaired controller connects, not on discovery. Run <code>openhead pair --device &lt;address&gt;</code>; it connects first, then asks for the code. After five wrong codes pairing is locked for five minutes.</p>
+      </details>
+      <details>
+        <summary>Screenshots or logs say dev mode is required</summary>
+        <p>Long-press the face for 1.5 seconds to open settings and switch on Dev mode. Switch it off again when the robot is in use.</p>
+      </details>
+      <details>
+        <summary>A video or image does not show</summary>
+        <p>The head fetches media itself, so the address must be reachable from the phone. Video should be H.264 MP4. <code>openhead show file.mp4</code> serves a local file from your computer automatically.</p>
+      </details>
+      <details>
+        <summary>The app stops responding when the screen locks</summary>
+        <p>iOS pauses apps in the background. On a robot, use Guided Access (Settings → Accessibility → Guided Access) to keep OpenHead in front; the app keeps the screen awake by itself.</p>
+      </details>
+      <details>
+        <summary>How do I remove a controller?</summary>
+        <p>Open settings (long-press the face) and remove it under Paired clients. It must pair again to connect.</p>
+      </details>
+
+      <h2>Privacy</h2>
+      <p>The app collects no data. Read the <a href="privacy.html">privacy policy</a>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>OpenHead · Apache 2.0</span>
+      <nav aria-label="Footer">
+        <a href="./">Home</a>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
