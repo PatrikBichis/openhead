@@ -20,7 +20,7 @@ Planen utgår från följande val. De är Patriks att ändra; agenten ska inte a
 | ROS 2 | Utanför repot. Robotrepot bygger sin bridge på `openhead`-biblioteket. |
 | Minsta OS | iOS/iPadOS 17. Universell app, fullskärm på iPad. |
 | Språk | Kod, README och protokolldokumentation på engelska. Den här planen på svenska. |
-| Namn | **OpenHead** (beslutat 2026-10-31). Repo `openhead`, Python-paket och CLI `openhead`, Swift-mål `OpenHead`, mDNS `_openhead._tcp`, MCP-resurser `openhead://`, Bundle ID `<omvänd domän>.openhead`. Kontrollera GitHub, PyPI och npm före första push; vid krock på PyPI publiceras paketet som `openhead-head` med oförändrat importnamn. |
+| Namn | **OpenHead** (beslutat 2026-10-31). Repo `openhead`, Python-paket och CLI `openhead`, Swift-mål `OpenHead`, mDNS `_openhead._tcp`, MCP-resurser `openhead://`, Bundle ID `<omvänd domän>.openhead`. Kontrollera GitHub, PyPI och npm före första push; vid krock på PyPI publiceras paketet som `openhead-head` med oförändrat importnamn. Kontrollerat 2026-10-31: `openhead` ledigt på PyPI och npm, repot skapat som `PatrikBichis/openhead`. |
 | Licens | Apache 2.0 från första commit. |
 
 ## Omfattning för v0.1
