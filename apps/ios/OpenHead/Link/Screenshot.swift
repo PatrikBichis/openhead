@@ -62,12 +62,29 @@ final class ShotServer {
     private var shots: [String: (png: Data, token: String, expires: Date)] = [:]
     private weak var log: LogStore?
 
+    /// Idempotent: keeps a running listener (the link server calls this on every restart).
     func start(port: Int, log: LogStore) {
         self.log = log
+        if let listener, listener.state == .ready || listener.state == .setup { return }
+        listener?.cancel()
         guard let nwPort = NWEndpoint.Port(rawValue: UInt16(port)),
               let listener = try? NWListener(using: .tcp, on: nwPort) else {
             log.log("error", "link", "cannot serve screenshots on port \(port)")
             return
+        }
+        listener.stateUpdateHandler = { [weak self] state in
+            MainActor.assumeIsolated {
+                guard case .failed(let error) = state, let self else { return }
+                self.log?.log("error", "link", "screenshot listener failed: \(error); restarting")
+                self.listener?.cancel()
+                self.listener = nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    MainActor.assumeIsolated {
+                        guard let self, let log = self.log else { return }
+                        self.start(port: port, log: log)
+                    }
+                }
+            }
         }
         listener.newConnectionHandler = { [weak self] connection in
             MainActor.assumeIsolated { self?.serve(connection) }

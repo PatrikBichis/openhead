@@ -374,7 +374,16 @@ class _System:
             with urllib.request.urlopen(request, timeout=10) as response:
                 return response.read()
 
-        return await asyncio.to_thread(fetch)
+        # The URL stays valid for 60 s; the device's HTTP port occasionally drops a connection.
+        for attempt in range(3):
+            try:
+                return await asyncio.to_thread(fetch)
+            except OSError as exc:  # URLError and timeouts
+                if attempt == 2:
+                    raise
+                log.warning("screenshot fetch failed (%s); retrying", exc)
+                await asyncio.sleep(0.5 * (attempt + 1))
+        raise AssertionError("unreachable")
 
     async def logs(self, n: int = 100, level: str | None = None) -> list[models.LogPayload]:
         result = await self._h.command("system.logs", n=n, level=level)
