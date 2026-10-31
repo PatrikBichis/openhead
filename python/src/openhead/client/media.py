@@ -69,6 +69,7 @@ class MediaServer:
                 self.send_header("Content-Type", kind or "application/octet-stream")
                 self.send_header("Content-Length", str(end - start + 1))
                 self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Access-Control-Allow-Origin", "*")  # frames usable in screenshots
                 self.end_headers()
                 if body:
                     with path.open("rb") as f:

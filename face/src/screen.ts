@@ -100,7 +100,18 @@ export class Screen {
       video.autoplay = true;
       video.loop = opts.loop ?? false;
       video.muted = opts.muted ?? false;
-      loaded = settle(video, "loadeddata", "error", `could not load video ${short(source)}`);
+      // Ask with CORS so the frame can be copied for screenshots (freezeVideo); a server that
+      // does not allow it gets a second, plain request (screenshots then show black there).
+      video.crossOrigin = "anonymous";
+      const failed = `could not load video ${short(source)}`;
+      loaded = settle(video, "loadeddata", "error", failed).catch(() => {
+        this.log("debug", "video without CORS; screenshots will not show its frames");
+        video.removeAttribute("crossorigin");
+        const again = settle(video, "loadeddata", "error", failed);
+        video.src = source;
+        video.load();
+        return again;
+      });
       video.onended = () => {
         if (this.display.firstElementChild !== video) return;
         this.log("info", "video ended; showing the face");

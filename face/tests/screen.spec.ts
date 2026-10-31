@@ -168,6 +168,20 @@ test.describe("video", () => {
     expect(await page.locator("canvas.frame").count()).toBe(0);
   });
 
+  test("asks for CORS, and falls back when the server does not allow it", async ({ page }) => {
+    await open(page);
+    await show(page, "video", "/media/clip.mp4", { muted: true });
+    expect(await page.evaluate(() => document.querySelector("video")!.crossOrigin)).toBe("anonymous");
+    // A cross-origin server without CORS headers: the CORS request fails, the plain one plays.
+    await page.route("http://other.test/**", (route) =>
+      route.request().headers()["origin"]
+        ? route.fulfill({ status: 403, body: "no CORS here" })
+        : route.fulfill({ body: readFileSync(ASSETS + "clip.mp4"), contentType: "video/mp4" }));
+    await show(page, "video", "http://other.test/clip.mp4", { muted: true });
+    expect((await screenState(page)).view).toBe("video");
+    expect(await page.evaluate(() => document.querySelector("video")!.crossOrigin)).toBeNull();
+  });
+
   test("loops when asked", async ({ page }) => {
     await open(page);
     await show(page, "video", "/media/clip.mp4", { muted: true, loop: true });
