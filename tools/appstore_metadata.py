@@ -3,7 +3,8 @@
     uv run --project python python tools/appstore_metadata.py [--dry-run] [--build N]
 
 metadata/en-US/        App Store page: description, subtitle, promotional_text, keywords,
-                       support_url, marketing_url (the version being prepared, not submitted)
+                       support_url, marketing_url, privacy_policy_url (the version being
+                       prepared and the app info; not submitted)
 metadata/testflight/   beta_description (TestFlight app description) and whats_new
                        ("What to Test" for the newest build, or --build N)
 
@@ -77,7 +78,8 @@ def main() -> int:
     store = META / locale
 
     # TestFlight: app description and What to Test
-    beta = fields(META / "testflight", {"beta_description": "description"})
+    beta = {**fields(META / "testflight", {"beta_description": "description"}),
+            **fields(store, {"privacy_policy_url": "privacyPolicyUrl", "marketing_url": "marketingUrl"})}
     if beta:
         found = [x for x in asc.request("GET", f"/apps/{app}/betaAppLocalizations")["data"]
                  if x["attributes"]["locale"] == locale]
@@ -103,15 +105,16 @@ def main() -> int:
                     f"What to Test, build {build['attributes']['version']}")
 
     # App Store page: subtitle (app info) and the version being prepared
-    info_fields = fields(store, {"subtitle": "subtitle"})
-    if info_fields:
+    info_fields = fields(store, {"subtitle": "subtitle", "privacy_policy_url": "privacyPolicyUrl"})
+    if info_fields:  # subtitle and privacy policy belong to the app info, not the version
         infos = [i for i in asc.request("GET", f"/apps/{app}/appInfos")["data"]
                  if i["attributes"].get("appStoreState") != "READY_FOR_SALE"]
         for info in infos[:1]:
             locs = [x for x in asc.request("GET", f"/appInfos/{info['id']}/appInfoLocalizations")["data"]
                     if x["attributes"]["locale"] == locale]
             if locs:
-                sync.upsert("appInfoLocalizations", locs[0], info_fields, {}, "App Store subtitle")
+                sync.upsert("appInfoLocalizations", locs[0], info_fields, {},
+                            "App Store subtitle and privacy policy")
     version_fields = fields(store, {"description": "description", "keywords": "keywords",
                                     "promotional_text": "promotionalText",
                                     "support_url": "supportUrl", "marketing_url": "marketingUrl"})

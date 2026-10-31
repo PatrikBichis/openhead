@@ -25,7 +25,7 @@ The protocol is the product. The iOS app is the first client; the desktop simula
 - **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
 - **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
 
-The iOS app is in TestFlight as *OpenHead Robot Face*; its store texts live in [`apps/ios/appstore/metadata`](apps/ios/appstore/metadata) and are pushed with `tools/appstore_metadata.py` (see [docs/ios.md](docs/ios.md)).
+Website: **[patrikbichis.github.io/openhead](https://patrikbichis.github.io/openhead/)** ([privacy policy](https://patrikbichis.github.io/openhead/privacy.html), [support](https://patrikbichis.github.io/openhead/support.html)). The iOS app is in TestFlight as *OpenHead Robot Face*; its store texts live in [`apps/ios/appstore/metadata`](apps/ios/appstore/metadata) and are pushed with `tools/appstore_metadata.py` (see [docs/ios.md](docs/ios.md)).
 
 ---
 
