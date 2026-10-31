@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DisplayHud",
+  "description": "Put your own information on the camera view's HUD, on top of the theme. `values` are variables for templates ({speed}, {task}); they are merged with earlier ones (send null to remove one). `blocks` are extra text blocks and `widgets` extra instruments, as in a HUD theme; each replaces the previous ones sent this way. `clear` removes everything added with this command. Kept until cleared, across HUD themes.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "display.hud"
+    },
+    "values": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]{0,31}$"
+      },
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ],
+        "maxLength": 80
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "$ref": "../hud.schema.json#/$defs/block"
+      }
+    },
+    "widgets": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "$ref": "../hud.schema.json#/$defs/widget"
+      }
+    },
+    "clear": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false
+}

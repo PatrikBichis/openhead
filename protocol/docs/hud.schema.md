@@ -8,7 +8,7 @@
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-**Description:** A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a second).
+**Description:** A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.
 
 | Property                   | Pattern | Type             | Deprecated | Definition                    | Title/Description                                                                |
 | -------------------------- | ------- | ---------------- | ---------- | ----------------------------- | -------------------------------------------------------------------------------- |
@@ -24,7 +24,8 @@
 | - [vignette](#vignette )   | No      | number           | No         | -                             | Darker corners.                                                                  |
 | - [boxes](#boxes )         | No      | object           | No         | -                             | How every detected face is marked.                                               |
 | - [lock](#lock )           | No      | object           | No         | -                             | How the locked face (the largest, or the one \`look_at\` follows) is marked.     |
-| - [blocks](#blocks )       | No      | array of object  | No         | -                             | -                                                                                |
+| - [blocks](#blocks )       | No      | array            | No         | -                             | -                                                                                |
+| - [widgets](#widgets )     | No      | array            | No         | -                             | -                                                                                |
 | - [boot](#boot )           | No      | object           | No         | -                             | Lines typed out one by one when the view opens, then kept on screen at the left. |
 
 ## <a name="name"></a>1. Property `Hud > name`
@@ -307,10 +308,10 @@ Must be one of:
 
 ## <a name="blocks"></a>13. Property `Hud > blocks`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of object` |
-| **Required** | No                |
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -322,15 +323,16 @@ Must be one of:
 
 | Each item of this array must be | Description |
 | ------------------------------- | ----------- |
-| [blocks items](#blocks_items)   | -           |
+| [block](#blocks_items)          | -           |
 
-### <a name="blocks_items"></a>13.1. Hud > blocks > blocks items
+### <a name="blocks_items"></a>13.1. Hud > blocks > block
 
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
+|                           |               |
+| ------------------------- | ------------- |
+| **Type**                  | `object`      |
+| **Required**              | No            |
+| **Additional properties** | Not allowed   |
+| **Defined in**            | #/$defs/block |
 
 | Property                              | Pattern | Type             | Deprecated | Definition               | Title/Description                                |
 | ------------------------------------- | ------- | ---------------- | ---------- | ------------------------ | ------------------------------------------------ |
@@ -418,7 +420,87 @@ Must be one of:
 | **Minimum**  | &ge; 0    |
 | **Maximum**  | &le; 5000 |
 
-## <a name="boot"></a>14. Property `Hud > boot`
+## <a name="widgets"></a>14. Property `Hud > widgets`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | 6                  |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be | Description                             |
+| ------------------------------- | --------------------------------------- |
+| [widget](#widgets_items)        | An instrument drawn from device values. |
+
+### <a name="widgets_items"></a>14.1. Hud > widgets > widget
+
+|                           |                |
+| ------------------------- | -------------- |
+| **Type**                  | `object`       |
+| **Required**              | No             |
+| **Additional properties** | Not allowed    |
+| **Defined in**            | #/$defs/widget |
+
+**Description:** An instrument drawn from device values.
+
+| Property                       | Pattern | Type             | Deprecated | Definition | Title/Description                                                                                                |
+| ------------------------------ | ------- | ---------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| + [type](#widgets_items_type ) | No      | enum (of string) | No         | -          | \`compass\`: heading tape; \`horizon\`: artificial horizon from pitch and roll; \`battery\`: level and charging. |
+| - [at](#widgets_items_at )     | No      | enum (of string) | No         | -          | Default: top for compass, center for horizon, top-right for battery.                                             |
+| - [size](#widgets_items_size ) | No      | number           | No         | -          | -                                                                                                                |
+
+#### <a name="widgets_items_type"></a>14.1.1. Property `Hud > widgets > widgets items > type`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | Yes                |
+
+**Description:** `compass`: heading tape; `horizon`: artificial horizon from pitch and roll; `battery`: level and charging.
+
+Must be one of:
+* "compass"
+* "horizon"
+* "battery"
+
+#### <a name="widgets_items_at"></a>14.1.2. Property `Hud > widgets > widgets items > at`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+**Description:** Default: top for compass, center for horizon, top-right for battery.
+
+Must be one of:
+* "top"
+* "bottom"
+* "center"
+* "top-left"
+* "top-right"
+* "bottom-left"
+* "bottom-right"
+
+#### <a name="widgets_items_size"></a>14.1.3. Property `Hud > widgets > widgets items > size`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `number` |
+| **Required** | No       |
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | N/A    |
+| **Maximum**  | &le; 3 |
+
+## <a name="boot"></a>15. Property `Hud > boot`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -433,7 +515,7 @@ Must be one of:
 | + [lines](#boot_lines )             | No      | array of string | No         | -          | -                 |
 | - [ms_per_line](#boot_ms_per_line ) | No      | integer         | No         | -          | -                 |
 
-### <a name="boot_lines"></a>14.1. Property `Hud > boot > lines`
+### <a name="boot_lines"></a>15.1. Property `Hud > boot > lines`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -452,7 +534,7 @@ Must be one of:
 | -------------------------------- | ----------- |
 | [lines items](#boot_lines_items) | -           |
 
-#### <a name="boot_lines_items"></a>14.1.1. Hud > boot > lines > lines items
+#### <a name="boot_lines_items"></a>15.1.1. Hud > boot > lines > lines items
 
 |              |          |
 | ------------ | -------- |
@@ -463,7 +545,7 @@ Must be one of:
 | -------------- | -- |
 | **Max length** | 60 |
 
-### <a name="boot_ms_per_line"></a>14.2. Property `Hud > boot > ms_per_line`
+### <a name="boot_ms_per_line"></a>15.2. Property `Hud > boot > ms_per_line`
 
 |              |           |
 | ------------ | --------- |

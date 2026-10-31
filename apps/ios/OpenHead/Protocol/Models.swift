@@ -12,6 +12,7 @@ import Foundation
 public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let ack: ACK?
     public let displayClear: DisplayClear?
+    public let displayHud: DisplayHud?
     public let displayShow: DisplayShow?
     public let displaySubtitle: DisplaySubtitle?
     public let faceBlink: FaceBlink?
@@ -30,6 +31,8 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let facesPayload: FacesPayload?
     public let hello: Hello?
     public let hud: Hud?
+    public let hudBlock: HudBlock?
+    public let hudWidget: HudWidget?
     public let imu: Imu?
     public let imuFields: ImuFields?
     public let imuPayload: ImuPayload?
@@ -68,6 +71,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public enum CodingKeys: String, CodingKey {
         case ack = "Ack"
         case displayClear = "DisplayClear"
+        case displayHud = "DisplayHud"
         case displayShow = "DisplayShow"
         case displaySubtitle = "DisplaySubtitle"
         case faceBlink = "FaceBlink"
@@ -86,6 +90,8 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case facesPayload = "FacesPayload"
         case hello = "Hello"
         case hud = "Hud"
+        case hudBlock = "HudBlock"
+        case hudWidget = "HudWidget"
         case imu = "Imu"
         case imuFields = "ImuFields"
         case imuPayload = "ImuPayload"
@@ -122,9 +128,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, hello: Hello?, hud: Hud?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
+        self.displayHud = displayHud
         self.displayShow = displayShow
         self.displaySubtitle = displaySubtitle
         self.faceBlink = faceBlink
@@ -143,6 +150,8 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.facesPayload = facesPayload
         self.hello = hello
         self.hud = hud
+        self.hudBlock = hudBlock
+        self.hudWidget = hudWidget
         self.imu = imu
         self.imuFields = imuFields
         self.imuPayload = imuPayload
@@ -243,6 +252,173 @@ public struct DisplayClear: Codable, Equatable, Sendable {
 
 public enum DisplayClearType: String, Codable, Equatable, Sendable {
     case displayClear = "display.clear"
+}
+
+
+/// Put your own information on the camera view's HUD, on top of the theme. `values` are
+/// variables for templates ({speed}, {task}); they are merged with earlier ones (send null
+/// to remove one). `blocks` are extra text blocks and `widgets` extra instruments, as in a
+/// HUD theme; each replaces the previous ones sent this way. `clear` removes everything
+/// added with this command. Kept until cleared, across HUD themes.
+// MARK: - DisplayHud
+public struct DisplayHud: Codable, Equatable, Sendable {
+    public let blocks: [HudBlock]?
+    public let clear: Bool?
+    /// Client-chosen id, echoed in the reply.
+    public let id: String
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: DisplayHudType
+    public let values: [String: Value]?
+    public let widgets: [HudWidget]?
+
+    public enum CodingKeys: String, CodingKey {
+        case blocks = "blocks"
+        case clear = "clear"
+        case id = "id"
+        case seq = "seq"
+        case ts = "ts"
+        case type = "type"
+        case values = "values"
+        case widgets = "widgets"
+    }
+
+    public init(blocks: [HudBlock]?, clear: Bool?, id: String, seq: Int, ts: Int, type: DisplayHudType, values: [String: Value]?, widgets: [HudWidget]?) {
+        self.blocks = blocks
+        self.clear = clear
+        self.id = id
+        self.seq = seq
+        self.ts = ts
+        self.type = type
+        self.values = values
+        self.widgets = widgets
+    }
+}
+
+
+// MARK: - HudBlock
+public struct HudBlock: Codable, Equatable, Sendable {
+    public let at: HudBlockAt
+    public let blinkMS: Int?
+    public let color: String?
+    public let lines: [String]
+    /// Text size; 1 is about 4.5% of the screen height.
+    public let size: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case at = "at"
+        case blinkMS = "blink_ms"
+        case color = "color"
+        case lines = "lines"
+        case size = "size"
+    }
+
+    public init(at: HudBlockAt, blinkMS: Int?, color: String?, lines: [String], size: Double?) {
+        self.at = at
+        self.blinkMS = blinkMS
+        self.color = color
+        self.lines = lines
+        self.size = size
+    }
+}
+
+public enum HudBlockAt: String, Codable, Equatable, Sendable {
+    case atLeft = "left"
+    case bottomLeft = "bottom-left"
+    case bottomRight = "bottom-right"
+    case topLeft = "top-left"
+    case topRight = "top-right"
+}
+
+public enum DisplayHudType: String, Codable, Equatable, Sendable {
+    case displayHud = "display.hud"
+}
+
+public enum Value: Codable, Equatable, Sendable {
+    case bool(Bool)
+    case double(Double)
+    case string(String)
+    case null
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let x = try? container.decode(Bool.self) {
+            self = .bool(x)
+            return
+        }
+        if let x = try? container.decode(Double.self) {
+            self = .double(x)
+            return
+        }
+        if let x = try? container.decode(String.self) {
+            self = .string(x)
+            return
+        }
+        if container.decodeNil() {
+            self = .null
+            return
+        }
+        throw DecodingError.typeMismatch(Value.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for Value"))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .bool(let x):
+            try container.encode(x)
+        case .double(let x):
+            try container.encode(x)
+        case .string(let x):
+            try container.encode(x)
+        case .null:
+            try container.encodeNil()
+        }
+    }
+}
+
+
+/// An instrument drawn from device values.
+// MARK: - HudWidget
+public struct HudWidget: Codable, Equatable, Sendable {
+    /// Default: top for compass, center for horizon, top-right for battery.
+    public let at: HudWidgetAt?
+    public let size: Double?
+    /// `compass`: heading tape; `horizon`: artificial horizon from pitch and roll; `battery`:
+    /// level and charging.
+    public let type: HudWidgetType
+
+    public enum CodingKeys: String, CodingKey {
+        case at = "at"
+        case size = "size"
+        case type = "type"
+    }
+
+    public init(at: HudWidgetAt?, size: Double?, type: HudWidgetType) {
+        self.at = at
+        self.size = size
+        self.type = type
+    }
+}
+
+/// Default: top for compass, center for horizon, top-right for battery.
+public enum HudWidgetAt: String, Codable, Equatable, Sendable {
+    case bottom = "bottom"
+    case bottomLeft = "bottom-left"
+    case bottomRight = "bottom-right"
+    case center = "center"
+    case top = "top"
+    case topLeft = "top-left"
+    case topRight = "top-right"
+}
+
+/// `compass`: heading tape; `horizon`: artificial horizon from pitch and roll; `battery`:
+/// level and charging.
+public enum HudWidgetType: String, Codable, Equatable, Sendable {
+    case battery = "battery"
+    case compass = "compass"
+    case horizon = "horizon"
 }
 
 
@@ -909,15 +1085,19 @@ public enum HelloType: String, Codable, Equatable, Sendable {
 
 
 /// A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines
-/// are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or
-/// SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame
-/// counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a
-/// second).
+/// are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status}
+/// LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame}
+/// frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the
+/// device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical,
+/// {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y}
+/// {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their
+/// own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names
+/// show as `-`.
 // MARK: - Hud
 public struct Hud: Codable, Equatable, Sendable {
     /// The locked face and highlights.
     public let accent: String?
-    public let blocks: [Block]?
+    public let blocks: [HudBlock]?
     /// Lines typed out one by one when the view opens, then kept on screen at the left.
     public let boot: Boot?
     /// How every detected face is marked.
@@ -938,6 +1118,7 @@ public struct Hud: Codable, Equatable, Sendable {
     public let version: String
     /// Darker corners.
     public let vignette: Double?
+    public let widgets: [HudWidget]?
 
     public enum CodingKeys: String, CodingKey {
         case accent = "accent"
@@ -954,9 +1135,10 @@ public struct Hud: Codable, Equatable, Sendable {
         case title = "title"
         case version = "version"
         case vignette = "vignette"
+        case widgets = "widgets"
     }
 
-    public init(accent: String?, blocks: [Block]?, boot: Boot?, boxes: Boxes?, color: String, font: Font?, lock: Lock?, name: String, scanlines: Scanlines?, shadow: String?, tint: Tint?, title: String, version: String, vignette: Double?) {
+    public init(accent: String?, blocks: [HudBlock]?, boot: Boot?, boxes: Boxes?, color: String, font: Font?, lock: Lock?, name: String, scanlines: Scanlines?, shadow: String?, tint: Tint?, title: String, version: String, vignette: Double?, widgets: [HudWidget]?) {
         self.accent = accent
         self.blocks = blocks
         self.boot = boot
@@ -971,42 +1153,8 @@ public struct Hud: Codable, Equatable, Sendable {
         self.title = title
         self.version = version
         self.vignette = vignette
+        self.widgets = widgets
     }
-}
-
-
-// MARK: - Block
-public struct Block: Codable, Equatable, Sendable {
-    public let at: At
-    public let blinkMS: Int?
-    public let color: String?
-    public let lines: [String]
-    /// Text size; 1 is about 4.5% of the screen height.
-    public let size: Double?
-
-    public enum CodingKeys: String, CodingKey {
-        case at = "at"
-        case blinkMS = "blink_ms"
-        case color = "color"
-        case lines = "lines"
-        case size = "size"
-    }
-
-    public init(at: At, blinkMS: Int?, color: String?, lines: [String], size: Double?) {
-        self.at = at
-        self.blinkMS = blinkMS
-        self.color = color
-        self.lines = lines
-        self.size = size
-    }
-}
-
-public enum At: String, Codable, Equatable, Sendable {
-    case atLeft = "left"
-    case bottomLeft = "bottom-left"
-    case bottomRight = "bottom-right"
-    case topLeft = "top-left"
-    case topRight = "top-right"
 }
 
 

@@ -314,6 +314,36 @@ class Boot(BaseModel):
     ms_per_line: int | None = Field(None, ge=20, le=2000)
 
 
+class HudWidget(BaseModel):
+    """
+    An instrument drawn from device values.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["compass", "horizon", "battery"]
+    """
+    `compass`: heading tape; `horizon`: artificial horizon from pitch and roll; `battery`: level and charging.
+    """
+    at: (
+        Literal[
+            "top",
+            "bottom",
+            "center",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+        ]
+        | None
+    ) = None
+    """
+    Default: top for compass, center for horizon, top-right for battery.
+    """
+    size: float | None = Field(None, ge=0.5, le=3.0)
+
+
 class LogFields(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
@@ -1139,7 +1169,7 @@ class Tint(BaseModel):
     opacity: float = Field(..., ge=0.0, le=1.0)
 
 
-class Block(BaseModel):
+class HudBlock(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
@@ -1151,65 +1181,6 @@ class Block(BaseModel):
     """
     color: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
     blink_ms: int | None = Field(None, ge=0, le=5000)
-
-
-class Hud(BaseModel):
-    """
-    A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a second).
-    """
-
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    name: str = Field(..., pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName")
-    """
-    Lower-case identifier used for themes and emotions.
-    """
-    title: str
-    version: str = Field(
-        ..., pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$", title="CommonVersion"
-    )
-    """
-    Semantic version, MAJOR.MINOR.PATCH.
-    """
-    font: Literal["mono", "sans"] | None = None
-    """
-    Default mono.
-    """
-    color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
-    """
-    Text and boxes.
-    """
-    accent: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
-    """
-    The locked face and highlights.
-    """
-    shadow: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
-    """
-    Glow or shadow behind text and lines.
-    """
-    tint: Tint | None = None
-    """
-    Colour laid over the camera image (works over a native camera view too).
-    """
-    scanlines: Scanlines | None = None
-    vignette: float | None = Field(None, ge=0.0, le=1.0)
-    """
-    Darker corners.
-    """
-    boxes: Boxes | None = None
-    """
-    How every detected face is marked.
-    """
-    lock: Lock | None = None
-    """
-    How the locked face (the largest, or the one `look_at` follows) is marked.
-    """
-    blocks: list[Block] | None = Field(None, max_length=8)
-    boot: Boot | None = None
-    """
-    Lines typed out one by one when the view opens, then kept on screen at the left.
-    """
 
 
 class ImuFields(BaseModel):
@@ -1633,6 +1604,92 @@ class WelcomeDevice(BaseModel):
     os_version: str
     app_version: str
     screen: WelcomeScreen
+
+
+class DisplayHud(Command):
+    """
+    Put your own information on the camera view's HUD, on top of the theme. `values` are variables for templates ({speed}, {task}); they are merged with earlier ones (send null to remove one). `blocks` are extra text blocks and `widgets` extra instruments, as in a HUD theme; each replaces the previous ones sent this way. `clear` removes everything added with this command. Kept until cleared, across HUD themes.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["display.hud"] = Field(
+        ..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$"
+    )
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+    values: (
+        dict[
+            constr(pattern=r"^[a-z][a-z0-9_]{0,31}$"),
+            constr(max_length=80) | float | bool | None,
+        ]
+        | None
+    ) = Field(None, max_length=32)
+    blocks: list[HudBlock] | None = Field(None, max_length=8)
+    widgets: list[HudWidget] | None = Field(None, max_length=6)
+    clear: bool | None = None
+
+
+class Hud(BaseModel):
+    """
+    A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    name: str = Field(..., pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName")
+    """
+    Lower-case identifier used for themes and emotions.
+    """
+    title: str
+    version: str = Field(
+        ..., pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$", title="CommonVersion"
+    )
+    """
+    Semantic version, MAJOR.MINOR.PATCH.
+    """
+    font: Literal["mono", "sans"] | None = None
+    """
+    Default mono.
+    """
+    color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    """
+    Text and boxes.
+    """
+    accent: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    """
+    The locked face and highlights.
+    """
+    shadow: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    """
+    Glow or shadow behind text and lines.
+    """
+    tint: Tint | None = None
+    """
+    Colour laid over the camera image (works over a native camera view too).
+    """
+    scanlines: Scanlines | None = None
+    vignette: float | None = Field(None, ge=0.0, le=1.0)
+    """
+    Darker corners.
+    """
+    boxes: Boxes | None = None
+    """
+    How every detected face is marked.
+    """
+    lock: Lock | None = None
+    """
+    How the locked face (the largest, or the one `look_at` follows) is marked.
+    """
+    blocks: list[HudBlock] | None = Field(None, max_length=8)
+    widgets: list[HudWidget] | None = Field(None, max_length=6)
+    boot: Boot | None = None
+    """
+    Lines typed out one by one when the view opens, then kept on screen at the left.
+    """
 
 
 class Imu(Envelope, ImuFields):

@@ -1,0 +1,28 @@
+{
+  "type": "display.hud",
+  "ts": 1793462400000,
+  "seq": 50,
+  "id": "c-24",
+  "values": {
+    "speed": 0.4,
+    "task": "DELIVER CUP",
+    "target_room": "KITCHEN"
+  },
+  "blocks": [
+    {
+      "at": "bottom-left",
+      "lines": [
+        "TASK {task}",
+        "SPEED {speed} M/S",
+        "DEST {target_room}"
+      ],
+      "size": 0.8
+    }
+  ],
+  "widgets": [
+    {
+      "type": "compass",
+      "at": "top"
+    }
+  ]
+}

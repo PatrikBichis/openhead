@@ -6,6 +6,7 @@ Protocol version 0.2.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | --- | --- | --- |
 | `ack` | [Ack](messages/ack.md) | Successful reply to a command. |
 | `display.clear` | [DisplayClear](commands/display.clear.md) | Remove any image or web page and show the face full screen. |
+| `display.hud` | [DisplayHud](commands/display.hud.md) | Put your own information on the camera view's HUD, on top of the theme. |
 | `display.show` | [DisplayShow](commands/display.show.md) | Change what fills the screen. |
 | `display.subtitle` | [DisplaySubtitle](commands/display.subtitle.md) | Text on top of whatever is shown (face, image, video, web page): for a robot without a speaker, or to show an AI answer as it streams in. |
 | `error` | [Error](messages/error.md) | Failed command (with `id`) or failed handshake (without). |

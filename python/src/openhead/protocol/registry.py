@@ -10,6 +10,7 @@ PROTOCOL_VERSION = "0.2.0"
 MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "ack": models.Ack,
     "display.clear": models.DisplayClear,
+    "display.hud": models.DisplayHud,
     "display.show": models.DisplayShow,
     "display.subtitle": models.DisplaySubtitle,
     "error": models.Error,

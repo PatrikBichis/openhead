@@ -6,6 +6,7 @@ public let protocolVersion = "0.2.0"
 public let messageTypes: [String: any Codable.Type] = [
     "ack": ACK.self,
     "display.clear": DisplayClear.self,
+    "display.hud": DisplayHud.self,
     "display.show": DisplayShow.self,
     "display.subtitle": DisplaySubtitle.self,
     "error": ProtocolError.self,

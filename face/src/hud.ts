@@ -1,4 +1,4 @@
-import type { Hud } from "./generated/hud";
+import type { Block, Hud, Widget } from "./generated/hud";
 import { mulberry32 } from "./rng";
 
 /** A face from the `faces` topic, as the host passes it to the page. */
@@ -12,6 +12,19 @@ export interface SeenFace {
   box?: { x: number; y: number; w: number; h: number };
   locked?: boolean;
 }
+
+/** Values for HUD templates: device readings from the host and the host's own (`display.hud`). */
+export type HudValues = Record<string, string | number | boolean | null>;
+
+/** What `display.hud` adds on top of the theme. */
+export interface HudExtras {
+  values?: HudValues;
+  blocks?: Block[];
+  widgets?: Widget[];
+  clear?: boolean;
+}
+
+const HEADINGS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 
 export interface HudInfo {
   name: string;
@@ -56,6 +69,10 @@ export class HudRenderer {
   private ctx: CanvasRenderingContext2D;
   /** Random digits for {rand:N}: one sequence per render, new every half second. */
   private rand = mulberry32(7);
+  /** Device readings (battery, heading, pitch, ...) and the host's own values. */
+  private values: Record<string, string | number | boolean> = {};
+  private extraBlocks: Block[] = [];
+  private extraWidgets: Widget[] = [];
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -70,6 +87,26 @@ export class HudRenderer {
 
   get name(): string {
     return this.hud?.name ?? "none";
+  }
+
+  /** Merge values for templates; `null` removes one. */
+  setValues(values: HudValues) {
+    for (const [key, value] of Object.entries(values)) {
+      if (value === null) delete this.values[key];
+      else this.values[key] = value;
+    }
+  }
+
+  /** `display.hud`: the host's values, blocks and widgets on top of the theme. */
+  setExtras(extras: HudExtras) {
+    if (extras.clear) {
+      this.extraBlocks = [];
+      this.extraWidgets = [];
+      for (const key of Object.keys(this.values)) if (!DEVICE_KEYS.has(key)) delete this.values[key];
+    }
+    if (extras.values) this.setValues(extras.values);
+    if (extras.blocks) this.extraBlocks = extras.blocks;
+    if (extras.widgets) this.extraWidgets = extras.widgets;
   }
 
   setFaces(faces: SeenFace[]) {
@@ -179,9 +216,14 @@ export class HudRenderer {
       ctx.fillText(hud.lock.label, W / 2, H - unit * 1.2);
     }
 
-    // text blocks
+    // instruments
     const margin = Math.max(16, H * 0.05);
-    for (const block of hud.blocks ?? []) {
+    for (const widget of [...(hud.widgets ?? []), ...this.extraWidgets]) {
+      this.widget(widget, W, H, unit, margin, font, hud);
+    }
+
+    // text blocks
+    for (const block of [...(hud.blocks ?? []), ...this.extraBlocks]) {
       if (!this.visible(block.blink_ms)) continue;
       const size = block.size ?? 1;
       ctx.font = font(size);
@@ -212,6 +254,112 @@ export class HudRenderer {
       for (let i = 0; i < shown; i++) ctx.fillText(hud.boot.lines[i], margin * 1.4, margin + i * lh);
     }
     ctx.shadowBlur = 0;
+  }
+
+  private widget(w: Widget, W: number, H: number, unit: number, margin: number,
+                 font: (size: number, weight?: number) => string, hud: Hud) {
+    const { ctx } = this;
+    const size = w.size ?? 1;
+    const num = (key: string) => (typeof this.values[key] === "number" ? (this.values[key] as number) : undefined);
+    ctx.strokeStyle = hud.color;
+    ctx.fillStyle = hud.color;
+    ctx.lineWidth = 1.5;
+    if (w.type === "compass") {
+      const heading = num("heading");
+      const width = W * 0.4 * size;
+      const height = unit * 1.5 * size;
+      const [x, y] = place(w.at ?? "top", width, height, W, H, margin);
+      const cx = x + width / 2;
+      const span = 70; // degrees across the tape
+      ctx.font = font(0.55 * size);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.beginPath();
+      ctx.moveTo(x, y + height * 0.55);
+      ctx.lineTo(x + width, y + height * 0.55);
+      if (heading !== undefined) {
+        const first = Math.ceil((heading - span / 2) / 5) * 5;
+        for (let deg = first; deg <= heading + span / 2; deg += 5) {
+          const tx = cx + ((deg - heading) / span) * width;
+          const long = deg % 15 === 0;
+          ctx.moveTo(tx, y + height * 0.55);
+          ctx.lineTo(tx, y + height * (long ? 0.2 : 0.38));
+          const d = ((deg % 360) + 360) % 360;
+          if (d % 45 === 0) ctx.fillText(HEADINGS[d / 45], tx, y + height * 0.62);
+        }
+      }
+      ctx.stroke();
+      // the heading itself, in a box above the centre mark
+      const label = heading === undefined ? "---" : String(Math.round(((heading % 360) + 360) % 360)).padStart(3, "0");
+      ctx.font = font(0.7 * size, 700);
+      ctx.textBaseline = "bottom";
+      const bw = ctx.measureText("000").width + 10;
+      ctx.strokeRect(cx - bw / 2, y - unit * 0.85 * size, bw, unit * 0.85 * size);
+      ctx.fillText(label, cx, y - 2);
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, y);
+      ctx.lineTo(cx + 5, y);
+      ctx.lineTo(cx, y + 7);
+      ctx.closePath();
+      ctx.fill();
+    } else if (w.type === "horizon") {
+      const pitch = num("pitch") ?? 0;
+      const roll = num("roll") ?? 0;
+      const r = H * 0.26 * size;
+      const [x, y] = place(w.at ?? "center", r * 2, r * 2, W, H, margin);
+      const cx = x + r;
+      const cy = y + r;
+      const perDeg = r / 30;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate((-roll * Math.PI) / 180);
+      ctx.translate(0, pitch * perDeg);
+      ctx.font = font(0.5 * size);
+      ctx.textBaseline = "middle";
+      ctx.beginPath();
+      ctx.moveTo(-r * 1.1, 0);
+      ctx.lineTo(-r * 0.25, 0);
+      ctx.moveTo(r * 0.25, 0);
+      ctx.lineTo(r * 1.1, 0);
+      for (const step of [-20, -10, 10, 20]) {
+        const ly = -step * perDeg;
+        ctx.moveTo(-r * 0.45, ly);
+        ctx.lineTo(-r * 0.2, ly);
+        ctx.moveTo(r * 0.2, ly);
+        ctx.lineTo(r * 0.45, ly);
+      }
+      ctx.stroke();
+      ctx.textAlign = "left";
+      for (const step of [-20, -10, 10, 20]) ctx.fillText(String(Math.abs(step)), r * 0.5, -step * perDeg);
+      ctx.restore();
+      // fixed reticle: the head
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - r * 0.18, cy);
+      ctx.lineTo(cx - r * 0.07, cy);
+      ctx.lineTo(cx, cy + r * 0.06);
+      ctx.lineTo(cx + r * 0.07, cy);
+      ctx.lineTo(cx + r * 0.18, cy);
+      ctx.stroke();
+    } else if (w.type === "battery") {
+      const level = num("battery");
+      const bw = unit * 2 * size;
+      const bh = unit * 0.95 * size;
+      ctx.font = font(0.7 * size, 700);
+      const text = level === undefined ? "--%" : `${Math.round(level)}%${this.values.charging === true ? " +" : ""}`;
+      const tw = ctx.measureText("100% +").width;
+      const [x, y] = place(w.at ?? "top-right", bw + 8 + tw, bh, W, H, margin);
+      ctx.strokeRect(x, y, bw, bh);
+      ctx.fillRect(x + bw, y + bh * 0.3, bw * 0.07, bh * 0.4);
+      if (level !== undefined) {
+        ctx.fillStyle = level < 20 ? "#ff4040" : hud.color;
+        ctx.fillRect(x + 3, y + 3, Math.max(0, (bw - 6) * Math.min(1, level / 100)), bh - 6);
+        ctx.fillStyle = hud.color;
+      }
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x + bw * 1.07 + 6, y + bh / 2);
+    }
   }
 
   private box(style: string, x: number, y: number, w: number, h: number) {
@@ -276,7 +424,28 @@ export class HudRenderer {
   private vars(face: SeenFace | undefined): Record<string, string> {
     const s = Math.floor(this.clock / 1000);
     const pad = (n: number) => String(n).padStart(2, "0");
+    const v = this.values;
+    const n = (key: string, digits: number, sign = false) => {
+      const value = v[key];
+      if (typeof value !== "number") return value === undefined ? "-" : String(value);
+      return `${sign && value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
+    };
+    const heading = typeof v.heading === "number" ? ((v.heading % 360) + 360) % 360 : undefined;
+    const custom: Record<string, string> = {};
+    for (const [key, value] of Object.entries(v)) custom[key] = typeof value === "boolean" ? (value ? "YES" : "NO") : String(value);
     return {
+      ...custom,
+      battery: n("battery", 0),
+      thermal: typeof v.thermal === "string" ? v.thermal.toUpperCase() : "-",
+      heading: heading === undefined ? "-" : String(Math.round(heading)).padStart(3, "0"),
+      heading_name: heading === undefined ? "-" : HEADINGS[Math.round(heading / 45) % 8],
+      pitch: n("pitch", 1, true),
+      roll: n("roll", 1, true),
+      x: n("x", 2, true),
+      y: n("y", 2, true),
+      z: n("z", 2, true),
+      tracking: typeof v.tracking === "string" ? v.tracking.toUpperCase() : "-",
+      mode: typeof v.mode === "string" ? v.mode.toUpperCase() : "-",
       faces: String(this.faces.length),
       target: face ? String(face.id) : "NONE",
       status: face ? "LOCKED" : "SEARCHING",
@@ -298,9 +467,20 @@ export class HudRenderer {
         for (let i = 0; i < Number(n ?? 4); i++) out += Math.floor(rand() * 10);
         return out;
       }
-      return vars[key] ?? `{${key}}`;
+      return vars[key] ?? "-";
     });
   }
+}
+
+/** Keys the device fills in; `display.hud {clear}` keeps them. */
+const DEVICE_KEYS = new Set(["battery", "charging", "thermal", "heading", "pitch", "roll", "x", "y", "z",
+  "tracking", "mode", "clients"]);
+
+/** Top-left corner for something `w` x `h` at a named place. */
+function place(at: string, w: number, h: number, W: number, H: number, margin: number): [number, number] {
+  const x = at.endsWith("left") ? margin * 1.4 : at.endsWith("right") ? W - margin * 1.4 - w : (W - w) / 2;
+  const y = at.startsWith("top") ? margin * 1.4 : at.startsWith("bottom") ? H - margin - h : (H - h) / 2;
+  return [x, y];
 }
 
 /**

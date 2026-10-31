@@ -6,11 +6,25 @@
   "color": "#7dff8a",
   "accent": "#d6ffd9",
   "shadow": "#002a08",
-  "tint": { "color": "#001a06", "opacity": 0.45 },
-  "scanlines": { "opacity": 0.1, "spacing": 3 },
+  "tint": {
+    "color": "#001a06",
+    "opacity": 0.45
+  },
+  "scanlines": {
+    "opacity": 0.1,
+    "spacing": 3
+  },
   "vignette": 0.3,
-  "boxes": { "style": "bracket", "width": 2, "label": "{id}" },
-  "lock": { "style": "corners", "label": "LOCK", "blink_ms": 700 },
+  "boxes": {
+    "style": "bracket",
+    "width": 2,
+    "label": "{id}"
+  },
+  "lock": {
+    "style": "corners",
+    "label": "LOCK",
+    "blink_ms": 700
+  },
   "boot": {
     "lines": [
       "HEAD.SYS",
@@ -29,6 +43,22 @@
     "ms_per_line": 140
   },
   "blocks": [
-    { "at": "bottom-right", "lines": ["TRACKING {faces}", "TARGET {target}"], "size": 0.85 }
+    {
+      "at": "bottom-left",
+      "lines": [
+        "PWR {battery}%  {thermal}",
+        "HDG {heading} {heading_name}",
+        "P {pitch}  R {roll}"
+      ],
+      "size": 0.75
+    },
+    {
+      "at": "bottom-right",
+      "lines": [
+        "TRACKING {faces}",
+        "TARGET {target}"
+      ],
+      "size": 0.85
+    }
   ]
 }

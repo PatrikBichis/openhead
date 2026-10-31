@@ -1,6 +1,6 @@
 import "@fontsource-variable/inter/wght.css";
 import { FaceEngine, type LogLevel } from "./engine";
-import { hudInfo, hudNames, type HudInfo, type SeenFace } from "./hud";
+import { hudInfo, hudNames, type HudExtras, type HudInfo, type HudValues, type SeenFace } from "./hud";
 import { Screen, type ScreenEvent, type ScreenState, type ShowOptions, type SubtitleOptions, type View } from "./screen";
 
 /**
@@ -24,6 +24,10 @@ export interface OpenHead extends FaceEngine {
   /** `look_at {frame: face}`: a face id, `null` for the locked face, `undefined` to stop. */
   followFace(id: number | null | undefined): void;
   listHuds(): HudInfo[];
+  /** Device readings for HUD templates and widgets (the host sends them a few times a second). */
+  setHudValues(values: HudValues): void;
+  /** `display.hud`: the host's own values, text blocks and widgets on the HUD. */
+  hudExtras(extras: HudExtras): void;
 }
 
 declare global {
@@ -63,6 +67,8 @@ window.openhead = Object.assign(engine, {
   setFaces: (faces: SeenFace[]) => screen.setFaces(faces),
   followFace: (id: number | null | undefined) => screen.followFace(id),
   listHuds: () => hudNames().map(hudInfo),
+  setHudValues: (values: HudValues) => screen.setHudValues(values),
+  hudExtras: (extras: HudExtras) => screen.hudExtras(extras),
 });
 
 await engine.setTheme(query.get("theme") ?? "cartoon", 0);

@@ -1,0 +1,68 @@
+{
+  "name": "flight",
+  "title": "Flight",
+  "version": "0.2.0",
+  "font": "mono",
+  "color": "#8dff9b",
+  "accent": "#ffffff",
+  "shadow": "#00330a",
+  "tint": {
+    "color": "#04140a",
+    "opacity": 0.3
+  },
+  "vignette": 0.25,
+  "boxes": {
+    "style": "rect",
+    "width": 1.2,
+    "label": "{id}"
+  },
+  "lock": {
+    "style": "crosshair",
+    "label": "",
+    "blink_ms": 0
+  },
+  "widgets": [
+    {
+      "type": "compass",
+      "at": "top"
+    },
+    {
+      "type": "horizon",
+      "at": "center",
+      "size": 0.9
+    },
+    {
+      "type": "battery",
+      "at": "top-right",
+      "size": 0.8
+    }
+  ],
+  "blocks": [
+    {
+      "at": "bottom-left",
+      "lines": [
+        "PITCH {pitch}",
+        "ROLL  {roll}",
+        "MODE  {mode}"
+      ],
+      "size": 0.75
+    },
+    {
+      "at": "bottom-right",
+      "lines": [
+        "POS {x} {y} {z}",
+        "TRACK {tracking}",
+        "FACES {faces}  TGT {target}"
+      ],
+      "size": 0.75
+    },
+    {
+      "at": "top-left",
+      "lines": [
+        "TEMP {thermal}",
+        "{time}"
+      ],
+      "size": 0.75
+    }
+  ]
+}

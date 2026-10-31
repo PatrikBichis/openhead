@@ -7,11 +7,16 @@ const FACES = [
   { id: 7, bearing: -20, elevation: 3, size: 0.1, confidence: 0.81, box: { x: 0.68, y: 0.28, w: 0.09, h: 0.19 } },
 ];
 
+// What the host reports a few times a second.
+const DEVICE = { battery: 76, charging: false, thermal: "nominal", heading: 47, pitch: 4.5, roll: -6,
+  x: 0.12, y: 0.01, z: -0.35, tracking: "normal", mode: "capture", clients: 1 };
+
 async function camera(page: Page, hud: string, opts: object = {}) {
   await openFace(page, "cartoon");
   await page.evaluate(() => document.fonts.load('600 24px "Inter Variable"'));
   await page.evaluate(([h, o]) => window.openhead.show("camera", "", { hud: h as string, ...(o as object) }), [hud, opts] as const);
   await page.evaluate((f) => window.openhead.setFaces(f), FACES);
+  await page.evaluate((d) => window.openhead.setHudValues(d), DEVICE);
 }
 
 const tick = (page: Page, ms: number) =>
@@ -20,13 +25,13 @@ const tick = (page: Page, ms: number) =>
     window.openhead.render();
   }, ms);
 
-test("lists the three HUD themes", async ({ page }) => {
+test("lists the HUD themes", async ({ page }) => {
   await openFace(page, "cartoon");
   const huds = await page.evaluate(() => window.openhead.listHuds());
-  expect(huds.map((h) => h.name)).toEqual(["boot", "camcorder", "hunter"]);
+  expect(huds.map((h) => h.name)).toEqual(["boot", "camcorder", "flight", "hunter"]);
 });
 
-for (const hud of ["hunter", "camcorder", "boot"]) {
+for (const hud of ["hunter", "camcorder", "boot", "flight"]) {
   test(`${hud} HUD over the synthetic camera`, async ({ page }) => {
     await camera(page, hud);
     await tick(page, 2400); // past the boot text
@@ -34,6 +39,32 @@ for (const hud of ["hunter", "camcorder", "boot"]) {
     await expect(page).toHaveScreenshot(`hud-${hud}.png`);
   });
 }
+
+test("the host's own values, blocks and widgets (display.hud)", async ({ page }) => {
+  await camera(page, "camcorder");
+  await page.evaluate(() =>
+    window.openhead.hudExtras({
+      values: { speed: 0.4, task: "DELIVER CUP" },
+      blocks: [{ at: "top-left", lines: ["", "", "TASK {task}", "SPEED {speed} M/S", "HDG {heading}"], size: 0.8 }],
+      widgets: [{ type: "compass", at: "top" }],
+    }),
+  );
+  await tick(page, 600);
+  await expect(page).toHaveScreenshot("hud-camcorder-extras.png");
+  // clear removes the host's additions but keeps the device readings
+  await page.evaluate(() => window.openhead.hudExtras({ clear: true }));
+  await page.evaluate(() => window.openhead.hudExtras({ blocks: [{ at: "top-left", lines: ["", "", "{task} {battery}"] }] }));
+  await tick(page, 600);
+  await expect(page).toHaveScreenshot("hud-camcorder-extras-cleared.png");
+});
+
+test("the horizon follows pitch and roll", async ({ page }) => {
+  await camera(page, "flight");
+  await page.evaluate(() => window.openhead.setFaces([]));
+  await page.evaluate(() => window.openhead.setHudValues({ pitch: -12, roll: 20, heading: 300 }));
+  await tick(page, 300);
+  await expect(page).toHaveScreenshot("hud-flight-tilted.png");
+});
 
 test("no faces: searching, no lock", async ({ page }) => {
   await camera(page, "hunter");

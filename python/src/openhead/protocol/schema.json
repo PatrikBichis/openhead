@@ -157,6 +157,58 @@
       ],
       "unevaluatedProperties": false
     },
+    "DisplayHud": {
+      "title": "DisplayHud",
+      "description": "Put your own information on the camera view's HUD, on top of the theme. `values` are variables for templates ({speed}, {task}); they are merged with earlier ones (send null to remove one). `blocks` are extra text blocks and `widgets` extra instruments, as in a HUD theme; each replaces the previous ones sent this way. `clear` removes everything added with this command. Kept until cleared, across HUD themes.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "display.hud"
+        },
+        "values": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ],
+            "maxLength": 80
+          }
+        },
+        "blocks": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/HudBlock"
+          }
+        },
+        "widgets": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/HudWidget"
+          }
+        },
+        "clear": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
     "DisplayShow": {
       "title": "DisplayShow",
       "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. `camera` shows the front camera with a HUD theme (`hud`) drawn over it: boxes around faces, the locked target, text; it switches to mode `capture` if needed. With `overlay: face-corner` the face keeps running in a corner.",
@@ -1033,7 +1085,7 @@
     },
     "Hud": {
       "title": "Hud",
-      "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a second).",
+      "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.",
       "type": "object",
       "properties": {
         "name": {
@@ -1172,46 +1224,14 @@
           "type": "array",
           "maxItems": 8,
           "items": {
-            "type": "object",
-            "properties": {
-              "at": {
-                "type": "string",
-                "enum": [
-                  "top-left",
-                  "top-right",
-                  "bottom-left",
-                  "bottom-right",
-                  "left"
-                ]
-              },
-              "lines": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "maxLength": 80
-                },
-                "maxItems": 16
-              },
-              "size": {
-                "type": "number",
-                "minimum": 0.5,
-                "maximum": 3,
-                "description": "Text size; 1 is about 4.5% of the screen height."
-              },
-              "color": {
-                "$ref": "#/$defs/HudColor"
-              },
-              "blink_ms": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 5000
-              }
-            },
-            "required": [
-              "at",
-              "lines"
-            ],
-            "additionalProperties": false
+            "$ref": "#/$defs/HudBlock"
+          }
+        },
+        "widgets": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/HudWidget"
           }
         },
         "boot": {
@@ -1246,10 +1266,91 @@
       ],
       "additionalProperties": false
     },
+    "HudBlock": {
+      "title": "HudBlock",
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string",
+          "enum": [
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "left"
+          ]
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "maxItems": 16
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3,
+          "description": "Text size; 1 is about 4.5% of the screen height."
+        },
+        "color": {
+          "$ref": "#/$defs/HudColor"
+        },
+        "blink_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        }
+      },
+      "required": [
+        "at",
+        "lines"
+      ],
+      "additionalProperties": false
+    },
     "HudColor": {
       "title": "HudColor",
       "type": "string",
       "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "HudWidget": {
+      "title": "HudWidget",
+      "type": "object",
+      "description": "An instrument drawn from device values.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "compass",
+            "horizon",
+            "battery"
+          ],
+          "description": "`compass`: heading tape; `horizon`: artificial horizon from pitch and roll; `battery`: level and charging."
+        },
+        "at": {
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom",
+            "center",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right"
+          ],
+          "description": "Default: top for compass, center for horizon, top-right for battery."
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
     },
     "Imu": {
       "title": "Imu",

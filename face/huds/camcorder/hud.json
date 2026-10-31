@@ -6,15 +6,55 @@
   "color": "#62ff8e",
   "accent": "#62ff8e",
   "shadow": "#003b12",
-  "tint": { "color": "#0a2a12", "opacity": 0.25 },
-  "scanlines": { "opacity": 0.22, "spacing": 2 },
+  "tint": {
+    "color": "#0a2a12",
+    "opacity": 0.25
+  },
+  "scanlines": {
+    "opacity": 0.22,
+    "spacing": 2
+  },
   "vignette": 0.35,
-  "boxes": { "style": "rect", "width": 1.5, "label": "" },
-  "lock": { "style": "crosshair", "label": "", "blink_ms": 0 },
+  "boxes": {
+    "style": "rect",
+    "width": 1.5,
+    "label": ""
+  },
+  "lock": {
+    "style": "crosshair",
+    "label": "",
+    "blink_ms": 0
+  },
   "blocks": [
-    { "at": "top-left", "lines": ["● REC"], "size": 1, "color": "#ff4040", "blink_ms": 600 },
-    { "at": "top-right", "lines": ["SP  {faces} IN VIEW"], "size": 0.9 },
-    { "at": "bottom-left", "lines": ["PLAYBACK"], "size": 1.2 },
-    { "at": "bottom-right", "lines": ["{time}"], "size": 1.2 }
+    {
+      "at": "top-left",
+      "lines": [
+        "● REC"
+      ],
+      "size": 1,
+      "color": "#ff4040",
+      "blink_ms": 600
+    },
+    {
+      "at": "bottom-left",
+      "lines": [
+        "SP  {faces} IN VIEW",
+        "PLAYBACK"
+      ],
+      "size": 1.1
+    },
+    {
+      "at": "bottom-right",
+      "lines": [
+        "{time}"
+      ],
+      "size": 1.2
+    }
+  ],
+  "widgets": [
+    {
+      "type": "battery",
+      "at": "top-right"
+    }
   ]
 }

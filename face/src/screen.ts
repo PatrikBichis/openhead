@@ -1,5 +1,5 @@
 import type { FaceEngine, LogLevel } from "./engine";
-import { drawSyntheticCamera, HudRenderer, type SeenFace } from "./hud";
+import { drawSyntheticCamera, HudRenderer, type HudExtras, type HudValues, type SeenFace } from "./hud";
 
 export type View = "face" | "image" | "video" | "web" | "camera";
 export type Overlay = "none" | "face-corner";
@@ -152,6 +152,17 @@ export class Screen {
   setFaces(faces: SeenFace[]) {
     this.faces = faces;
     this.hud.setFaces(faces);
+    if (this.view === "camera") this.renderCamera();
+  }
+
+  /** Device readings for the HUD (battery, thermal, heading, pitch, roll, position, mode). */
+  setHudValues(values: HudValues) {
+    this.hud.setValues(values);
+  }
+
+  /** `display.hud`: the host's own values, blocks and widgets on the HUD. */
+  hudExtras(extras: HudExtras) {
+    this.hud.setExtras(extras);
     if (this.view === "camera") this.renderCamera();
   }
 

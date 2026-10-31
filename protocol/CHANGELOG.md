@@ -12,7 +12,8 @@ All changes to `protocol/schema` are recorded here, in the same commit as the ch
 - `face.look_at {frame: face, face_id?}`: the eyes follow a detected face.
 - `face.list` lists HUD themes (`huds`); `status` reports how many `faces` are seen.
 - Capabilities `camera`, `faces`, `pose` in `welcome`.
-- HUD theme schema `hud.schema.json` (tint, scanlines, vignette, boxes, lock, text blocks with templates, boot text).
+- HUD theme schema `hud.schema.json` (tint, scanlines, vignette, boxes, lock, text blocks with templates, boot text, widgets `compass`, `horizon`, `battery`); templates for device values (battery, thermal, heading, pitch, roll, position, mode).
+- `display.hud`: the host's own values, text blocks and widgets on the HUD (`values`, `blocks`, `widgets`, `clear`).
 
 ## 0.1.0 (2026-10-31)
 
