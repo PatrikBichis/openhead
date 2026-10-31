@@ -197,7 +197,7 @@ Ett paket `openhead` (Python 3.11+, asyncio, pydantic v2, websockets). Extras `[
 
 **Klient** (`openhead.client`): `Head.discover()`, `Head.connect(host, token=None)`, `await head.pair(code)`, `head.subscribe("imu", 100)` som async-iterator, `await head.face.set_emotion(...)`, `await head.system.screenshot()` som returnerar bytes. Modeller genererade från schema; en handskriven tunn fasad ovanpå. Automatisk återanslutning med backoff. Det här biblioteket är det enda robotrepot ska bero på.
 
-**Simulator** (`openhead.sim`): samma server-API som iOS-appen, implementerat i Python. Kör `face/dist` i ett fönster via `pywebview`; headless-läge renderar via Playwright för automatiska tester. Syntetisk IMU (konfigurerbar rörelse eller inspelad fil), syntetisk status. Stöder parkoppling med fast kod `0000` i dev-läge. Allt ett protokolltest behöver utan hårdvara.
+**Simulator** (`openhead.sim`): samma server-API som iOS-appen, implementerat i Python. Kör `face/dist` i Chromium via Playwright, både med fönster och headless (ändrat från `pywebview` 2026-10-31: samma kod för fönster och tester, och skärmdumpar fungerar i båda lägena). Syntetisk IMU (konfigurerbar rörelse eller inspelad fil), syntetisk status. Stöder parkoppling med fast kod `0000` i dev-läge. Allt ett protokolltest behöver utan hårdvara.
 
 **MCP-server** (`openhead.mcp`): byggd på det officiella Python-SDK:t för MCP, stdio i v0.1. Håller en klientanslutning mot vald enhet och exponerar:
 

@@ -1,1 +1,1 @@
-"""The openhead command-line interface (step 4)."""
+"""The openhead command-line interface."""

@@ -5,6 +5,7 @@ import { FaceEngine, type LogLevel } from "./engine";
  *   theme=<name>      initial theme (default cartoon)
  *   emotion=<name>    initial emotion
  *   test              deterministic mode: no idle motion, no animation loop
+ *   idle=0            animate, but without idle motion (headless simulator)
  *   seed=<n>          idle randomness seed
  */
 declare global {
@@ -24,7 +25,8 @@ function onLog(level: LogLevel, message: string) {
   (level === "warning" || level === "error" ? console.warn : console.info)(`[face] ${message}`);
 }
 
-const engine = new FaceEngine(canvas, { idle: !test, seed: Number(query.get("seed") ?? 1), onLog });
+const idle = !test && query.get("idle") !== "0";
+const engine = new FaceEngine(canvas, { idle, seed: Number(query.get("seed") ?? 1), onLog });
 window.openhead = engine;
 
 await engine.setTheme(query.get("theme") ?? "cartoon", 0);

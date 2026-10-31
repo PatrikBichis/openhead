@@ -259,12 +259,14 @@ Python and Swift models are generated from the schemas by `tools/protocol.py` an
 **Without hardware**
 
 ```bash
-pip install -e "python/[sim,mcp]"
-openhead sim                                  # simulated head with a face window (pairing code 0000)
-openhead pair 0000 --device localhost
-openhead emotion curious && openhead screenshot -o face.png
-openhead run scenarios/smoke.yaml
-openhead mcp --device localhost               # expose it to an agent
+cd face && npm ci && npm run build && cd ..   # the face engine the simulator renders
+cd python && uv sync && uv run playwright install chromium
+uv run openhead sim                           # simulated head with a face window (pairing code 0000)
+uv run openhead pair 0000 --device localhost  # in a second terminal
+uv run openhead emotion curious --device localhost
+uv run openhead screenshot -o face.png --device localhost
+uv run openhead run ../scenarios/smoke.yaml --device localhost
+uv run openhead mcp --device localhost        # expose it to an agent (step 5)
 ```
 
 **With an iPhone or iPad**
@@ -294,7 +296,7 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 1. Repo skeleton, local schema validation
 - [x] 2. Protocol schemas 0.1 with generated models and docs
 - [x] 3. Face engine with three themes and golden-image tests
-- [ ] 4. Simulator, Python client, CLI, smoke scenario
+- [x] 4. Simulator, Python client, CLI, smoke scenario
 - [ ] 5. MCP server (stdio)
 - [ ] 6. Apple Developer setup and secrets
 - [ ] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build

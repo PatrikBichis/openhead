@@ -53,30 +53,34 @@ def main() -> int:
     args = parser.parse_args()
 
     uv = ["uv", "run", "--project", "python"]
-    results = {
-        "protocol: schemas, examples, themes": run(
-            "protocol: schemas, examples, themes", [*uv, "python", "tools/protocol.py", "check"]),
-        "protocol: generated files up to date": run(
-            "protocol: generated files up to date",
-            [*uv, "python", "tools/protocol.py", "generate", "--check"]),
-        "python: ruff": run("python: ruff", ["uv", "run", "ruff", "check", ".", "../tools"],
-                            cwd=ROOT / "python"),
-        "python: pytest": run("python: pytest", ["uv", "run", "pytest", "-q"], cwd=ROOT / "python"),
-    }
-    skipped = []
+    results: dict[str, bool] = {}
+    skipped: list[str] = []
+
+    def check(name: str, cmd: list[str] | str, cwd: Path = ROOT, shell: bool = False) -> bool:
+        results[name] = run(name, cmd, cwd, shell)
+        return results[name]
+
+    check("protocol: schemas, examples, themes", [*uv, "python", "tools/protocol.py", "check"])
+    check("protocol: generated files up to date",
+          [*uv, "python", "tools/protocol.py", "generate", "--check"])
+    check("python: ruff", ["uv", "run", "ruff", "check", ".", "../tools"], cwd=ROOT / "python")
+
+    face = ROOT / "face"
     if args.fast:
-        skipped += ["face", "swift"]
+        skipped += ["face build and Playwright", "swift"]
     else:
-        face = ROOT / "face"
         if not (face / "node_modules").exists():
             run("face: npm ci", "npm ci", cwd=face, shell=True)
-        results["face: build"] = run("face: build", "npm run build", cwd=face, shell=True)
-        results["face: playwright"] = results["face: build"] and run(
-            "face: playwright", "npx playwright test", cwd=face, shell=True)
+        # Built before pytest: the simulator renders face/dist.
+        if check("face: build", "npm run build", cwd=face, shell=True):
+            check("face: playwright", "npx playwright test", cwd=face, shell=True)
+    # Contract, simulator, scenario and CLI tests (simulator tests skip without face/dist).
+    check("python: pytest (protocol, simulator, scenarios, CLI)", ["uv", "run", "pytest", "-q"],
+          cwd=ROOT / "python")
+    if not args.fast:
         swift = swift_command()
         if swift:
-            results["swift: models compile and round-trip"] = run(
-                "swift: models compile and round-trip", swift)
+            check("swift: models compile and round-trip", swift)
         else:
             skipped.append("swift (no swiftc locally or in WSL; see docs/dev-loop.md)")
 

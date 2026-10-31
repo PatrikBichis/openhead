@@ -1,1 +1,5 @@
-"""Desktop simulator speaking the OpenHead protocol (step 4)."""
+"""Desktop simulator speaking the OpenHead protocol (needs the `[sim]` extra)."""
+
+from .server import SimConfig, SimError, SimServer
+
+__all__ = ["SimConfig", "SimError", "SimServer"]

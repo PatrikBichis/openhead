@@ -4,7 +4,7 @@ The head is built to be validated by an agent, not only by a person holding the 
 
 | Level | Where | Time | Proves | Status |
 | --- | --- | --- | --- | --- |
-| 1 | PC (Windows, WSL) | seconds–minutes | protocol, Python/Swift models, face rendering, simulator behaviour | available; simulator from step 4 |
+| 1 | PC (Windows, WSL) | about a minute | protocol, Python/Swift models, face rendering, simulator, scenarios, CLI | available |
 | 2 | Device on the desk | minutes | WKWebView, sensors, ARKit, performance, thermals | step 8 |
 | 3 | TestFlight build (GitHub Actions, manual) | ~10 min | the app builds, signs and uploads | step 7 |
 
@@ -16,7 +16,7 @@ uv run --project python python tools/check.py --fast   # protocol + Python only
 cd face && npm run gallery                             # test-results/gallery.png to review by eye
 ```
 
-`tools/check.py` runs: protocol validation, generated-file check, ruff, pytest (contract tests; from step 4 also scenarios against `openhead sim --headless`), face build with type check, Playwright golden images and API tests, and the Swift contract test when Swift is available.
+`tools/check.py` runs: protocol validation, generated-file check, ruff, face build with type check, Playwright golden images and API tests, pytest (contract tests, the protocol against the headless simulator, every scenario in `scenarios/` with screenshot goldens, and the CLI end to end), and the Swift contract test when Swift is available.
 
 Install the git hooks once:
 
