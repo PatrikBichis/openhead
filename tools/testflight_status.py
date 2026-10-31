@@ -18,13 +18,13 @@ from apple_setup import Asc, read_env
 def builds(asc: Asc, app_id: str) -> list[dict]:
     data = asc.request("GET", "/builds", params={
         "filter[app]": app_id, "sort": "-uploadedDate", "limit": 10,
-        "fields[builds]": "version,uploadedDate,processingState,expirationDate,expired",
+        "fields[builds]": "version,uploadedDate,processingState,expirationDate,expired,preReleaseVersion",
         "include": "preReleaseVersion", "fields[preReleaseVersions]": "version",
     })
     versions = {v["id"]: v["attributes"]["version"] for v in data.get("included", [])}
     rows = []
     for b in data["data"]:
-        rel = b["relationships"]["preReleaseVersion"]["data"]
+        rel = b.get("relationships", {}).get("preReleaseVersion", {}).get("data")
         rows.append({"build": b["attributes"]["version"],
                      "version": versions.get(rel["id"], "?") if rel else "?",
                      "state": b["attributes"]["processingState"],
@@ -37,9 +37,8 @@ def main() -> int:
     parser.add_argument("--wait", metavar="BUILD", help="poll until this build number is VALID")
     args = parser.parse_args()
     env = read_env()
-    asc = Asc(env)
     while True:
-        rows = builds(asc, env["ASC_APP_ID"])
+        rows = builds(Asc(env), env["ASC_APP_ID"])  # fresh token each time: they last 20 min
         target = next((r for r in rows if r["build"] == args.wait), None) if args.wait else None
         if not args.wait or (target and target["state"] in ("VALID", "FAILED", "INVALID")):
             break
