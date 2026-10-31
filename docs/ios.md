@@ -77,6 +77,17 @@ uv run --with imageio-ffmpeg python ../tools/media.py            # stills and pr
 
 Upload them in App Store Connect under the app version (Previews and Screenshots). The 6.9" set is scaled down for smaller iPhones and the 13" set for smaller iPads. Speech uses a Windows SAPI voice; elsewhere the preview has a silent track. The settings pictures in `docs/media/settings_*.jpg` are real device screenshots.
 
+## Store texts
+
+The texts shown in TestFlight and on the App Store page live in `apps/ios/appstore/metadata/` (`en-US/` for the App Store page: description, subtitle, promotional text, keywords, URLs; `testflight/` for the TestFlight description and "What to Test"). Edit them there, then:
+
+```bash
+uv run --project python python tools/appstore_metadata.py --dry-run   # what would change
+uv run --project python python tools/appstore_metadata.py             # push; --build N for What to Test
+```
+
+It updates the version being prepared (nothing is submitted for review). Before the first App Store submission, a privacy policy URL and the version number (App Store Connect has `1.0`, the builds are `0.1.0`) still need settling.
+
 ## Running on a robot
 
 - Mount the phone in landscape (left or right); the app does not rotate to portrait on iPhone.

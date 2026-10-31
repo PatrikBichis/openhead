@@ -1,0 +1,8 @@
+New in this build:
+• Subtitles on top of anything: openhead subtitle "Hello" --mouth. Use --mode append to stream an answer word by word; the newest three lines stay on screen.
+• Video: openhead show clip.mp4 --overlay face-corner plays a file from your computer; the face comes back when it ends.
+• Images now include SVG and animated GIF.
+• The face fills the whole screen, edge to edge.
+• Screenshots during a video show the frame instead of black.
+
+Please try: run scenarios/display.yaml and scenarios/smoke.yaml (openhead run ...) and check that video plays smoothly, subtitles are easy to read from a distance, and the mouth moves with the text.

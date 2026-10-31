@@ -15,6 +15,18 @@ The protocol is the product. The iOS app is the first client; the desktop simula
 | --- | --- | --- |
 | ![Cartoon theme, happy](docs/media/cartoon-happy.png) | ![Minimal theme, surprised](docs/media/minimal-surprised.png) | ![Halloween theme, cackle](docs/media/halloween-cackle.png) |
 
+## Features
+
+- **Expressive face.** 28 expressions shared by every theme (happy, curious, confused, shocked, laughing, smug, ...), blended, timed or layered; three themes: Cartoon, Minimal and Halloween.
+- **Eyes and mouth that live.** Gaze on the screen or from the head's frame; idle blinking, breathing and small eye movements; a mouth driven by the robot's voice (loudness streamed at 25 Hz).
+- **Subtitles.** Text on top of anything, for a robot without a speaker or an AI answer streaming in word by word; the newest three lines stay on screen, and the mouth can move with the text.
+- **Pictures, video and web pages.** PNG, JPEG, animated GIF, WebP and SVG; H.264 video (loop, mute, back to the face when it ends); web pages; the face can keep running in a corner. Local files are served to the head from the host.
+- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; battery, thermal state, clients, what is on screen.
+- **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
+- **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
+
+The iOS app is in TestFlight as *OpenHead Robot Face*; its store texts live in [`apps/ios/appstore/metadata`](apps/ios/appstore/metadata) and are pushed with `tools/appstore_metadata.py` (see [docs/ios.md](docs/ios.md)).
+
 ---
 
 ## Why

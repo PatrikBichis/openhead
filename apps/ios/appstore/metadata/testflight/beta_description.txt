@@ -1,0 +1,5 @@
+OpenHead turns this phone into the face of a robot. Mount it in landscape; a robot's computer, a Python script or an AI agent on the same Wi-Fi drives it after pairing with the code shown on screen.
+
+What it does: 28 expressions in three themes (Cartoon, Minimal, Halloween), eyes that look around, a mouth that moves with the robot's voice, subtitles (also streamed word by word, with a moving mouth), images including SVG and animated GIF, video and web pages with the face in a corner, a motion sensor stream and status. Nothing leaves your local network.
+
+To drive it, install the tools from github.com/PatrikBichis/openhead (Python, uv) and run: openhead discover, then openhead pair. Long-press the face for 1.5 s for settings; turn on Dev mode there for screenshots and logs.
