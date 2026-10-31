@@ -1,6 +1,6 @@
 [project]
 name = "openhead"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Use a phone as a robot head: Python client, simulator and MCP server for the OpenHead protocol."
 readme = "README.md"
 requires-python = ">=3.11"

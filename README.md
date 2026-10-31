@@ -337,7 +337,7 @@ Mount the phone in landscape and start the app: the face fills the screen. A lon
 
 ## Status
 
-Early development. The protocol is unstable until `0.1.0` is tagged; robot integrations should track `main` until then and pin a tag afterwards.
+Protocol `0.1.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.1.0)); robot integrations pin a tag. v0.2 (camera view with HUD, face tracking, ARKit pose) is in progress on `main`.
 
 - [x] 1. Repo skeleton, local schema validation
 - [x] 2. Protocol schemas 0.1 with generated models and docs
@@ -349,7 +349,7 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 8. Device in the loop: smoke scenario green on simulator and device
 - [ ] 9. IMU stream and envelope-driven mouth
 - [x] 10. Video, subtitles and a display test suite
-- [ ] 11. Tag `0.1.0`
+- [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
 
 ---
 

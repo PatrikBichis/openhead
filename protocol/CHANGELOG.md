@@ -2,7 +2,7 @@
 
 All changes to `protocol/schema` are recorded here, in the same commit as the change. The protocol follows [semver](https://semver.org) from 0.1.0; until 0.1.0 is tagged anything may change.
 
-## Unreleased (0.1.0)
+## 0.1.0 (2026-10-31)
 
 ### Added
 
