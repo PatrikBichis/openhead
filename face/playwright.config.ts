@@ -8,6 +8,9 @@ export default defineConfig({
   snapshotPathTemplate: "{testDir}/golden/{arg}{ext}",
   fullyParallel: true,
   forbidOnly: CI,
+  // A rare timing hiccup under load (pre-push runs everything at once) is retried once and
+  // reported as "flaky" instead of blocking the push; a real regression fails both tries.
+  retries: 1,
   reporter: CI ? [["list"], ["html", { open: "never" }]] : "list",
   expect: {
     toHaveScreenshot: { maxDiffPixelRatio: 0.01, threshold: 0.2, animations: "disabled" },

@@ -35,7 +35,8 @@ async function open(page: Page, theme = "cartoon") {
     });
   });
   await openFace(page, theme);
-  await page.evaluate(() => document.fonts.ready);
+  // The subtitle font loads on first use; load it now so it cannot swap mid-screenshot.
+  await page.evaluate(() => document.fonts.load('600 24px "Inter Variable"'));
 }
 
 const show = (page: Page, content: string, source: string, opts: object = {}) =>
