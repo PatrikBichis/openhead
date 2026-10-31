@@ -336,7 +336,7 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
 - [x] 8. Device in the loop: smoke scenario green on simulator and device
 - [ ] 9. IMU stream and envelope-driven mouth
-- [ ] 10. Video, subtitles and a display test suite
+- [x] 10. Video, subtitles and a display test suite
 - [ ] 11. Tag `0.1.0`
 
 ---
