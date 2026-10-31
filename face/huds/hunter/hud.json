@@ -43,7 +43,7 @@
         "SIZE ASSESSMENT",
         "",
         "ASSESSMENT {status}",
-        "FIT PROBABILITY 0.{conf}",
+        "FIT PROBABILITY {conf}",
         "",
         "TARGET {target}",
         "BEARING {bearing}",

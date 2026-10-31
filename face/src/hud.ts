@@ -450,7 +450,7 @@ export class HudRenderer {
       target: face ? String(face.id) : "NONE",
       status: face ? "LOCKED" : "SEARCHING",
       id: face ? String(face.id) : "-",
-      conf: face ? String(Math.round(face.confidence * 100)).padStart(2, "0") : "00",
+      conf: face ? face.confidence.toFixed(2) : "0.00",
       bearing: face ? `${face.bearing >= 0 ? "+" : ""}${face.bearing.toFixed(1)}` : "-",
       elevation: face ? `${face.elevation >= 0 ? "+" : ""}${face.elevation.toFixed(1)}` : "-",
       size: face ? face.size.toFixed(2) : "-",

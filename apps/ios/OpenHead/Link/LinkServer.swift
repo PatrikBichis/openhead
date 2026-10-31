@@ -43,11 +43,15 @@ final class Session {
     }
 }
 
-/// WebSocket server (Network.framework), advertised over mDNS as `_openhead._tcp`.
+/// WebSocket server (Network.framework), advertised over mDNS as `_openhead._tcp` by a
+/// separate `Advertiser`, so an mDNS hiccup never takes the server down.
 @MainActor
 final class LinkServer {
     unowned let model: AppModel
     private var listener: NWListener?
+    private let advertiser = Advertiser()
+    private var watchdog: Timer?
+    private var restarting = false
     private(set) var sessions: [UUID: Session] = [:]
     let shots = ShotServer()
     private var queueTail: Task<Void, Never>?
@@ -59,7 +63,11 @@ final class LinkServer {
 
     func start() {
         let settings = model.settings
+        listener?.stateUpdateHandler = nil
+        listener?.cancel()
+        listener = nil
         let parameters = NWParameters.tcp
+        parameters.allowLocalEndpointReuse = true  // restart on the same port at once
         let websocket = NWProtocolWebSocket.Options()
         websocket.autoReplyPing = true
         websocket.maximumMessageSize = 4 * 1024 * 1024
@@ -69,7 +77,6 @@ final class LinkServer {
             log.log("error", "link", "cannot listen on port \(settings.port)")
             return
         }
-        listener.service = NWListener.Service(name: settings.name, type: "_openhead._tcp")
         listener.stateUpdateHandler = { [weak self] state in
             MainActor.assumeIsolated { self?.listenerState(state) }
         }
@@ -79,6 +86,32 @@ final class LinkServer {
         listener.start(queue: .main)
         self.listener = listener
         shots.start(port: settings.port + 1, log: log)
+        if watchdog == nil {
+            advertiser.start(name: settings.name, port: settings.port, log: log)
+            // A listener that is not ready for long (failed restart, stuck state) is replaced.
+            watchdog = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, !self.restarting, self.listener?.state != .ready else { return }
+                    self.log.log("warning", "link", "listener not ready; restarting it")
+                    self.restart()
+                }
+            }
+        }
+    }
+
+    private func restart() {
+        restarting = true
+        listening = false
+        publish(ready: false)
+        listener?.stateUpdateHandler = nil
+        listener?.cancel()
+        listener = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            MainActor.assumeIsolated {
+                self?.restarting = false
+                self?.start()
+            }
+        }
     }
 
     private func listenerState(_ state: NWListener.State) {
@@ -88,13 +121,8 @@ final class LinkServer {
             log.log("info", "link", "listening on port \(model.settings.port) as \(model.settings.name)")
             publish(ready: true)
         case .failed(let error):
-            listening = false
             log.log("error", "link", "listener failed: \(error); restarting")
-            publish(ready: false)
-            listener?.cancel()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                MainActor.assumeIsolated { self?.start() }
-            }
+            restart()
         case .waiting(let error):
             listening = false
             log.log("warning", "link", "listener waiting: \(error)")
