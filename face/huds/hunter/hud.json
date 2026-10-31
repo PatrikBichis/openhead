@@ -1,0 +1,22 @@
+{
+  "name": "hunter",
+  "title": "Hunter",
+  "version": "0.2.0",
+  "font": "sans",
+  "color": "#ffffff",
+  "accent": "#ffffff",
+  "shadow": "#5a0000",
+  "tint": { "color": "#d81e1e", "opacity": 0.55 },
+  "scanlines": { "opacity": 0.12, "spacing": 3 },
+  "vignette": 0.55,
+  "boxes": { "style": "corners", "width": 2, "label": "ID {id}" },
+  "lock": { "style": "rect", "label": "MATCH", "blink_ms": 0 },
+  "blocks": [
+    { "at": "top-left", "lines": ["ANALYSIS:", "{rand:10}", "{rand:6} {rand:3} {rand:2}", "{rand:6} {rand:3} {rand:2}"], "size": 0.8 },
+    {
+      "at": "top-right",
+      "lines": ["SCAN MODE {frame}", "SIZE ASSESSMENT", "", "ASSESSMENT {status}", "FIT PROBABILITY 0.{conf}", "", "TARGET {target}", "BEARING {bearing}", "FACES IN VIEW {faces}"],
+      "size": 0.8
+    }
+  ]
+}

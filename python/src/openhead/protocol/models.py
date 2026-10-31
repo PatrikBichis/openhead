@@ -259,6 +259,61 @@ class Hello(Envelope):
     """
 
 
+class Scanlines(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    opacity: float = Field(..., ge=0.0, le=1.0)
+    spacing: float | None = Field(None, ge=2.0, le=12.0)
+    """
+    Pixels between lines.
+    """
+
+
+class Boxes(BaseModel):
+    """
+    How every detected face is marked.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    style: Literal["corners", "rect", "bracket", "none"]
+    width: float | None = Field(None, ge=0.5, le=8.0)
+    """
+    Line width in points.
+    """
+    label: str | None = Field(None, max_length=80)
+
+
+class Lock(BaseModel):
+    """
+    How the locked face (the largest, or the one `look_at` follows) is marked.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    style: Literal["crosshair", "rect", "corners", "none"]
+    label: str | None = Field(None, max_length=40)
+    """
+    Shown big near the bottom while locked.
+    """
+    blink_ms: int | None = Field(None, ge=0, le=5000)
+
+
+class Boot(BaseModel):
+    """
+    Lines typed out one by one when the view opens, then kept on screen at the left.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    lines: list[str] = Field(..., max_length=24)
+    ms_per_line: int | None = Field(None, ge=20, le=2000)
+
+
 class LogFields(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
@@ -1069,6 +1124,91 @@ class Faces(Envelope, FacesFields):
     type: Literal["faces"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
+class Tint(BaseModel):
+    """
+    Colour laid over the camera image (works over a native camera view too).
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    opacity: float = Field(..., ge=0.0, le=1.0)
+
+
+class Block(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    at: Literal["top-left", "top-right", "bottom-left", "bottom-right", "left"]
+    lines: list[str] = Field(..., max_length=16)
+    size: float | None = Field(None, ge=0.5, le=3.0)
+    """
+    Text size; 1 is about 4.5% of the screen height.
+    """
+    color: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    blink_ms: int | None = Field(None, ge=0, le=5000)
+
+
+class Hud(BaseModel):
+    """
+    A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a second).
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    name: str = Field(..., pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName")
+    """
+    Lower-case identifier used for themes and emotions.
+    """
+    title: str
+    version: str = Field(
+        ..., pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$", title="CommonVersion"
+    )
+    """
+    Semantic version, MAJOR.MINOR.PATCH.
+    """
+    font: Literal["mono", "sans"] | None = None
+    """
+    Default mono.
+    """
+    color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    """
+    Text and boxes.
+    """
+    accent: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    """
+    The locked face and highlights.
+    """
+    shadow: str | None = Field(None, pattern="^#[0-9a-fA-F]{6}$", title="HudColor")
+    """
+    Glow or shadow behind text and lines.
+    """
+    tint: Tint | None = None
+    """
+    Colour laid over the camera image (works over a native camera view too).
+    """
+    scanlines: Scanlines | None = None
+    vignette: float | None = Field(None, ge=0.0, le=1.0)
+    """
+    Darker corners.
+    """
+    boxes: Boxes | None = None
+    """
+    How every detected face is marked.
+    """
+    lock: Lock | None = None
+    """
+    How the locked face (the largest, or the one `look_at` follows) is marked.
+    """
+    blocks: list[Block] | None = Field(None, max_length=8)
+    boot: Boot | None = None
+    """
+    Lines typed out one by one when the view opens, then kept on screen at the left.
     """
 
 

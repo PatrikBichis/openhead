@@ -29,6 +29,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let facesFields: FacesFields?
     public let facesPayload: FacesPayload?
     public let hello: Hello?
+    public let hud: Hud?
     public let imu: Imu?
     public let imuFields: ImuFields?
     public let imuPayload: ImuPayload?
@@ -84,6 +85,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case facesFields = "FacesFields"
         case facesPayload = "FacesPayload"
         case hello = "Hello"
+        case hud = "Hud"
         case imu = "Imu"
         case imuFields = "ImuFields"
         case imuPayload = "ImuPayload"
@@ -120,7 +122,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, hello: Hello?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, hello: Hello?, hud: Hud?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
         self.displayShow = displayShow
@@ -140,6 +142,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.facesFields = facesFields
         self.facesPayload = facesPayload
         self.hello = hello
+        self.hud = hud
         self.imu = imu
         self.imuFields = imuFields
         self.imuPayload = imuPayload
@@ -902,6 +905,226 @@ public struct Hello: Codable, Equatable, Sendable {
 
 public enum HelloType: String, Codable, Equatable, Sendable {
     case hello = "hello"
+}
+
+
+/// A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines
+/// are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or
+/// SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame
+/// counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a
+/// second).
+// MARK: - Hud
+public struct Hud: Codable, Equatable, Sendable {
+    /// The locked face and highlights.
+    public let accent: String?
+    public let blocks: [Block]?
+    /// Lines typed out one by one when the view opens, then kept on screen at the left.
+    public let boot: Boot?
+    /// How every detected face is marked.
+    public let boxes: Boxes?
+    /// Text and boxes.
+    public let color: String
+    /// Default mono.
+    public let font: Font?
+    /// How the locked face (the largest, or the one `look_at` follows) is marked.
+    public let lock: Lock?
+    public let name: String
+    public let scanlines: Scanlines?
+    /// Glow or shadow behind text and lines.
+    public let shadow: String?
+    /// Colour laid over the camera image (works over a native camera view too).
+    public let tint: Tint?
+    public let title: String
+    public let version: String
+    /// Darker corners.
+    public let vignette: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case accent = "accent"
+        case blocks = "blocks"
+        case boot = "boot"
+        case boxes = "boxes"
+        case color = "color"
+        case font = "font"
+        case lock = "lock"
+        case name = "name"
+        case scanlines = "scanlines"
+        case shadow = "shadow"
+        case tint = "tint"
+        case title = "title"
+        case version = "version"
+        case vignette = "vignette"
+    }
+
+    public init(accent: String?, blocks: [Block]?, boot: Boot?, boxes: Boxes?, color: String, font: Font?, lock: Lock?, name: String, scanlines: Scanlines?, shadow: String?, tint: Tint?, title: String, version: String, vignette: Double?) {
+        self.accent = accent
+        self.blocks = blocks
+        self.boot = boot
+        self.boxes = boxes
+        self.color = color
+        self.font = font
+        self.lock = lock
+        self.name = name
+        self.scanlines = scanlines
+        self.shadow = shadow
+        self.tint = tint
+        self.title = title
+        self.version = version
+        self.vignette = vignette
+    }
+}
+
+
+// MARK: - Block
+public struct Block: Codable, Equatable, Sendable {
+    public let at: At
+    public let blinkMS: Int?
+    public let color: String?
+    public let lines: [String]
+    /// Text size; 1 is about 4.5% of the screen height.
+    public let size: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case at = "at"
+        case blinkMS = "blink_ms"
+        case color = "color"
+        case lines = "lines"
+        case size = "size"
+    }
+
+    public init(at: At, blinkMS: Int?, color: String?, lines: [String], size: Double?) {
+        self.at = at
+        self.blinkMS = blinkMS
+        self.color = color
+        self.lines = lines
+        self.size = size
+    }
+}
+
+public enum At: String, Codable, Equatable, Sendable {
+    case atLeft = "left"
+    case bottomLeft = "bottom-left"
+    case bottomRight = "bottom-right"
+    case topLeft = "top-left"
+    case topRight = "top-right"
+}
+
+
+/// Lines typed out one by one when the view opens, then kept on screen at the left.
+// MARK: - Boot
+public struct Boot: Codable, Equatable, Sendable {
+    public let lines: [String]
+    public let msPerLine: Int?
+
+    public enum CodingKeys: String, CodingKey {
+        case lines = "lines"
+        case msPerLine = "ms_per_line"
+    }
+
+    public init(lines: [String], msPerLine: Int?) {
+        self.lines = lines
+        self.msPerLine = msPerLine
+    }
+}
+
+
+/// How every detected face is marked.
+// MARK: - Boxes
+public struct Boxes: Codable, Equatable, Sendable {
+    public let label: String?
+    public let style: BoxesStyle
+    /// Line width in points.
+    public let width: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case label = "label"
+        case style = "style"
+        case width = "width"
+    }
+
+    public init(label: String?, style: BoxesStyle, width: Double?) {
+        self.label = label
+        self.style = style
+        self.width = width
+    }
+}
+
+public enum BoxesStyle: String, Codable, Equatable, Sendable {
+    case bracket = "bracket"
+    case corners = "corners"
+    case none = "none"
+    case rect = "rect"
+}
+
+/// Default mono.
+public enum Font: String, Codable, Equatable, Sendable {
+    case mono = "mono"
+    case sans = "sans"
+}
+
+
+/// How the locked face (the largest, or the one `look_at` follows) is marked.
+// MARK: - Lock
+public struct Lock: Codable, Equatable, Sendable {
+    public let blinkMS: Int?
+    /// Shown big near the bottom while locked.
+    public let label: String?
+    public let style: LockStyle
+
+    public enum CodingKeys: String, CodingKey {
+        case blinkMS = "blink_ms"
+        case label = "label"
+        case style = "style"
+    }
+
+    public init(blinkMS: Int?, label: String?, style: LockStyle) {
+        self.blinkMS = blinkMS
+        self.label = label
+        self.style = style
+    }
+}
+
+public enum LockStyle: String, Codable, Equatable, Sendable {
+    case corners = "corners"
+    case crosshair = "crosshair"
+    case none = "none"
+    case rect = "rect"
+}
+
+
+// MARK: - Scanlines
+public struct Scanlines: Codable, Equatable, Sendable {
+    public let opacity: Double
+    /// Pixels between lines.
+    public let spacing: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case opacity = "opacity"
+        case spacing = "spacing"
+    }
+
+    public init(opacity: Double, spacing: Double?) {
+        self.opacity = opacity
+        self.spacing = spacing
+    }
+}
+
+
+/// Colour laid over the camera image (works over a native camera view too).
+// MARK: - Tint
+public struct Tint: Codable, Equatable, Sendable {
+    public let color: String
+    public let opacity: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case color = "color"
+        case opacity = "opacity"
+    }
+
+    public init(color: String, opacity: Double) {
+        self.color = color
+        self.opacity = opacity
+    }
 }
 
 

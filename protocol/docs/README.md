@@ -34,4 +34,4 @@ Protocol version 0.2.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `unsubscribe` | [Unsubscribe](commands/unsubscribe.md) | Close a stream. |
 | `welcome` | [Welcome](messages/welcome.md) | Session accepted. |
 
-Shared: [Envelope](envelope.md), [Command](command.md), [Common](common.md). Theme packs: [Theme](theme.schema.md), [Expressions](expressions.schema.md).
+Shared: [Envelope](envelope.md), [Command](command.md), [Common](common.md). Theme packs: [Theme](theme.schema.md), [Expressions](expressions.schema.md), [HUD](hud.schema.md).

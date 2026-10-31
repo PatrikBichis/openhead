@@ -27,6 +27,7 @@ PROTOCOL = ROOT / "protocol"
 SCHEMA_DIR = PROTOCOL / "schema"
 EXAMPLES = PROTOCOL / "examples"
 THEMES = ROOT / "face" / "themes"
+HUDS = ROOT / "face" / "huds"
 BUNDLE = PROTOCOL / "dist" / "openhead.schema.json"
 DOCS = PROTOCOL / "docs"
 MODELS = ROOT / "python" / "src" / "openhead" / "protocol" / "models.py"
@@ -82,6 +83,7 @@ public enum JSONValue: Codable, Hashable, Sendable {
 """
 THEME_SCHEMA = SCHEMA_DIR / "theme.schema.json"
 EXPRESSIONS_SCHEMA = SCHEMA_DIR / "expressions.schema.json"
+HUD_SCHEMA = SCHEMA_DIR / "hud.schema.json"
 DIALECT = "https://json-schema.org/draft/2020-12/schema"
 
 
@@ -167,7 +169,7 @@ def check() -> int:
     reg = registry()
     types = message_types()
     covered: set[str] = set()
-    counts = {"messages": 0, "results": 0, "invalid": 0, "themes": 0}
+    counts = {"messages": 0, "results": 0, "invalid": 0, "themes": 0, "huds": 0}
 
     for path in sorted(EXAMPLES.glob("*.json")):
         data = load(path)
@@ -218,6 +220,13 @@ def check() -> int:
         for shape in theme.get("shapes", {}).values():
             if "image" in shape and not (folder / shape["image"]).exists():
                 problems.append(f"{rel(folder)}: missing {shape['image']}")
+
+    for hud_file in sorted(HUDS.glob("*/hud.json")):
+        counts["huds"] += 1
+        hud = load(hud_file)
+        problems += [f"{rel(hud_file)}: {e}" for e in errors_of(validator(reg, HUD_SCHEMA), hud)]
+        if hud.get("name") != hud_file.parent.name:
+            problems.append(f"{rel(hud_file)}: name must equal folder {hud_file.parent.name!r}")
 
     for p in problems:
         print(f"ERROR {p}")
@@ -403,7 +412,7 @@ def generate_docs(out_dir: Path) -> None:
         "",
         (
             "Shared: [Envelope](envelope.md), [Command](command.md), [Common](common.md). "
-            "Theme packs: [Theme](theme.schema.md), [Expressions](expressions.schema.md)."
+            "Theme packs: [Theme](theme.schema.md), [Expressions](expressions.schema.md), [HUD](hud.schema.md)."
         ),
         "",
     ]

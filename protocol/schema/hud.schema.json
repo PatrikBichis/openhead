@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hud",
+  "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits (change twice a second).",
+  "type": "object",
+  "properties": {
+    "name": { "$ref": "common.json#/$defs/name" },
+    "title": { "type": "string" },
+    "version": { "$ref": "common.json#/$defs/version" },
+    "font": { "type": "string", "enum": ["mono", "sans"], "description": "Default mono." },
+    "color": { "$ref": "#/$defs/color", "description": "Text and boxes." },
+    "accent": { "$ref": "#/$defs/color", "description": "The locked face and highlights." },
+    "shadow": { "$ref": "#/$defs/color", "description": "Glow or shadow behind text and lines." },
+    "tint": {
+      "type": "object",
+      "description": "Colour laid over the camera image (works over a native camera view too).",
+      "properties": {
+        "color": { "$ref": "#/$defs/color" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["color", "opacity"],
+      "additionalProperties": false
+    },
+    "scanlines": {
+      "type": "object",
+      "properties": {
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "spacing": { "type": "number", "minimum": 2, "maximum": 12, "description": "Pixels between lines." }
+      },
+      "required": ["opacity"],
+      "additionalProperties": false
+    },
+    "vignette": { "type": "number", "minimum": 0, "maximum": 1, "description": "Darker corners." },
+    "boxes": {
+      "type": "object",
+      "description": "How every detected face is marked.",
+      "properties": {
+        "style": { "type": "string", "enum": ["corners", "rect", "bracket", "none"] },
+        "width": { "type": "number", "minimum": 0.5, "maximum": 8, "description": "Line width in points." },
+        "label": { "type": "string", "maxLength": 80 }
+      },
+      "required": ["style"],
+      "additionalProperties": false
+    },
+    "lock": {
+      "type": "object",
+      "description": "How the locked face (the largest, or the one `look_at` follows) is marked.",
+      "properties": {
+        "style": { "type": "string", "enum": ["crosshair", "rect", "corners", "none"] },
+        "label": { "type": "string", "maxLength": 40, "description": "Shown big near the bottom while locked." },
+        "blink_ms": { "type": "integer", "minimum": 0, "maximum": 5000 }
+      },
+      "required": ["style"],
+      "additionalProperties": false
+    },
+    "blocks": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": { "type": "string", "enum": ["top-left", "top-right", "bottom-left", "bottom-right", "left"] },
+          "lines": { "type": "array", "items": { "type": "string", "maxLength": 80 }, "maxItems": 16 },
+          "size": { "type": "number", "minimum": 0.5, "maximum": 3, "description": "Text size; 1 is about 4.5% of the screen height." },
+          "color": { "$ref": "#/$defs/color" },
+          "blink_ms": { "type": "integer", "minimum": 0, "maximum": 5000 }
+        },
+        "required": ["at", "lines"],
+        "additionalProperties": false
+      }
+    },
+    "boot": {
+      "type": "object",
+      "description": "Lines typed out one by one when the view opens, then kept on screen at the left.",
+      "properties": {
+        "lines": { "type": "array", "items": { "type": "string", "maxLength": 60 }, "maxItems": 24 },
+        "ms_per_line": { "type": "integer", "minimum": 20, "maximum": 2000 }
+      },
+      "required": ["lines"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["name", "title", "version", "color"],
+  "additionalProperties": false,
+  "$defs": {
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+  }
+}

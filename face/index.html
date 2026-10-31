@@ -40,7 +40,8 @@
       }
       #display img,
       #display video,
-      #display canvas.frame {
+      #display canvas.frame,
+      #display canvas.synthetic-camera {
         width: 100%;
         height: 100%;
         object-fit: contain;
@@ -58,14 +59,26 @@
       body.showing:not(.face-corner) #face {
         visibility: hidden;
       }
+      /* camera view: HUD over the camera (native below on iOS, synthetic in the simulator) */
+      #hud {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 2;
+        pointer-events: none;
+      }
+      #hud[hidden] {
+        display: none;
+      }
       body.face-corner #face {
         position: fixed;
         right: max(12px, env(safe-area-inset-right));
         bottom: max(12px, env(safe-area-inset-bottom));
         width: 32vw;
         height: 32vh;
-        z-index: 2;
         border-radius: 16px;
+        z-index: 3;
       }
       /* iOS draws web pages natively below this view */
       body.native-web,
@@ -78,7 +91,7 @@
         left: 50%;
         bottom: max(16px, env(safe-area-inset-bottom));
         transform: translateX(-50%);
-        z-index: 3;
+        z-index: 4;
         box-sizing: border-box;
         width: max-content;
         max-width: min(92vw, 1200px);
@@ -114,6 +127,7 @@
   <body>
     <canvas id="face"></canvas>
     <div id="display" hidden></div>
+    <canvas id="hud" hidden></canvas>
     <div id="subtitles" hidden><div><p></p></div></div>
     <script type="module" src="./src/main.ts"></script>
   </body>

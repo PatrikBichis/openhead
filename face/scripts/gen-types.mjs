@@ -13,6 +13,7 @@ await mkdir(outDir, { recursive: true });
 for (const [schema, out] of [
   ["theme.schema.json", "theme.ts"],
   ["expressions.schema.json", "expressions.ts"],
+  ["hud.schema.json", "hud.ts"],
 ]) {
   const ts = await compileFromFile(resolve(schemaDir, schema), {
     bannerComment: banner,

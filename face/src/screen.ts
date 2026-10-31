@@ -1,6 +1,7 @@
 import type { FaceEngine, LogLevel } from "./engine";
+import { drawSyntheticCamera, HudRenderer, type SeenFace } from "./hud";
 
-export type View = "face" | "image" | "video" | "web";
+export type View = "face" | "image" | "video" | "web" | "camera";
 export type Overlay = "none" | "face-corner";
 
 export interface ShowOptions {
@@ -14,6 +15,13 @@ export interface ShowOptions {
    * turns transparent so the corner face and subtitles stay on top. Otherwise an iframe.
    */
   nativeWeb?: boolean;
+  /** `camera`: HUD theme drawn over the camera, or `none`. Default `hunter`. */
+  hud?: string;
+  /**
+   * `camera`: the host shows the real camera natively below this view (iOS); otherwise the
+   * page draws a synthetic scene with a person at every face (simulator, tests).
+   */
+  nativeCamera?: boolean;
 }
 
 export interface SubtitleOptions {
@@ -29,6 +37,10 @@ export interface ScreenState {
   view: View;
   overlay: Overlay;
   subtitle: string;
+  /** HUD theme while the camera shows, else `none`. */
+  hud: string;
+  /** Faces the host last passed in (`setFaces`). */
+  faces: number;
 }
 
 /** Something the host should know about without asking: the page changed view on its own. */
@@ -55,6 +67,11 @@ export class Screen {
   private subtitleAge = 0;
   private subtitleLife = Infinity;
   private mouth?: { text: string; ms: number };
+  private hud: HudRenderer;
+  private hudCanvas: HTMLCanvasElement;
+  private faces: SeenFace[] = [];
+  /** `look_at {frame: face}`: undefined = not following, null = the locked face. */
+  private following?: number | null;
 
   constructor(
     private engine: FaceEngine,
@@ -63,6 +80,8 @@ export class Screen {
   ) {
     this.display = document.getElementById("display")!;
     this.subtitles = document.getElementById("subtitles")!;
+    this.hudCanvas = document.getElementById("hud") as HTMLCanvasElement;
+    this.hud = new HudRenderer(this.hudCanvas);
   }
 
   async show(content: View, source = "", opts: ShowOptions = {}): Promise<void> {
@@ -94,6 +113,13 @@ export class Screen {
       const frame = document.createElement("iframe");
       frame.src = source;
       element = frame;
+    } else if (content === "camera") {
+      this.hud.set(opts.hud ?? "hunter"); // throws on an unknown HUD before anything changes
+      if (!opts.nativeCamera) {
+        const scene = document.createElement("canvas");
+        scene.className = "synthetic-camera";
+        element = scene;
+      }
     } else if (content !== "web") {
       throw new Error(`unknown content: ${content}`);
     }
@@ -118,12 +144,29 @@ export class Screen {
     this.view = content;
     this.overlay = overlay;
     this.apply();
-    this.log("info", `view=${content} overlay=${overlay}`);
+    if (content === "camera") this.renderCamera();
+    this.log("info", `view=${content} overlay=${overlay}` + (content === "camera" ? ` hud=${this.hud.name}` : ""));
+  }
+
+  /** Faces from the host's `faces` stream: drive the HUD, the synthetic camera and the gaze. */
+  setFaces(faces: SeenFace[]) {
+    this.faces = faces;
+    this.hud.setFaces(faces);
+    if (this.view === "camera") this.renderCamera();
+  }
+
+  /** Make the eyes follow a face: an id, `null` for the locked one, `undefined` to stop. */
+  followFace(id: number | null | undefined) {
+    this.following = id;
+    this.hud.follow(id ?? undefined);
+    if (id === undefined) this.engine.setGaze(0, 0);
   }
 
   clear() {
     this.stopVideo();
     this.display.replaceChildren();
+    this.hud.set(undefined);
+    this.hud.render();
     this.view = "face";
     this.overlay = "none";
     this.apply();
@@ -151,6 +194,16 @@ export class Screen {
 
   /** Called by the engine every tick. */
   tick(dt: number) {
+    if (this.following !== undefined) {
+      const target = this.hud.locked();
+      // Head frame, as face.look_at: +bearing is the head's left, which is the viewer's right.
+      if (target) this.engine.setGaze(clamp(target.bearing / 45), clamp(target.elevation / 45));
+      else this.engine.setGaze(0, 0);
+    }
+    if (this.view === "camera") {
+      this.hud.tick(dt);
+      this.renderCamera();
+    }
     if (this.text) {
       this.subtitleAge += dt;
       if (this.subtitleAge >= this.subtitleLife) this.setText("");
@@ -191,7 +244,13 @@ export class Screen {
   }
 
   state(): ScreenState {
-    return { view: this.view, overlay: this.overlay, subtitle: this.text };
+    return {
+      view: this.view,
+      overlay: this.overlay,
+      subtitle: this.text,
+      hud: this.hud.name,
+      faces: this.faces.length,
+    };
   }
 
   private setText(text: string) {
@@ -202,11 +261,18 @@ export class Screen {
     this.subtitles.hidden = !text;
   }
 
+  private renderCamera() {
+    const scene = this.display.querySelector<HTMLCanvasElement>("canvas.synthetic-camera");
+    if (scene) drawSyntheticCamera(scene, this.faces);
+    this.hud.render();
+  }
+
   private apply() {
     const body = document.body.classList;
     body.toggle("showing", this.view !== "face");
     body.toggle("face-corner", this.view !== "face" && this.overlay === "face-corner");
-    body.toggle("native-web", this.view === "web" && !this.display.firstElementChild);
+    body.toggle("native-web", (this.view === "web" || this.view === "camera") && !this.display.firstElementChild);
+    this.hudCanvas.hidden = this.view !== "camera";
     this.display.hidden = this.view === "face";
   }
 
@@ -220,6 +286,10 @@ export class Screen {
       old.load();
     }
   }
+}
+
+function clamp(v: number): number {
+  return Math.max(-1, Math.min(1, v));
 }
 
 /** Mouth opening per character: vowels wide, consonants a little, spaces and punctuation shut. */

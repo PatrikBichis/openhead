@@ -1,5 +1,6 @@
 import "@fontsource-variable/inter/wght.css";
 import { FaceEngine, type LogLevel } from "./engine";
+import { hudInfo, hudNames, type HudInfo, type SeenFace } from "./hud";
 import { Screen, type ScreenEvent, type ScreenState, type ShowOptions, type SubtitleOptions, type View } from "./screen";
 
 /**
@@ -18,6 +19,11 @@ export interface OpenHead extends FaceEngine {
   screen(): ScreenState;
   /** Before/after a WebKit snapshot: show the current video frame as a still. */
   freezeVideo(on: boolean): void;
+  /** Faces from the host's `faces` stream (camera view, HUD, gaze following). */
+  setFaces(faces: SeenFace[]): void;
+  /** `look_at {frame: face}`: a face id, `null` for the locked face, `undefined` to stop. */
+  followFace(id: number | null | undefined): void;
+  listHuds(): HudInfo[];
 }
 
 declare global {
@@ -54,6 +60,9 @@ window.openhead = Object.assign(engine, {
   subtitle: (text?: string, opts?: SubtitleOptions) => screen.subtitle(text, opts),
   screen: () => screen.state(),
   freezeVideo: (on: boolean) => screen.freezeVideo(on),
+  setFaces: (faces: SeenFace[]) => screen.setFaces(faces),
+  followFace: (id: number | null | undefined) => screen.followFace(id),
+  listHuds: () => hudNames().map(hudInfo),
 });
 
 await engine.setTheme(query.get("theme") ?? "cartoon", 0);
