@@ -21,6 +21,9 @@ The protocol is the product. The iOS app is the first client; the desktop simula
 - **Eyes and mouth that live.** Gaze on the screen or from the head's frame; idle blinking, breathing and small eye movements; a mouth driven by the robot's voice (loudness streamed at 25 Hz).
 - **Subtitles.** Text on top of anything, for a robot without a speaker or an AI answer streaming in word by word; the newest three lines stay on screen, and the mouth can move with the text.
 - **Pictures, video and web pages.** PNG, JPEG, animated GIF, WebP and SVG; H.264 video (loop, mute, back to the face when it ends); web pages; the face can keep running in a corner. Local files are served to the head from the host.
+- **Camera view with a HUD** *(0.2)*. The front camera with a sci-fi heads-up display: boxes around faces, a locked target, compass tape, artificial horizon, battery, temperature and the robot's own lines (`display.hud`). HUD themes are JSON: `hunter`, `camcorder`, `boot`, `flight`.
+- **Finds people** *(0.2)*. Several faces at once (`faces`: bearing, elevation, size, box) at 15 Hz; the eyes can follow the person in front of the robot (`look_at {frame: face}`).
+- **Knows where it is** *(0.2)*. ARKit world tracking gives the head's position and orientation in the room (`pose`, 60 Hz) and follows one face with distance.
 - **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; battery, thermal state, clients, what is on screen.
 - **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
 - **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
@@ -173,6 +176,22 @@ Shared emotion names, required in every theme (missing ones fall back to `neutra
 
 Built-in themes in v0.1: `cartoon`, `minimal`, `halloween`. Hosts discover themes and their extra expressions with `face.list`.
 
+### Camera view and HUD (0.2)
+
+| Hunter | Camcorder | Flight |
+| --- | --- | --- |
+| ![Hunter HUD: red analysis view, MATCH on the locked face](docs/media/hud-hunter.png) | ![Camcorder HUD: REC, PLAYBACK, timecode, battery](docs/media/hud-camcorder.png) | ![Flight HUD: compass, artificial horizon, tilt and position](docs/media/hud-flight.png) |
+
+Two camera modes, because ARKit owns the cameras and never hands out the front camera's image: **`capture`** shows the front camera (several faces with boxes; pose only as orientation from the IMU) and **`sensing`** runs ARKit (position and orientation in the room, one face with distance, no camera image). `display.show {content: camera, hud}` switches to `capture` by itself.
+
+```bash
+openhead camera hunter --follow            # camera view with a HUD; the eyes follow the nearest face
+openhead hud --set task="DELIVER CUP" --set speed=0.4 --line "TASK {task}" --line "SPEED {speed} M/S"
+openhead mode sensing && openhead watch pose -n 3
+```
+
+Sensor charts and data from a recording are on the [website](https://patrikbichis.github.io/openhead/#sensors) (`tools/sensor_plots.py` records any head).
+
 <details>
 <summary>All 28 emotions in each theme</summary>
 
@@ -193,7 +212,8 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 | MCP | Maps to |
 | --- | --- |
 | Tool `pair(code)` | `pair` with the code the user reads off the device |
-| Tools `list_themes`, `set_theme`, `set_emotion`, `look_at`, `show_image`, `show_video`, `show_web`, `show_face`, `subtitle` | `face.*`, `display.*` |
+| Tools `list_themes`, `set_theme`, `set_emotion`, `look_at`, `look_at_face`, `show_image`, `show_video`, `show_web`, `show_camera`, `set_hud`, `show_face`, `subtitle` | `face.*`, `display.*` |
+| Tools `set_mode`, `get_faces`, `get_pose` | `mode.*`, `faces`, `pose` (0.2) |
 | Tools `get_status`, `take_screenshot` (returns image), `tail_logs`, `get_diagnostics` | `system.*` (dev mode required for the last three) |
 | Tool `wait_for(topic, predicate, timeout_s)` | A subscription that returns on first match (`status`, `log`; `faces` in 0.2) |
 | Tool `run_scenario(path)` | Runs a YAML scenario and returns the report with screenshots |
@@ -350,6 +370,7 @@ Protocol `0.1.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 - [ ] 9. IMU stream and envelope-driven mouth
 - [x] 10. Video, subtitles and a display test suite
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
+- [ ] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (simulator done; iOS in TestFlight testing)
 
 ---
 

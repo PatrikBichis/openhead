@@ -18,6 +18,8 @@
       <nav aria-label="Main">
         <a href="#features">Features</a>
         <a href="#themes">Themes</a>
+        <a href="#camera">Camera &amp; HUD</a>
+        <a href="#sensors">Sensors</a>
         <a href="#how">How it works</a>
         <a href="#developers">Developers</a>
         <a href="support.html">Support</a>
@@ -76,9 +78,19 @@
             <p>PNG, JPEG, animated GIF, WebP and SVG; H.264 video; web pages. Keep the face running in a corner while they show.</p>
           </div>
           <div class="card">
+            <div class="icon" aria-hidden="true">🎯</div>
+            <h3>Camera view with HUD</h3>
+            <p>See what the head sees, with a sci-fi heads-up display: boxes around faces, a locked target, compass, horizon, battery and your own lines.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🙂</div>
+            <h3>Finds people</h3>
+            <p>Several faces at once, with direction and size, 15 times a second. The eyes can follow the person in front of the robot.</p>
+          </div>
+          <div class="card">
             <div class="icon" aria-hidden="true">🧭</div>
-            <h3>Sensors and status</h3>
-            <p>Orientation, rotation and acceleration up to 100 times a second in robot conventions, plus battery, temperature and what is on screen.</p>
+            <h3>Knows where it is</h3>
+            <p>ARKit tracks the head's position and orientation in the room, 60 times a second, next to the motion sensors at up to 100 Hz.</p>
           </div>
         </div>
       </div>
@@ -108,6 +120,72 @@
           <p><img src="media/emotions-minimal.png" alt="All expressions in the minimal theme" loading="lazy"></p>
           <p><img src="media/emotions-halloween.png" alt="All expressions in the halloween theme" loading="lazy"></p>
         </details>
+      </div>
+    </section>
+
+    <section id="camera" class="dark">
+      <div class="wrap">
+        <h2>See what the head sees</h2>
+        <p class="sub">Show the front camera with a heads-up display drawn over it. The HUD marks every face, locks on the nearest one and shows the head's own readings. Four looks, all data like the face themes, so you can make your own.</p>
+        <div class="themes">
+          <figure>
+            <img src="media/hud-hunter.png" alt="Hunter HUD: red-tinted camera, white corner boxes, MATCH under the locked face, compass tape and analysis text" loading="lazy">
+            <figcaption style="color:#fff">Hunter <span style="color:#b9c4d6">Red analysis view with a compass and MATCH on the target.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="media/hud-camcorder.png" alt="Camcorder HUD: green REC, PLAYBACK, timecode, battery and a crosshair on the locked face" loading="lazy">
+            <figcaption style="color:#fff">Camcorder <span style="color:#b9c4d6">REC, PLAYBACK, timecode and battery.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="media/hud-flight.png" alt="Flight HUD: compass tape, artificial horizon, battery, pitch, roll and position" loading="lazy">
+            <figcaption style="color:#fff">Flight <span style="color:#b9c4d6">Compass, artificial horizon, tilt and position.</span></figcaption>
+          </figure>
+        </div>
+        <div class="split" style="margin-top: 48px">
+          <div>
+            <h3 style="color:#fff">Put your own information on it</h3>
+            <ul class="list">
+              <li>Built-in values: battery, temperature, compass heading, pitch and roll, position, faces in view, the locked target.</li>
+              <li>Instruments: compass tape, artificial horizon, battery gauge.</li>
+              <li>Your robot adds its own values and lines at any time, such as task, speed or destination.</li>
+              <li>A HUD theme is a small JSON file: colours, tint, scanlines, boxes, lock, text blocks and instruments.</li>
+            </ul>
+          </div>
+          <div>
+            <img class="shot" src="media/hud-camcorder-extras.png" alt="Camcorder HUD with the robot's own lines: TASK DELIVER CUP, SPEED 0.4 M/S, and a compass" loading="lazy">
+            <pre style="margin-top:16px"><span class="c"># the robot's own lines on the HUD</span>
+openhead camera camcorder --follow
+openhead hud --set task="DELIVER CUP" --set speed=0.4 \
+  --line "TASK {task}" --line "SPEED {speed} M/S" --widget compass</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sensors" class="alt">
+      <div class="wrap">
+        <h2>Sensor data</h2>
+        <p class="sub">Everything the head senses arrives as small JSON messages you subscribe to, at the rate you ask for. Angles follow the head: + to its left and up; motion follows ROS conventions. The charts below are a ten-second recording from the simulator; the same tool records a real phone.</p>
+        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/orientation.svg" alt="Line chart: yaw, pitch and roll in degrees over ten seconds" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/acceleration.svg" alt="Line chart: acceleration x, y and z in metres per second squared; y stays near 9.8" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/faces.svg" alt="Line chart: bearing of two faces in degrees as they move across the view" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/path.svg" alt="Path of the head seen from above, in metres, from ARKit" loading="lazy"></figure>
+        </div>
+        <p class="note">Data: <a href="media/sensors/imu.csv">imu.csv</a> · <a href="media/sensors/faces.csv">faces.csv</a> · <a href="media/sensors/pose.csv">pose.csv</a> · more charts: <a href="media/sensors/rotation.svg">rotation rate</a>, <a href="media/sensors/position.svg">position over time</a>.</p>
+        <div style="overflow-x:auto; margin-top: 32px">
+          <table class="data">
+            <thead><tr><th>Stream</th><th>Rate</th><th>Fields</th><th>When</th></tr></thead>
+            <tbody>
+              <tr><td><code>imu</code></td><td>up to 100 Hz</td><td>orientation (quaternion), rotation rate, acceleration, sensor time</td><td>always</td></tr>
+              <tr><td><code>faces</code></td><td>15 Hz</td><td>id, bearing, elevation, size, confidence, box on screen, locked; distance with ARKit</td><td>modes capture and sensing</td></tr>
+              <tr><td><code>pose</code></td><td>up to 60 Hz</td><td>position (m), orientation, tracking state and reason</td><td>mode sensing (ARKit)</td></tr>
+              <tr><td><code>status</code></td><td>1 Hz</td><td>battery, charging, thermal state, view, theme, emotion, mode, faces, clients</td><td>always</td></tr>
+              <tr><td><code>log</code></td><td>as it happens</td><td>level, subsystem, message</td><td>always (dev mode to read history)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Two camera modes, because ARKit owns the cameras: <strong>capture</strong> shows the front camera and finds several faces; <strong>sensing</strong> runs ARKit for the head's position in the room and follows one face with the depth camera.</p>
       </div>
     </section>
 
@@ -164,7 +242,9 @@ openhead pair --device 192.168.1.20
 <span class="c"># make it do things</span>
 openhead emotion curious
 openhead subtitle "Hello! I write when I can't speak." --mouth
-openhead show clip.mp4 --overlay face-corner</pre>
+openhead show clip.mp4 --overlay face-corner
+openhead camera hunter --follow
+openhead watch faces -n 5</pre>
       </div>
     </section>
 
@@ -182,6 +262,10 @@ openhead show clip.mp4 --overlay face-corner</pre>
         <details>
           <summary>Does it collect any data?</summary>
           <p>No. Nothing leaves your local network and there are no accounts, analytics or ads. See the <a href="privacy.html">privacy policy</a>.</p>
+        </details>
+        <details>
+          <summary>Does the camera record or send video?</summary>
+          <p>No. The camera only runs when a paired controller asks for it, images are processed on the phone and never stored or sent. Only positions and angles of faces leave the phone, and nobody is identified. See the <a href="privacy.html">privacy policy</a>.</p>
         </details>
         <details>
           <summary>Can I use it with ROS 2?</summary>
