@@ -1,0 +1,31 @@
+{
+  "name": "minimal",
+  "version": "0.1.0",
+  "title": "Minimal",
+  "description": "Two light bars and a line on black. Few lit pixels for low power on OLED screens.",
+  "palette": {
+    "bg": "#000000",
+    "sclera": "#000000",
+    "iris": "#9BE7FF",
+    "pupil": "#000000",
+    "lid": "#000000",
+    "mouth": "#9BE7FF",
+    "teeth": "#9BE7FF",
+    "accent": "#4FC3F7"
+  },
+  "shapes": {
+    "eye": { "preset": "line" },
+    "mouth": { "preset": "line" }
+  },
+  "layout": { "eye_spacing": 0.46, "eye_size": 0.26, "eye_y": 0.16, "mouth_width": 0.38, "mouth_y": -0.32 },
+  "render": { "stroke": 0, "glow": 0.35, "scanlines": false, "pixelate": 0 },
+  "idle": {
+    "blink_interval_ms": [3000, 7000],
+    "blink_duration_ms": 160,
+    "saccade_interval_ms": [1500, 4000],
+    "saccade_amplitude": 0.12,
+    "breath_period_ms": 5000,
+    "breath_amplitude": 0.04
+  },
+  "envelope": { "gain": 1.0, "gamma": 0.9, "attack_ms": 30, "release_ms": 100 }
+}

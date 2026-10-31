@@ -1,0 +1,31 @@
+{
+  "name": "cartoon",
+  "version": "0.1.0",
+  "title": "Cartoon",
+  "description": "Round eyes with a dark outline, a clear mouth and a warm palette.",
+  "palette": {
+    "bg": "#F6E7CF",
+    "sclera": "#FFFFFF",
+    "iris": "#3D7DD8",
+    "pupil": "#1D1A22",
+    "lid": "#F6E7CF",
+    "mouth": "#B8323F",
+    "teeth": "#FFFFFF",
+    "accent": "#E76F51"
+  },
+  "shapes": {
+    "eye": { "preset": "round" },
+    "mouth": { "preset": "round" }
+  },
+  "layout": { "eye_spacing": 0.5, "eye_size": 0.32, "eye_y": 0.2, "mouth_width": 0.46, "mouth_y": -0.36 },
+  "render": { "stroke": 0.014, "glow": 0, "scanlines": false, "pixelate": 0 },
+  "idle": {
+    "blink_interval_ms": [2200, 5500],
+    "blink_duration_ms": 130,
+    "saccade_interval_ms": [700, 2200],
+    "saccade_amplitude": 0.18,
+    "breath_period_ms": 3800,
+    "breath_amplitude": 0.08
+  },
+  "envelope": { "gain": 1.1, "gamma": 0.8, "attack_ms": 25, "release_ms": 80 }
+}

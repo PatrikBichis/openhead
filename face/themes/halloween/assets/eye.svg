@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="180" viewBox="0 0 200 180">
+  <!-- Jack-o'-lantern eye: a lit triangular cut-out with cracks. Drawn for OpenHead. -->
+  <defs>
+    <radialGradient id="flame" cx="50%" cy="68%" r="65%">
+      <stop offset="0" stop-color="#F4FFB8"/>
+      <stop offset="0.35" stop-color="#A6FF5C"/>
+      <stop offset="0.75" stop-color="#3FBF1F"/>
+      <stop offset="1" stop-color="#14460B"/>
+    </radialGradient>
+  </defs>
+  <path d="M104 10 L192 164 Q100 146 8 164 Z" fill="url(#flame)" stroke="#0E0A12" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M104 12 L96 52 L112 74 L98 112" fill="none" stroke="#0E0A12" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M154 104 L136 116 L144 138" fill="none" stroke="#0E0A12" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 140 L58 128" fill="none" stroke="#0E0A12" stroke-width="4" stroke-linecap="round"/>
+</svg>

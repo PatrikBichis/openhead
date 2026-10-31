@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="170" viewBox="0 0 400 170">
+  <!-- Jack-o'-lantern grin with jagged teeth. Drawn for OpenHead. -->
+  <defs>
+    <radialGradient id="flame" cx="50%" cy="40%" r="70%">
+      <stop offset="0" stop-color="#F4FFB8"/>
+      <stop offset="0.4" stop-color="#A6FF5C"/>
+      <stop offset="0.8" stop-color="#3FBF1F"/>
+      <stop offset="1" stop-color="#14460B"/>
+    </radialGradient>
+  </defs>
+  <path d="M10 28 Q200 96 390 28 Q376 118 300 146 L282 118 L258 152 L230 120 L200 158 L170 120 L142 152 L118 118 L100 146 Q24 118 10 28 Z"
+        fill="url(#flame)" stroke="#0E0A12" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M138 66 L166 70 L152 100 Z M234 70 L262 66 L248 100 Z" fill="#0E0A12"/>
+  <path d="M60 50 L74 70 L66 88" fill="none" stroke="#0E0A12" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

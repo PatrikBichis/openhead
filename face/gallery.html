@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenHead face gallery</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #1c1c1e;
+        color: #e5e5ea;
+        font: 13px system-ui, sans-serif;
+      }
+      h2 {
+        margin: 16px 0 8px;
+        font-size: 15px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      figure {
+        margin: 0;
+        text-align: center;
+      }
+      canvas {
+        display: block;
+        width: 120px;
+        height: 260px;
+        border-radius: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gallery"></div>
+    <script type="module" src="./src/gallery.ts"></script>
+  </body>
+</html>
