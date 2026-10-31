@@ -1,8 +1,7 @@
-New in this build:
-• Subtitles on top of anything: openhead subtitle "Hello" --mouth. Use --mode append to stream an answer word by word; the newest three lines stay on screen.
-• Video: openhead show clip.mp4 --overlay face-corner plays a file from your computer; the face comes back when it ends.
-• Images now include SVG and animated GIF.
-• The face fills the whole screen, edge to edge.
-• Screenshots during a video show the frame instead of black.
+New in this build (0.2):
+• Camera view with a HUD: openhead camera hunter --follow. Four HUD looks: hunter, camcorder, boot, flight. iOS asks for camera permission the first time.
+• Finds people: boxes around faces, the nearest is locked, and the eyes follow it (--follow). openhead watch faces prints where they are.
+• The HUD shows battery, temperature, compass heading, tilt and the robot's own lines: openhead hud --set task="SAY HI" --line "TASK {task}".
+• ARKit position: openhead mode sensing, then openhead watch pose. Move the phone around and see the position change.
 
-Please try: run scenarios/display.yaml and scenarios/smoke.yaml (openhead run ...) and check that video plays smoothly, subtitles are easy to read from a distance, and the mouth moves with the text.
+Please try: run scenarios/camera.yaml (openhead run scenarios/camera.yaml) while standing in front of the phone, then check that the boxes sit on faces, the eyes follow you, the compass turns with the phone, and the pose moves when you carry it.
