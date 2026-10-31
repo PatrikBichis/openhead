@@ -7,6 +7,7 @@ used in tests: Playwright gives both a real browser and pixel-exact screenshots.
 from __future__ import annotations
 
 import os
+import time
 from collections.abc import Callable
 from io import BytesIO
 from pathlib import Path
@@ -55,6 +56,22 @@ CLEAR_JS = """
 """
 
 
+CAPTION_JS = """
+(text) => {
+  let c = document.getElementById("caption");
+  if (!c) {
+    c = document.createElement("div");
+    c.id = "caption";
+    c.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:3;padding:14px 16px;" +
+      "font:600 20px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.55);text-align:center";
+    document.body.append(c);
+  }
+  c.textContent = text ?? "";
+  c.hidden = !text;
+}
+"""
+
+
 class FaceError(Exception):
     """The engine rejected a call (e.g. unknown theme)."""
 
@@ -81,14 +98,20 @@ class BrowserFace:
         headless: bool = True,
         idle: bool = True,
         on_log: Callable[[str, str], None] | None = None,
+        record_video_dir: Path | None = None,
     ):
         self.dist = (dist or find_face_dist()).resolve()
         self.size = size
         self.headless = headless
         self.idle = idle
         self.on_log = on_log or (lambda level, message: None)
+        self.record_video_dir = record_video_dir
+        #: monotonic time when video recording started, and the file once closed
+        self.video_started: float | None = None
+        self.video_path: Path | None = None
         self._pw: Any = None
         self._browser: Any = None
+        self._context: Any = None
         self._page: Any = None
 
     async def start(self, theme: str = "cartoon") -> None:
@@ -98,7 +121,15 @@ class BrowserFace:
         self._pw = await async_playwright().start()
         args = [] if self.headless else [f"--window-size={w},{h + 90}", "--app=about:blank"]
         self._browser = await self._pw.chromium.launch(headless=self.headless, args=args)
-        self._page = await self._browser.new_page(viewport={"width": w, "height": h})
+        video = {}
+        if self.record_video_dir:
+            video = {"record_video_dir": str(self.record_video_dir),
+                     "record_video_size": {"width": w, "height": h}}
+        self._context = await self._browser.new_context(viewport={"width": w, "height": h},
+                                                        **video)
+        if self.record_video_dir:
+            self.video_started = time.monotonic()
+        self._page = await self._context.new_page()
         await self._page.route(f"{ORIGIN}/**", self._serve)
         self._page.on("console", self._console)
         query = f"theme={theme}" + ("" if self.idle else "&idle=0")
@@ -107,6 +138,10 @@ class BrowserFace:
         await self._page.add_style_tag(content=DISPLAY_CSS)
 
     async def close(self) -> None:
+        if self._context:
+            await self._context.close()  # flushes a recorded video
+            if self.record_video_dir and self._page.video:
+                self.video_path = Path(await self._page.video.path())
         if self._browser:
             await self._browser.close()
         if self._pw:
@@ -166,6 +201,10 @@ class BrowserFace:
 
     async def clear(self) -> None:
         await self._call(CLEAR_JS)
+
+    async def caption(self, text: str | None) -> None:
+        """Simulator-only text strip at the top of the screen (demos, recordings)."""
+        await self._call(CAPTION_JS, text)
 
     async def screenshot(self, scale: float = 1.0) -> tuple[bytes, int, int]:
         png = await self._page.screenshot(type="png")

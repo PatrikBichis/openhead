@@ -60,3 +60,6 @@ apps/ios/keys/
 
 # Face engine generated types (built from protocol/schema)
 face/src/generated/
+
+# Recorded demo videos (examples/demo_video.py)
+demo/

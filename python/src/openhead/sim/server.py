@@ -66,6 +66,7 @@ class SimConfig:
     pairing_code: str | None = None  # default: "0000" in dev mode, random otherwise
     mdns: bool = True
     validate_outgoing: bool = False  # tests: record outgoing messages the schema rejects
+    record_video_dir: Path | None = None  # record the screen with Playwright (demos)
 
 
 class Session:
@@ -103,7 +104,8 @@ class SimServer:
         c = self.config
         self.face = BrowserFace(c.face_dist, size=c.size, headless=c.headless,
                                 idle=(not c.headless) if c.idle is None else c.idle,
-                                on_log=lambda level, msg: self.log(level, "face", msg))
+                                on_log=lambda level, msg: self.log(level, "face", msg),
+                                record_video_dir=c.record_video_dir)
         self.shots = ShotServer()
         self.sessions: set[Session] = set()
         self.logs: deque[dict] = deque(maxlen=2000)
