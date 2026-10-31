@@ -141,6 +141,12 @@
             <figcaption style="color:#fff">Flight <span style="color:#b9c4d6">Compass, artificial horizon, tilt and position.</span></figcaption>
           </figure>
         </div>
+        <h3 style="color:#fff; margin-top: 40px">On a real phone</h3>
+        <p class="sub" style="margin-bottom: 20px">Screenshots from an iPhone 18 Pro in a dim room: the face it found is locked, with the phone's own battery, heading and tilt.</p>
+        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+          <img class="shot" src="media/device-hud-hunter.jpg" alt="Hunter HUD on an iPhone: red camera view in a dim room, a locked face box, compass heading 066, battery 60 percent" loading="lazy">
+          <img class="shot" src="media/device-hud-flight.jpg" alt="Flight HUD on an iPhone: compass 077, artificial horizon, crosshair on the face, battery 60 percent, pitch and roll" loading="lazy">
+        </div>
         <div class="split" style="margin-top: 48px">
           <div>
             <h3 style="color:#fff">Put your own information on it</h3>
@@ -165,12 +171,12 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
     <section id="sensors" class="alt">
       <div class="wrap">
         <h2>Sensor data</h2>
-        <p class="sub">Everything the head senses arrives as small JSON messages you subscribe to, at the rate you ask for. Angles follow the head: + to its left and up; motion follows ROS conventions. The charts below are a ten-second recording from the simulator; the same tool records a real phone.</p>
+        <p class="sub">Everything the head senses arrives as small JSON messages you subscribe to, at the rate you ask for. Angles follow the head: + to its left and up; motion follows ROS conventions. The charts below are a 15-second recording from an iPhone 18 Pro held in the hand, with one person in front of it (<code>tools/sensor_plots.py</code> records any head).</p>
         <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
-          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/orientation.svg" alt="Line chart: yaw, pitch and roll in degrees over ten seconds" loading="lazy"></figure>
-          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/acceleration.svg" alt="Line chart: acceleration x, y and z in metres per second squared; y stays near 9.8" loading="lazy"></figure>
-          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/faces.svg" alt="Line chart: bearing of two faces in degrees as they move across the view" loading="lazy"></figure>
-          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/path.svg" alt="Path of the head seen from above, in metres, from ARKit" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/orientation.svg" alt="Line chart: pitch and roll of the phone in degrees over fifteen seconds; pitch drifts between 5 and 22 degrees" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/acceleration.svg" alt="Line chart: acceleration x, y and z; x stays near 9.8 because the phone stands in landscape" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/faces.svg" alt="Line chart: bearing of one face between 5 and 14 degrees as the person moves" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="media/sensors/path.svg" alt="Path of the phone seen from above, a few centimetres, from ARKit" loading="lazy"></figure>
         </div>
         <p class="note">Data: <a href="media/sensors/imu.csv">imu.csv</a> · <a href="media/sensors/faces.csv">faces.csv</a> · <a href="media/sensors/pose.csv">pose.csv</a> · more charts: <a href="media/sensors/rotation.svg">rotation rate</a>, <a href="media/sensors/position.svg">position over time</a>.</p>
         <div style="overflow-x:auto; margin-top: 32px">

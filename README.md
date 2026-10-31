@@ -190,7 +190,17 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 --line "TASK {task}" --lin
 openhead mode sensing && openhead watch pose -n 3
 ```
 
-Sensor charts and data from a recording are on the [website](https://patrikbichis.github.io/openhead/#sensors) (`tools/sensor_plots.py` records any head).
+On a real phone (iPhone 18 Pro, dim room):
+
+| Hunter | Flight |
+| --- | --- |
+| ![Hunter HUD on an iPhone: locked face, compass, battery](docs/media/device-hud-hunter.jpg) | ![Flight HUD on an iPhone: compass, horizon, battery, tilt](docs/media/device-hud-flight.jpg) |
+
+Sensor data recorded from the phone (tilt, acceleration, rotation, face bearing, ARKit position and path), with CSV files, is on the [website](https://patrikbichis.github.io/openhead/#sensors); `tools/sensor_plots.py` records any head (`--from-csv` redraws).
+
+| Tilt (imu) | Face bearing (faces) | ARKit path (pose) |
+| --- | --- | --- |
+| ![Pitch and roll of the phone over 15 s](docs/media/sensors/orientation.svg) | ![Bearing of one face over 15 s](docs/media/sensors/faces.svg) | ![Path of the phone seen from above](docs/media/sensors/path.svg) |
 
 <details>
 <summary>All 28 emotions in each theme</summary>

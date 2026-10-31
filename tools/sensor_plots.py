@@ -30,15 +30,6 @@ SERIES = ["#2a78d6", "#eb6834", "#1baf7a"]
 INK, MUTED, GRID, SURFACE = "#0b0b0b", "#52514e", "#e6e4df", "#fcfcfb"
 
 
-def euler(q: list[float]) -> tuple[float, float, float]:
-    """Yaw (about +y, up), pitch (about +x) and roll (about +z) in degrees from [x, y, z, w]."""
-    x, y, z, w = q
-    yaw = math.degrees(math.atan2(2 * (w * y + x * z), 1 - 2 * (x * x + y * y)))
-    pitch = math.degrees(math.asin(max(-1, min(1, 2 * (w * x - y * z)))))
-    roll = math.degrees(math.atan2(2 * (w * z + x * y), 1 - 2 * (x * x + z * z)))
-    return yaw, pitch, roll
-
-
 def nice(lo: float, hi: float, n: int = 4) -> list[float]:
     span = (hi - lo) or 1
     step = 10 ** math.floor(math.log10(span / n))
@@ -148,16 +139,66 @@ def write_csv(path: Path, header: list[str], rows: list[list]) -> None:
         writer.writerows(rows)
 
 
+def tilt(ax: float, ay: float, az: float) -> tuple[float, float]:
+    """Pitch and roll in degrees as a viewer sees a phone in landscape-right (as the app's HUD):
+    pitch + when the screen tilts up, roll + when it turns clockwise."""
+    up, right = ax, -ay
+    return (math.degrees(math.atan2(az, math.hypot(up, right))), math.degrees(math.atan2(right, up)))
+
+
+def read_csv(path: Path) -> list[dict]:
+    with path.open(encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def draw(out: Path, label: str) -> None:
+    """Charts from the CSV files in `out` (written by a recording, or kept from an earlier one)."""
+    label = f" · {label}"
+    imu = [{k: float(v) for k, v in r.items()} for r in read_csv(out / "imu.csv")]
+    faces = read_csv(out / "faces.csv")
+    pose = read_csv(out / "pose.csv")
+    tilts = [(r["t_s"], *tilt(r["ax"], r["ay"], r["az"])) for r in imu]
+    charts = {
+        "orientation": chart(f"Tilt (imu){label}", "degrees",
+                             {"pitch": [(t, p) for t, p, _ in tilts], "roll": [(t, r) for t, _, r in tilts]}),
+        "acceleration": chart(f"Acceleration (imu){label}", "m/s²",
+                              {k: [(r["t_s"], r["a" + k]) for r in imu] for k in "xyz"}),
+        "rotation": chart(f"Rotation rate (imu){label}", "rad/s",
+                          {k: [(r["t_s"], r["g" + k]) for r in imu] for k in "xyz"}),
+    }
+    by_id: dict[str, list] = {}
+    for r in faces:  # bearing per face id, the first three ids seen
+        if r["id"] in by_id or len(by_id) < 3:
+            by_id.setdefault(r["id"], []).append((float(r["t_s"]), float(r["bearing_deg"])))
+    charts["faces"] = chart(f"Face bearing (faces){label}", "degrees, + is the head's left",
+                            {f"face {i}": v for i, v in by_id.items()})
+    tracked = [r for r in pose if r["tracking"] == "normal"] or pose
+    charts["position"] = chart(f"Position (pose){label}", "metres",
+                               {k: [(float(r["t_s"]), float(r[k])) for r in tracked] for k in "xyz"})
+    charts["path"] = chart(f"Path seen from above (pose){label}", "metres",
+                           {"path": [(float(r["x"]), float(r["z"])) for r in tracked]},
+                           xlabel="x (m), up is z", equal=True)
+    for name, svg in charts.items():
+        if svg:
+            (out / f"{name}.svg").write_text(svg, encoding="utf-8")
+            print(out / f"{name}.svg")
+    print(f"{len(imu)} imu, {len(faces)} face rows, {len(pose)} pose ({len(tracked)} tracking normal)")
+
+
 async def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--device")
     parser.add_argument("--seconds", type=float, default=10)
-    parser.add_argument("--label", default="simulator")
+    parser.add_argument("--label", default="iPhone")
     parser.add_argument("--out", type=Path, default=ROOT / "docs" / "media" / "sensors")
+    parser.add_argument("--from-csv", action="store_true", help="only redraw the charts from the CSV files in --out")
     args = parser.parse_args()
+    args.out.mkdir(parents=True, exist_ok=True)
+    if args.from_csv:
+        draw(args.out, args.label)
+        return 0
     _load_dotenv()
     host, port = await resolve_device(args.device or os.environ.get("OPENHEAD_DEVICE", "auto"))
-    args.out.mkdir(parents=True, exist_ok=True)
     async with await Head.connect(host, port, auto_reconnect=False) as head:
         if not head.paired:
             print(f"not paired with {head.key}", file=sys.stderr)
@@ -170,44 +211,13 @@ async def main() -> int:
         sensing = await record(head, {"pose": 30}, args.seconds)
         await head.mode.set("idle")
 
-    label = f" · {args.label}"
-    imu = capture["imu"]
-    angles = [(t, *euler(m.q)) for t, m in imu]
-    write_csv(args.out / "imu.csv", ["t_s", "yaw_deg", "pitch_deg", "roll_deg", "gx", "gy", "gz", "ax", "ay", "az"],
-              [[round(t, 3), *(round(v, 3) for v in a[1:]), *m.gyro, *m.accel] for (t, m), a in zip(imu, angles)])
-    charts = {
-        "orientation": chart(f"Orientation (imu){label}", "degrees",
-                             {"yaw": [(a[0], a[1]) for a in angles], "pitch": [(a[0], a[2]) for a in angles],
-                              "roll": [(a[0], a[3]) for a in angles]}),
-        "acceleration": chart(f"Acceleration (imu){label}", "m/s²",
-                              {k: [(t, m.accel[i]) for t, m in imu] for i, k in enumerate("xyz")}),
-        "rotation": chart(f"Rotation rate (imu){label}", "rad/s",
-                          {k: [(t, m.gyro[i]) for t, m in imu] for i, k in enumerate("xyz")}),
-    }
-    # faces: bearing per face id (the first three ids seen)
-    by_id: dict[int, list] = {}
-    rows = []
-    for t, m in capture["faces"]:
-        for f in m.faces:
-            rows.append([round(t, 3), f.id, f.bearing, f.elevation, f.size])
-            if f.id in by_id or len(by_id) < 3:
-                by_id.setdefault(f.id, []).append((t, f.bearing))
-    write_csv(args.out / "faces.csv", ["t_s", "id", "bearing_deg", "elevation_deg", "size"], rows)
-    charts["faces"] = chart(f"Face bearing (faces){label}", "degrees, + is the head's left",
-                            {f"face {i}": s for i, s in by_id.items()})
-    pose = sensing["pose"]
+    write_csv(args.out / "imu.csv", ["t_s", "gx", "gy", "gz", "ax", "ay", "az"],
+              [[round(t, 3), *m.gyro, *m.accel] for t, m in capture["imu"]])
+    write_csv(args.out / "faces.csv", ["t_s", "id", "bearing_deg", "elevation_deg", "size"],
+              [[round(t, 3), f.id, f.bearing, f.elevation, f.size] for t, m in capture["faces"] for f in m.faces])
     write_csv(args.out / "pose.csv", ["t_s", "x", "y", "z", "tracking"],
-              [[round(t, 3), *m.position, m.tracking_state] for t, m in pose])
-    charts["position"] = chart(f"Position (pose){label}", "metres",
-                               {k: [(t, m.position[i]) for t, m in pose] for i, k in enumerate("xyz")})
-    charts["path"] = chart(f"Path seen from above (pose){label}", "metres",
-                           {"path": [(m.position[0], m.position[2]) for _, m in pose]},
-                           xlabel="x (m), up is z", equal=True)
-    for name, svg in charts.items():
-        if svg:
-            (args.out / f"{name}.svg").write_text(svg, encoding="utf-8")
-            print(f"{(args.out / name).relative_to(ROOT)}.svg")
-    print(f"{len(imu)} imu, {len(capture['faces'])} faces, {len(pose)} pose messages")
+              [[round(t, 3), *m.position, m.tracking_state] for t, m in sensing["pose"]])
+    draw(args.out, args.label)
     return 0
 
 
