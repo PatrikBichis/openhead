@@ -40,6 +40,7 @@ final class FaceSchemeHandler: NSObject, WKURLSchemeHandler {
         case "svg": return "image/svg+xml"
         case "png": return "image/png"
         case "jpg", "jpeg": return "image/jpeg"
+        case "woff2": return "font/woff2"
         default: return "application/octet-stream"
         }
     }

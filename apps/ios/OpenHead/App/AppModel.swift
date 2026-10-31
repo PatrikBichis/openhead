@@ -37,6 +37,7 @@ final class AppModel: ObservableObject {
         logs.log("info", "app", "OpenHead \(appVersion) starting on \(DeviceInfo.model)")
         face.onLog = { [weak self] level, message in self?.logs.log(level, "face", message) }
         face.onReady = { [weak self] in self?.faceReady() }
+        face.onView = { [weak self] view in self?.pageChangedView(view) }
         face.load(theme: settings.offlineTheme)
         fps.start()
         NotificationCenter.default.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification,
@@ -79,13 +80,30 @@ final class AppModel: ObservableObject {
 
     // MARK: - display
 
-    func show(_ content: DisplayContent, overlay: String, durationMs: Int?) {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            display = content
-            self.overlay = content.name == "face" ? "none" : overlay
+    /// Show `content` (loaded by the web layer first, so a bad source changes nothing).
+    func show(_ content: DisplayContent, source: String = "", overlay: String, loop: Bool = false,
+              muted: Bool = false, durationMs: Int?) async throws {
+        if content == .face {
+            try await face.clearDisplay()
+        } else {
+            try await face.show(content.name, source: source, overlay: overlay, loop: loop, muted: muted)
         }
+        display = content
+        self.overlay = content == .face ? "none" : overlay
         logs.log("info", "display", "view=\(content.name) overlay=\(self.overlay)")
-        schedule("display", durationMs) { [weak self] in self?.show(.face, overlay: "none", durationMs: nil) }
+        schedule("display", durationMs) { [weak self] in self?.showFace() }
+    }
+
+    func showFace() {
+        Task { try? await show(.face, overlay: "none", durationMs: nil) }
+    }
+
+    /// The page went back to the face by itself (a video ended).
+    private func pageChangedView(_ view: String) {
+        guard view == "face", display != .face else { return }
+        schedule("display", nil) {}
+        display = .face
+        overlay = "none"
     }
 
     /// Run `action` after `ms` (replacing an earlier one with the same key); nil cancels.
@@ -101,7 +119,7 @@ final class AppModel: ObservableObject {
     // MARK: - status and diagnostics
 
     func status(rttMs: Double?) async -> JSONObject {
-        let state = (try? await face.state()) ?? (theme: settings.offlineTheme, emotion: "neutral")
+        let state = (try? await face.state()) ?? FaceController.State(theme: settings.offlineTheme)
         let device = UIDevice.current
         var status: JSONObject = [
             "charging": device.batteryState == .charging || device.batteryState == .full,
@@ -115,6 +133,7 @@ final class AppModel: ObservableObject {
             "clients": clients,
             "uptime_s": (Date().timeIntervalSince(started) * 10).rounded() / 10,
         ]
+        if !state.subtitle.isEmpty { status["subtitle"] = String(state.subtitle.suffix(4000)) }
         if device.batteryLevel >= 0 { status["battery_level"] = Double(device.batteryLevel) }
         if let rttMs { status["rtt_ms"] = rttMs }
         return status

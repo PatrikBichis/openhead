@@ -57,5 +57,10 @@ targets:
         NSLocalNetworkUsageDescription: OpenHead lets robot controllers on your network connect to this head.
         NSBonjourServices:
           - _openhead._tcp
+        # Images, video and web pages come from the robot's computer on the LAN, often over
+        # plain http (openhead MediaServer); only the face's web views load them.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoadsInWebContent: true
+          NSAllowsLocalNetworking: true
         ITSAppUsesNonExemptEncryption: false
     scheme: {}

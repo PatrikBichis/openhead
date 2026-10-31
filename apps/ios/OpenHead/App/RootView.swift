@@ -36,28 +36,18 @@ struct RootView: View {
         }
     }
 
+    /// Web pages are native and sit below the face's web view, which turns transparent for
+    /// them; images, video, the corner face and subtitles are all drawn in that web view.
     @ViewBuilder private var content: some View {
-        switch model.display {
-        case .face:
-            EmptyView()
-        case .image(let image):
-            Image(uiImage: image).resizable().scaledToFit()
-        case .web(let url):
+        if case .web(let url) = model.display {
             WebPageView(url: url)
         }
     }
 
-    @ViewBuilder private func face(in size: CGSize) -> some View {
-        let corner = model.display.name != "face" && model.overlay == "face-corner"
-        let hidden = model.display.name != "face" && !corner
+    private func face(in size: CGSize) -> some View {
         FaceView(face: model.face)
-            .frame(width: corner ? size.width * 0.32 : size.width,
-                   height: corner ? size.height * 0.32 : size.height)
-            .clipShape(RoundedRectangle(cornerRadius: corner ? 16 : 0))
-            .frame(maxWidth: .infinity, maxHeight: .infinity,
-                   alignment: corner ? .bottomTrailing : .center)
-            .padding(corner ? 12 : 0)
-            .opacity(hidden ? 0 : 1)
+            .frame(width: size.width, height: size.height)
+            .allowsHitTesting(false)
     }
 }
 

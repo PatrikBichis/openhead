@@ -47,8 +47,8 @@ The project is generated from `apps/ios/project.yml`; `OpenHead.xcodeproj` and `
 | Module | What it does |
 | --- | --- |
 | `Link/` | WebSocket server (Network.framework) on the configured port, advertised as `_openhead._tcp`; pairing and Keychain tokens; every message decoded with the generated models (`Protocol/`) before it runs; commands run in arrival order; `imu`, `status`, `log` subscriptions; screenshot URLs on port + 1 |
-| `Face/` | `face/dist` in a WKWebView served on `openhead-face://`, driven through `window.openhead` |
-| `Display/` | image (URL or data URI) and web page views; face in a corner with `overlay: face-corner` |
+| `Face/` | `face/dist` in a WKWebView served on `openhead-face://`, driven through `window.openhead` (face, `show`, `clear`, `subtitle`); a video that ends reports back so `status` shows the face |
+| `Display/` | what fills the screen; images (incl. SVG, GIF), video, the corner face and subtitles are drawn by the face's web layer (`face/src/screen.ts`), web pages natively below it (the web view turns transparent). ATS allows plain http media on the LAN in web views only |
 | `Sensors/` | CoreMotion device motion (≤ 100 Hz) in the protocol's frame and sign conventions, mount offset |
 | `Logging/` | OSLog per subsystem plus a 2000-line ring buffer for `system.logs` and the `log` topic |
 | `Settings/` | name, port, dev mode, theme when offline, IMU mounting, paired clients (revoke) |

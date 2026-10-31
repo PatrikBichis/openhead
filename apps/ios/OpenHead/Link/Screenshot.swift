@@ -31,16 +31,13 @@ enum Screenshot {
             .first
     }
 
-    /// The window as drawn, with the face web view composited from its own snapshot
-    /// (WebKit content is not always captured by drawHierarchy).
+    /// The window as drawn, with the face web view (face, image, video, subtitles; transparent
+    /// over a native web page) composited from its own snapshot, since WebKit content is not
+    /// always captured by drawHierarchy.
     static func capture(model: AppModel, scale: Double) async throws -> (Data, Int, Int) {
         guard let window = keyWindow else { throw LinkError("busy", "no window to capture") }
         let webView = model.face.webView
-        let faceVisible = model.display.name == "face" || model.overlay == "face-corner"
-        var faceImage: UIImage?
-        if faceVisible {
-            faceImage = try? await webView.takeSnapshot(configuration: nil)
-        }
+        let faceImage = try? await webView.takeSnapshot(configuration: nil)
         let faceFrame = webView.convert(webView.bounds, to: window)
         let format = UIGraphicsImageRendererFormat()
         format.scale = window.screen.scale * scale

@@ -16,6 +16,7 @@ extension Dictionary where Key == String, Value == Any {
     func string(_ key: String) -> String? { self[key] as? String }
     func double(_ key: String) -> Double? { (self[key] as? NSNumber)?.doubleValue }
     func int(_ key: String) -> Int? { (self[key] as? NSNumber)?.intValue }
+    func bool(_ key: String) -> Bool? { self[key] as? Bool }
 }
 
 /// Decode with the generated model: the router uses it to reject malformed messages.

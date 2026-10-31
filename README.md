@@ -35,7 +35,7 @@ Robot heads usually need a screen, a camera, an IMU, a localization stack and a 
 flowchart LR
     subgraph Device["Head device (iPhone / iPad)"]
         Face["Face engine<br/>web-based · themes · expressions"]
-        Display["Display<br/>image · web · overlay"]
+        Display["Display<br/>image · video · web · subtitles · overlay"]
         Sensors["Sensors<br/>IMU · status · (pose · faces · GPS)"]
         Cam["Cameras<br/>(v0.2)"]
         Link["Link<br/>WebSocket server · mDNS · pairing"]
@@ -68,7 +68,8 @@ The device is the server. Hosts discover it over mDNS (`_openhead._tcp`), pair o
 | Capability | Direction | Transport | Version |
 | --- | --- | --- | --- |
 | Face: theme, emotion, gaze, blink, mouth envelope | host → head | commands + envelope stream (20–30 Hz) | 0.1 |
-| Display: image, web page, face, overlay | host → head | command; image by URL or base64 | 0.1 |
+| Display: image (PNG, JPEG, GIF, WebP, SVG), video, web page, face, overlay | host → head | command; image by URL or base64, video by URL | 0.1 |
+| Subtitles: text on top of anything, streamed word by word, optional moving mouth | host → head | command | 0.1 |
 | Status: battery, thermal, mode, theme, emotion, link | head → host | subscription, 1 Hz | 0.1 |
 | IMU: quaternion, gyro, accel in device frame | head → host | subscription, ≤ 100 Hz | 0.1 |
 | Log stream and diagnostics | head → host | subscription + commands (dev mode) | 0.1 |
@@ -120,7 +121,7 @@ sequenceDiagram
 | Family | Commands | Version |
 | --- | --- | --- |
 | `face.*` | `set_theme`, `set_emotion`, `look_at` (screen / head frame), `blink`, `envelope`, `list` | 0.1 |
-| `display.*` | `show` (face, image, web), `clear` | 0.1 |
+| `display.*` | `show` (face, image, video, web), `clear`, `subtitle` | 0.1 |
 | `system.*` | `status`, `screenshot`, `logs`, `diagnostics`, `settings` | 0.1 |
 | `mode.*` | `set` (`idle`, `sensing`, `capture`), `get` | 0.1 (`idle` only), 0.2 |
 | `pose.*` | `reset`, `save_map`, `load_map` | 0.2 |
@@ -180,7 +181,7 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 | MCP | Maps to |
 | --- | --- |
 | Tool `pair(code)` | `pair` with the code the user reads off the device |
-| Tools `list_themes`, `set_theme`, `set_emotion`, `look_at`, `show_image`, `show_web`, `show_face` | `face.*`, `display.*` |
+| Tools `list_themes`, `set_theme`, `set_emotion`, `look_at`, `show_image`, `show_video`, `show_web`, `show_face`, `subtitle` | `face.*`, `display.*` |
 | Tools `get_status`, `take_screenshot` (returns image), `tail_logs`, `get_diagnostics` | `system.*` (dev mode required for the last three) |
 | Tool `wait_for(topic, predicate, timeout_s)` | A subscription that returns on first match (`status`, `log`; `faces` in 0.2) |
 | Tool `run_scenario(path)` | Runs a YAML scenario and returns the report with screenshots |
@@ -252,7 +253,7 @@ openhead/
 ├── face/                   # face engine (TypeScript + Canvas, Vite)
 │   ├── src/
 │   ├── themes/             # cartoon/ minimal/ halloween/
-│   └── tests/              # Playwright golden images per theme × emotion
+│   └── tests/              # Playwright golden images: theme × emotion, images, video, subtitles, animation
 ├── apps/ios/               # SwiftUI shell; project.yml for XcodeGen
 │   ├── OpenHead/           # App/ Link/ Sensors/ Display/ Face/ Settings/ Logging/
 │   ├── OpenHeadTests/
@@ -335,7 +336,8 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
 - [x] 8. Device in the loop: smoke scenario green on simulator and device
 - [ ] 9. IMU stream and envelope-driven mouth
-- [ ] 10. Tag `0.1.0`
+- [ ] 10. Video, subtitles and a display test suite
+- [ ] 11. Tag `0.1.0`
 
 ---
 

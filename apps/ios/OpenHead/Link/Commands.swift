@@ -66,23 +66,37 @@ extension LinkServer {
             let content = m.string("content") ?? "face"
             let overlay = m.string("overlay") ?? "none"
             let duration = m.int("duration_ms")
+            let source = m.string("source") ?? ""
             switch content {
             case "image":
-                let image = try await ImageLoader.load(m.string("source") ?? "")
-                model.show(.image(image), overlay: overlay, durationMs: duration)
+                // The web layer loads it (http(s), data: URIs incl. SVG and GIF); a bad source
+                // throws before the screen changes.
+                try await model.show(.image, source: source, overlay: overlay, durationMs: duration)
+            case "video":
+                guard source.hasPrefix("http://") || source.hasPrefix("https://") else {
+                    throw LinkError("invalid_params", "video content needs an http(s) URL")
+                }
+                try await model.show(.video, source: source, overlay: overlay, loop: m.bool("loop") ?? false,
+                                     muted: m.bool("muted") ?? false, durationMs: duration)
             case "web":
-                guard let source = m.string("source"), source.hasPrefix("http://") || source.hasPrefix("https://"),
-                      let url = URL(string: source) else {
+                guard source.hasPrefix("http://") || source.hasPrefix("https://"), let url = URL(string: source) else {
                     throw LinkError("invalid_params", "web content needs an http(s) URL")
                 }
-                model.show(.web(url), overlay: overlay, durationMs: duration)
+                try await model.show(.web(url), source: source, overlay: overlay, durationMs: duration)
             default:
-                model.show(.face, overlay: "none", durationMs: nil)
+                try await model.show(.face, overlay: "none", durationMs: nil)
             }
             return nil
 
         case "display.clear":
-            model.show(.face, overlay: "none", durationMs: nil)
+            try await model.show(.face, overlay: "none", durationMs: nil)
+            return nil
+
+        case "display.subtitle":
+            let mode = m.string("mode") ?? "replace"
+            try await model.face.subtitle(m.string("text") ?? "", mode: mode, position: m.string("position"),
+                                          durationMs: m.int("duration_ms"), mouth: m.bool("mouth") ?? false)
+            model.logs.log("info", "display", "subtitle \(mode)")
             return nil
 
         case "system.status":

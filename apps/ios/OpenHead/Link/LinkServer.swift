@@ -288,7 +288,7 @@ final class LinkServer {
                 "screen": ["width": screen.width, "height": screen.height, "scale": screen.scale,
                            "safe_area": screen.safeArea],
             ],
-            "capabilities": ["face", "display.image", "display.web", "imu", "status", "log", "screenshot"],
+            "capabilities": ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu", "status", "log", "screenshot"],
             "themes": model.themeNames,
             "dev_mode": model.settings.devMode,
         ])
