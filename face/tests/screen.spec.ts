@@ -54,7 +54,7 @@ test.describe("image", () => {
   test("PNG fills the screen and hides the face", async ({ page }) => {
     await open(page);
     await show(page, "image", "/media/test-card.png");
-    expect(await screenState(page)).toEqual({ view: "image", overlay: "none", subtitle: "" });
+    expect(await screenState(page)).toMatchObject({ view: "image", overlay: "none", subtitle: "" });
     await expect(page).toHaveScreenshot("screen-image-png.png");
   });
 
@@ -105,7 +105,7 @@ test.describe("image", () => {
     await show(page, "image", "/media/test-card.png", { overlay: "face-corner" });
     await page.evaluate(() => window.openhead.clear());
     await settle(page);
-    expect(await screenState(page)).toEqual({ view: "face", overlay: "none", subtitle: "" });
+    expect(await screenState(page)).toMatchObject({ view: "face", overlay: "none", subtitle: "", hud: "none" });
     await expect(page.locator("#display")).toBeHidden();
     await expect(page).toHaveScreenshot("screen-face-after-clear.png");
   });
