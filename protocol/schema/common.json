@@ -52,7 +52,8 @@
         "face",
         "image",
         "video",
-        "web"
+        "web",
+        "camera"
       ],
       "description": "What fills the screen."
     },
@@ -61,9 +62,11 @@
       "enum": [
         "imu",
         "status",
-        "log"
+        "log",
+        "faces",
+        "pose"
       ],
-      "description": "Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2."
+      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later."
     },
     "log_level": {
       "type": "string",

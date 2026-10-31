@@ -32,5 +32,22 @@
         "cackle"
       ]
     }
+  ],
+  "huds": [
+    {
+      "name": "hunter",
+      "title": "Hunter",
+      "version": "0.2.0"
+    },
+    {
+      "name": "camcorder",
+      "title": "Camcorder",
+      "version": "0.2.0"
+    },
+    {
+      "name": "boot",
+      "title": "Boot",
+      "version": "0.2.0"
+    }
   ]
 }

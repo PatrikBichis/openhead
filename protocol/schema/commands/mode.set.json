@@ -1,13 +1,24 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ModeSet",
-  "description": "Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give `unsupported`.",
+  "description": "Choose who owns the cameras. `idle`: no camera (default). `capture`: the front camera runs for the camera view and face detection (`faces` with boxes, several faces); pose only as orientation from `imu`. `sensing`: ARKit owns the cameras: world tracking gives `pose` (position and orientation) and one face is tracked with the depth camera (`faces` without boxes); no camera image. Asks for camera permission the first time; `unsupported` where the device cannot.",
   "type": "object",
-  "allOf": [{ "$ref": "../command.json" }],
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
   "properties": {
-    "type": { "const": "mode.set" },
-    "mode": { "$ref": "../common.json#/$defs/mode" }
+    "type": {
+      "const": "mode.set"
+    },
+    "mode": {
+      "$ref": "../common.json#/$defs/mode"
+    }
   },
-  "required": ["type", "mode"],
+  "required": [
+    "type",
+    "mode"
+  ],
   "unevaluatedProperties": false
 }

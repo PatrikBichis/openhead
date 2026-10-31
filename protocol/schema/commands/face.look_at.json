@@ -1,28 +1,84 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FaceLookAt",
-  "description": "Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The world frame needs pose and arrives in 0.2.",
+  "description": "Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. `face`: follow a detected face (`faces` topic) until another `look_at`: `face_id`, or the locked (largest) face when omitted; the gaze rests when no face is seen. The world frame needs pose and arrives later.",
   "type": "object",
   "allOf": [
-    { "$ref": "../command.json" },
     {
-      "if": { "properties": { "frame": { "const": "screen" } } },
-      "then": { "required": ["x", "y"] },
-      "else": { "required": ["yaw", "pitch"] }
+      "$ref": "../command.json"
+    },
+    {
+      "if": {
+        "properties": {
+          "frame": {
+            "const": "screen"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "x",
+          "y"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "frame": {
+            "const": "head"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "yaw",
+          "pitch"
+        ]
+      }
     }
   ],
   "properties": {
-    "type": { "const": "face.look_at" },
-    "frame": { "type": "string", "enum": ["screen", "head"] },
-    "x": { "$ref": "../common.json#/$defs/signed_unit" },
-    "y": { "$ref": "../common.json#/$defs/signed_unit" },
-    "yaw": { "type": "number", "minimum": -90, "maximum": 90 },
-    "pitch": { "type": "number", "minimum": -90, "maximum": 90 },
+    "type": {
+      "const": "face.look_at"
+    },
+    "frame": {
+      "type": "string",
+      "enum": [
+        "screen",
+        "head",
+        "face"
+      ]
+    },
+    "x": {
+      "$ref": "../common.json#/$defs/signed_unit"
+    },
+    "y": {
+      "$ref": "../common.json#/$defs/signed_unit"
+    },
+    "yaw": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "pitch": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "face_id": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "`face` only: the face to follow; default the locked (largest) face."
+    },
     "duration_ms": {
       "$ref": "../common.json#/$defs/duration_ms",
       "description": "Hold the gaze, then return to idle motion. Omit to hold until the next `look_at`."
     }
   },
-  "required": ["type", "frame"],
+  "required": [
+    "type",
+    "frame"
+  ],
   "unevaluatedProperties": false
 }

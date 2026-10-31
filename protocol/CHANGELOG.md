@@ -2,6 +2,17 @@
 
 All changes to `protocol/schema` are recorded here, in the same commit as the change. The protocol follows [semver](https://semver.org) from 0.1.0; until 0.1.0 is tagged anything may change.
 
+## Unreleased (0.2.0)
+
+### Added
+
+- Modes `capture` (front camera, several faces with boxes) and `sensing` (ARKit world tracking and one face via the depth camera) in `mode.set`.
+- `display.show {content: camera, hud}`: the front camera with a HUD theme over it; view `camera` in `status`.
+- Topics `faces` (id, bearing, elevation, size, confidence, box, locked; `source` vision/arkit/sim) and `pose` (position, orientation, tracking state, world frame).
+- `face.look_at {frame: face, face_id?}`: the eyes follow a detected face.
+- `face.list` lists HUD themes (`huds`); `status` reports how many `faces` are seen.
+- Capabilities `camera`, `faces`, `pose` in `welcome`.
+
 ## 0.1.0 (2026-10-31)
 
 ### Added

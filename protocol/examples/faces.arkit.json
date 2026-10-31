@@ -1,0 +1,18 @@
+{
+  "type": "faces",
+  "ts": 1793462400000,
+  "seq": 41,
+  "faces": [
+    {
+      "id": 0,
+      "bearing": 3.2,
+      "elevation": -1.5,
+      "size": 0.15,
+      "distance_m": 0.82,
+      "confidence": 1.0,
+      "locked": true
+    }
+  ],
+  "source": "arkit",
+  "sensor_time_s": 81240.2
+}

@@ -1,0 +1,36 @@
+{
+  "type": "faces",
+  "ts": 1793462400000,
+  "seq": 40,
+  "faces": [
+    {
+      "id": 3,
+      "bearing": 12.5,
+      "elevation": -4.0,
+      "size": 0.18,
+      "confidence": 0.94,
+      "box": {
+        "x": 0.31,
+        "y": 0.22,
+        "w": 0.18,
+        "h": 0.32
+      },
+      "locked": true
+    },
+    {
+      "id": 7,
+      "bearing": -21.0,
+      "elevation": 2.5,
+      "size": 0.09,
+      "confidence": 0.81,
+      "box": {
+        "x": 0.72,
+        "y": 0.3,
+        "w": 0.09,
+        "h": 0.16
+      }
+    }
+  ],
+  "source": "vision",
+  "sensor_time_s": 81240.12
+}

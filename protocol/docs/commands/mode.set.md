@@ -9,7 +9,7 @@
 | **Additional properties** | Any type allowed |
 | **Defined in**            |                  |
 
-**Description:** Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give `unsupported`.
+**Description:** Choose who owns the cameras. `idle`: no camera (default). `capture`: the front camera runs for the camera view and face detection (`faces` with boxes, several faces); pose only as orientation from `imu`. `sensing`: ARKit owns the cameras: world tracking gives `pose` (position and orientation) and one face is tracked with the depth camera (`faces` without boxes); no camera image. Asks for camera permission the first time; `unsupported` where the device cannot.
 
 | Property         | Pattern | Type             | Deprecated | Definition                    | Title/Description                                            |
 | ---------------- | ------- | ---------------- | ---------- | ----------------------------- | ------------------------------------------------------------ |

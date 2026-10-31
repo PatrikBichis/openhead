@@ -1,0 +1,19 @@
+{
+  "type": "pose",
+  "ts": 1793462400000,
+  "seq": 42,
+  "position": [
+    0.12,
+    0.01,
+    -0.35
+  ],
+  "q": [
+    0.0,
+    0.0871,
+    0.0,
+    0.9962
+  ],
+  "tracking_state": "normal",
+  "frame": "world",
+  "sensor_time_s": 81240.25
+}

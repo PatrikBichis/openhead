@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DisplayShow",
-  "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.",
+  "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. `camera` shows the front camera with a HUD theme (`hud`) drawn over it: boxes around faces, the locked target, text; it switches to mode `capture` if needed. With `overlay: face-corner` the face keeps running in a corner.",
   "type": "object",
   "allOf": [
     {
@@ -65,6 +65,11 @@
         "face-corner"
       ],
       "description": "Default `none`."
+    },
+    "hud": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$",
+      "description": "`camera` only: HUD theme from `face.list` (`huds`), or `none` for the bare camera. Default `hunter`."
     },
     "loop": {
       "type": "boolean",

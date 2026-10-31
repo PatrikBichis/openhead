@@ -17,11 +17,17 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let faceBlink: FaceBlink?
     public let faceEnvelope: FaceEnvelope?
     public let faceList: FaceList?
+    public let faceListHudInfo: FaceListHudInfo?
     public let faceListResult: FaceListResult?
     public let faceListThemeInfo: FaceListThemeInfo?
     public let faceLookAt: FaceLookAt?
+    public let faces: Faces?
+    public let facesBox: FacesBox?
     public let faceSetEmotion: FaceSetEmotion?
     public let faceSetTheme: FaceSetTheme?
+    public let facesFace: FacesFace?
+    public let facesFields: FacesFields?
+    public let facesPayload: FacesPayload?
     public let hello: Hello?
     public let imu: Imu?
     public let imuFields: ImuFields?
@@ -34,6 +40,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let modeSet: ModeSet?
     public let pair: Pair?
     public let pairRequired: PairRequired?
+    public let pose: Pose?
+    public let poseFields: PoseFields?
+    public let posePayload: PosePayload?
     public let protocolError: ProtocolError?
     public let status: Status?
     public let statusFields: StatusFields?
@@ -63,11 +72,17 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case faceBlink = "FaceBlink"
         case faceEnvelope = "FaceEnvelope"
         case faceList = "FaceList"
+        case faceListHudInfo = "FaceListHudInfo"
         case faceListResult = "FaceListResult"
         case faceListThemeInfo = "FaceListThemeInfo"
         case faceLookAt = "FaceLookAt"
+        case faces = "Faces"
+        case facesBox = "FacesBox"
         case faceSetEmotion = "FaceSetEmotion"
         case faceSetTheme = "FaceSetTheme"
+        case facesFace = "FacesFace"
+        case facesFields = "FacesFields"
+        case facesPayload = "FacesPayload"
         case hello = "Hello"
         case imu = "Imu"
         case imuFields = "ImuFields"
@@ -80,6 +95,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case modeSet = "ModeSet"
         case pair = "Pair"
         case pairRequired = "PairRequired"
+        case pose = "Pose"
+        case poseFields = "PoseFields"
+        case posePayload = "PosePayload"
         case protocolError = "ProtocolError"
         case status = "Status"
         case statusFields = "StatusFields"
@@ -102,7 +120,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, hello: Hello?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, hello: Hello?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
         self.displayShow = displayShow
@@ -110,11 +128,17 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.faceBlink = faceBlink
         self.faceEnvelope = faceEnvelope
         self.faceList = faceList
+        self.faceListHudInfo = faceListHudInfo
         self.faceListResult = faceListResult
         self.faceListThemeInfo = faceListThemeInfo
         self.faceLookAt = faceLookAt
+        self.faces = faces
+        self.facesBox = facesBox
         self.faceSetEmotion = faceSetEmotion
         self.faceSetTheme = faceSetTheme
+        self.facesFace = facesFace
+        self.facesFields = facesFields
+        self.facesPayload = facesPayload
         self.hello = hello
         self.imu = imu
         self.imuFields = imuFields
@@ -127,6 +151,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.modeSet = modeSet
         self.pair = pair
         self.pairRequired = pairRequired
+        self.pose = pose
+        self.poseFields = poseFields
+        self.posePayload = posePayload
         self.protocolError = protocolError
         self.status = status
         self.statusFields = statusFields
@@ -220,13 +247,17 @@ public enum DisplayClearType: String, Codable, Equatable, Sendable {
 /// `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the
 /// device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an
 /// http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without
-/// `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running
-/// in a corner.
+/// `loop` the face returns when it ends. `camera` shows the front camera with a HUD theme
+/// (`hud`) drawn over it: boxes around faces, the locked target, text; it switches to mode
+/// `capture` if needed. With `overlay: face-corner` the face keeps running in a corner.
 // MARK: - DisplayShow
 public struct DisplayShow: Codable, Equatable, Sendable {
     public let content: CommonView
     /// Return to the face after this time. Omit to hold.
     public let durationMS: Int?
+    /// `camera` only: HUD theme from `face.list` (`huds`), or `none` for the bare camera.
+    /// Default `hunter`.
+    public let hud: String?
     /// Client-chosen id, echoed in the reply.
     public let id: String
     /// `video` only: start again at the end. Default false.
@@ -246,6 +277,7 @@ public struct DisplayShow: Codable, Equatable, Sendable {
     public enum CodingKeys: String, CodingKey {
         case content = "content"
         case durationMS = "duration_ms"
+        case hud = "hud"
         case id = "id"
         case loop = "loop"
         case muted = "muted"
@@ -256,9 +288,10 @@ public struct DisplayShow: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(content: CommonView, durationMS: Int?, id: String, loop: Bool?, muted: Bool?, overlay: Overlay?, seq: Int, source: String?, ts: Int, type: DisplayShowType) {
+    public init(content: CommonView, durationMS: Int?, hud: String?, id: String, loop: Bool?, muted: Bool?, overlay: Overlay?, seq: Int, source: String?, ts: Int, type: DisplayShowType) {
         self.content = content
         self.durationMS = durationMS
+        self.hud = hud
         self.id = id
         self.loop = loop
         self.muted = muted
@@ -272,6 +305,7 @@ public struct DisplayShow: Codable, Equatable, Sendable {
 
 /// What fills the screen.
 public enum CommonView: String, Codable, Equatable, Sendable {
+    case camera = "camera"
     case face = "face"
     case image = "image"
     case video = "video"
@@ -421,7 +455,7 @@ public enum FaceEnvelopeType: String, Codable, Equatable, Sendable {
 }
 
 
-/// List installed themes with their expressions.
+/// List installed face themes with their expressions, and HUD themes for the camera view.
 // MARK: - FaceList
 public struct FaceList: Codable, Equatable, Sendable {
     /// Client-chosen id, echoed in the reply.
@@ -452,18 +486,42 @@ public enum FaceListType: String, Codable, Equatable, Sendable {
 }
 
 
+// MARK: - FaceListHudInfo
+public struct FaceListHudInfo: Codable, Equatable, Sendable {
+    public let name: String
+    public let title: String
+    public let version: String?
+
+    public enum CodingKeys: String, CodingKey {
+        case name = "name"
+        case title = "title"
+        case version = "version"
+    }
+
+    public init(name: String, title: String, version: String?) {
+        self.name = name
+        self.title = title
+        self.version = version
+    }
+}
+
+
 // MARK: - FaceListResult
 public struct FaceListResult: Codable, Equatable, Sendable {
     public let active: String
+    /// HUD themes for `display.show {content: camera}` (0.2).
+    public let huds: [FaceListHudInfo]?
     public let themes: [FaceListThemeInfo]
 
     public enum CodingKeys: String, CodingKey {
         case active = "active"
+        case huds = "huds"
         case themes = "themes"
     }
 
-    public init(active: String, themes: [FaceListThemeInfo]) {
+    public init(active: String, huds: [FaceListHudInfo]?, themes: [FaceListThemeInfo]) {
         self.active = active
+        self.huds = huds
         self.themes = themes
     }
 }
@@ -498,12 +556,16 @@ public struct FaceListThemeInfo: Codable, Equatable, Sendable {
 
 
 /// Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right,
-/// +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The
-/// world frame needs pose and arrives in 0.2.
+/// +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. `face`:
+/// follow a detected face (`faces` topic) until another `look_at`: `face_id`, or the locked
+/// (largest) face when omitted; the gaze rests when no face is seen. The world frame needs
+/// pose and arrives later.
 // MARK: - FaceLookAt
 public struct FaceLookAt: Codable, Equatable, Sendable {
     /// Hold the gaze, then return to idle motion. Omit to hold until the next `look_at`.
     public let durationMS: Int?
+    /// `face` only: the face to follow; default the locked (largest) face.
+    public let faceID: Int?
     public let frame: FaceLookAtFrame
     /// Client-chosen id, echoed in the reply.
     public let id: String
@@ -519,6 +581,7 @@ public struct FaceLookAt: Codable, Equatable, Sendable {
 
     public enum CodingKeys: String, CodingKey {
         case durationMS = "duration_ms"
+        case faceID = "face_id"
         case frame = "frame"
         case id = "id"
         case pitch = "pitch"
@@ -530,8 +593,9 @@ public struct FaceLookAt: Codable, Equatable, Sendable {
         case yaw = "yaw"
     }
 
-    public init(durationMS: Int?, frame: FaceLookAtFrame, id: String, pitch: Double?, seq: Int, ts: Int, type: FaceLookAtType, x: Double?, y: Double?, yaw: Double?) {
+    public init(durationMS: Int?, faceID: Int?, frame: FaceLookAtFrame, id: String, pitch: Double?, seq: Int, ts: Int, type: FaceLookAtType, x: Double?, y: Double?, yaw: Double?) {
         self.durationMS = durationMS
+        self.faceID = faceID
         self.frame = frame
         self.id = id
         self.pitch = pitch
@@ -545,6 +609,7 @@ public struct FaceLookAt: Codable, Equatable, Sendable {
 }
 
 public enum FaceLookAtFrame: String, Codable, Equatable, Sendable {
+    case face = "face"
     case head = "head"
     case screen = "screen"
 }
@@ -646,6 +711,158 @@ public struct FaceSetTheme: Codable, Equatable, Sendable {
 
 public enum FaceSetThemeType: String, Codable, Equatable, Sendable {
     case faceSetTheme = "face.set_theme"
+}
+
+
+/// People in front of the head, up to 15 Hz while mode is `capture` (front camera, several
+/// faces, with `box`) or `sensing` (ARKit, one face, no `box`). Angles are in the head frame
+/// like `face.look_at`: +bearing to the head's left, +elevation up, in degrees. An empty
+/// list means nobody is seen. Every payload field is present unless the subscription named
+/// `fields`.
+// MARK: - Faces
+public struct Faces: Codable, Equatable, Sendable {
+    public let faces: [FacesFace]?
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    public let source: Source?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: FacesType
+
+    public enum CodingKeys: String, CodingKey {
+        case faces = "faces"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case source = "source"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(faces: [FacesFace]?, sensorTimeS: Double?, seq: Int, source: Source?, ts: Int, type: FacesType) {
+        self.faces = faces
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.source = source
+        self.ts = ts
+        self.type = type
+    }
+}
+
+
+// MARK: - FacesFace
+public struct FacesFace: Codable, Equatable, Sendable {
+    /// Degrees, + to the head's left.
+    public let bearing: Double
+    public let box: FacesBox?
+    public let confidence: Double
+    /// Metres, when the depth camera measures it (`sensing`).
+    public let distanceM: Double?
+    /// Degrees, + up.
+    public let elevation: Double
+    /// Stable while the face stays in view.
+    public let id: Int
+    /// The face the HUD and `look_at {frame: face}` follow.
+    public let locked: Bool?
+    /// Face width as a share of the camera's field of view: bigger is closer.
+    public let size: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case bearing = "bearing"
+        case box = "box"
+        case confidence = "confidence"
+        case distanceM = "distance_m"
+        case elevation = "elevation"
+        case id = "id"
+        case locked = "locked"
+        case size = "size"
+    }
+
+    public init(bearing: Double, box: FacesBox?, confidence: Double, distanceM: Double?, elevation: Double, id: Int, locked: Bool?, size: Double) {
+        self.bearing = bearing
+        self.box = box
+        self.confidence = confidence
+        self.distanceM = distanceM
+        self.elevation = elevation
+        self.id = id
+        self.locked = locked
+        self.size = size
+    }
+}
+
+
+/// Where the face is in the camera view as shown on screen, normalised 0-1, origin top-left.
+// MARK: - FacesBox
+public struct FacesBox: Codable, Equatable, Sendable {
+    public let h: Double
+    public let w: Double
+    public let x: Double
+    public let y: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case h = "h"
+        case w = "w"
+        case x = "x"
+        case y = "y"
+    }
+
+    public init(h: Double, w: Double, x: Double, y: Double) {
+        self.h = h
+        self.w = w
+        self.x = x
+        self.y = y
+    }
+}
+
+public enum Source: String, Codable, Equatable, Sendable {
+    case arkit = "arkit"
+    case sim = "sim"
+    case vision = "vision"
+}
+
+public enum FacesType: String, Codable, Equatable, Sendable {
+    case faces = "faces"
+}
+
+
+// MARK: - FacesFields
+public struct FacesFields: Codable, Equatable, Sendable {
+    public let faces: [FacesFace]?
+    public let sensorTimeS: Double?
+    public let source: Source?
+
+    public enum CodingKeys: String, CodingKey {
+        case faces = "faces"
+        case sensorTimeS = "sensor_time_s"
+        case source = "source"
+    }
+
+    public init(faces: [FacesFace]?, sensorTimeS: Double?, source: Source?) {
+        self.faces = faces
+        self.sensorTimeS = sensorTimeS
+        self.source = source
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
+// MARK: - FacesPayload
+public struct FacesPayload: Codable, Equatable, Sendable {
+    public let faces: [FacesFace]
+    public let sensorTimeS: Double
+    public let source: Source
+
+    public enum CodingKeys: String, CodingKey {
+        case faces = "faces"
+        case sensorTimeS = "sensor_time_s"
+        case source = "source"
+    }
+
+    public init(faces: [FacesFace], sensorTimeS: Double, source: Source) {
+        self.faces = faces
+        self.sensorTimeS = sensorTimeS
+        self.source = source
+    }
 }
 
 
@@ -977,8 +1194,12 @@ public enum CommonMode: String, Codable, Equatable, Sendable {
 }
 
 
-/// Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give
-/// `unsupported`.
+/// Choose who owns the cameras. `idle`: no camera (default). `capture`: the front camera
+/// runs for the camera view and face detection (`faces` with boxes, several faces); pose
+/// only as orientation from `imu`. `sensing`: ARKit owns the cameras: world tracking gives
+/// `pose` (position and orientation) and one face is tracked with the depth camera (`faces`
+/// without boxes); no camera image. Asks for camera permission the first time; `unsupported`
+/// where the device cannot.
 // MARK: - ModeSet
 public struct ModeSet: Codable, Equatable, Sendable {
     /// Client-chosen id, echoed in the reply.
@@ -1086,6 +1307,140 @@ public enum PairRequiredType: String, Codable, Equatable, Sendable {
 }
 
 
+/// Where the head is, up to 60 Hz while mode is `sensing` (ARKit world tracking). World
+/// frame: origin where tracking started, +y up (against gravity), +x and +z horizontal;
+/// position in metres. `q` turns the device frame of `imu` into the world frame ([x, y, z,
+/// w]). Every payload field is present unless the subscription named `fields`.
+// MARK: - Pose
+public struct Pose: Codable, Equatable, Sendable {
+    public let frame: PoseFrame?
+    /// Metres in the world frame.
+    public let position: [Double]?
+    /// Unit quaternion [x, y, z, w], device frame to world frame.
+    public let q: [Double]?
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Why tracking is `limited`.
+    public let trackingReason: TrackingReason?
+    public let trackingState: TrackingState?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: PoseType
+
+    public enum CodingKeys: String, CodingKey {
+        case frame = "frame"
+        case position = "position"
+        case q = "q"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case trackingReason = "tracking_reason"
+        case trackingState = "tracking_state"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(frame: PoseFrame?, position: [Double]?, q: [Double]?, sensorTimeS: Double?, seq: Int, trackingReason: TrackingReason?, trackingState: TrackingState?, ts: Int, type: PoseType) {
+        self.frame = frame
+        self.position = position
+        self.q = q
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.trackingReason = trackingReason
+        self.trackingState = trackingState
+        self.ts = ts
+        self.type = type
+    }
+}
+
+public enum PoseFrame: String, Codable, Equatable, Sendable {
+    case world = "world"
+}
+
+/// Why tracking is `limited`.
+public enum TrackingReason: String, Codable, Equatable, Sendable {
+    case excessiveMotion = "excessive_motion"
+    case initializing = "initializing"
+    case insufficientFeatures = "insufficient_features"
+    case relocalizing = "relocalizing"
+}
+
+public enum TrackingState: String, Codable, Equatable, Sendable {
+    case limited = "limited"
+    case normal = "normal"
+    case notAvailable = "not_available"
+}
+
+public enum PoseType: String, Codable, Equatable, Sendable {
+    case pose = "pose"
+}
+
+
+// MARK: - PoseFields
+public struct PoseFields: Codable, Equatable, Sendable {
+    public let frame: PoseFrame?
+    /// Metres in the world frame.
+    public let position: [Double]?
+    /// Unit quaternion [x, y, z, w], device frame to world frame.
+    public let q: [Double]?
+    public let sensorTimeS: Double?
+    /// Why tracking is `limited`.
+    public let trackingReason: TrackingReason?
+    public let trackingState: TrackingState?
+
+    public enum CodingKeys: String, CodingKey {
+        case frame = "frame"
+        case position = "position"
+        case q = "q"
+        case sensorTimeS = "sensor_time_s"
+        case trackingReason = "tracking_reason"
+        case trackingState = "tracking_state"
+    }
+
+    public init(frame: PoseFrame?, position: [Double]?, q: [Double]?, sensorTimeS: Double?, trackingReason: TrackingReason?, trackingState: TrackingState?) {
+        self.frame = frame
+        self.position = position
+        self.q = q
+        self.sensorTimeS = sensorTimeS
+        self.trackingReason = trackingReason
+        self.trackingState = trackingState
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
+// MARK: - PosePayload
+public struct PosePayload: Codable, Equatable, Sendable {
+    public let frame: PoseFrame
+    /// Metres in the world frame.
+    public let position: [Double]
+    /// Unit quaternion [x, y, z, w], device frame to world frame.
+    public let q: [Double]
+    public let sensorTimeS: Double
+    /// Why tracking is `limited`.
+    public let trackingReason: TrackingReason?
+    public let trackingState: TrackingState
+
+    public enum CodingKeys: String, CodingKey {
+        case frame = "frame"
+        case position = "position"
+        case q = "q"
+        case sensorTimeS = "sensor_time_s"
+        case trackingReason = "tracking_reason"
+        case trackingState = "tracking_state"
+    }
+
+    public init(frame: PoseFrame, position: [Double], q: [Double], sensorTimeS: Double, trackingReason: TrackingReason?, trackingState: TrackingState) {
+        self.frame = frame
+        self.position = position
+        self.q = q
+        self.sensorTimeS = sensorTimeS
+        self.trackingReason = trackingReason
+        self.trackingState = trackingState
+    }
+}
+
+
 /// Failed command (with `id`) or failed handshake (without).
 // MARK: - ProtocolError
 public struct ProtocolError: Codable, Equatable, Sendable {
@@ -1145,6 +1500,8 @@ public struct Status: Codable, Equatable, Sendable {
     public let clients: Int?
     public let devMode: Bool?
     public let emotion: String?
+    /// Faces seen now (modes `capture` and `sensing`). Omitted in `idle`.
+    public let faces: Int?
     public let mode: CommonMode?
     public let overlay: Overlay?
     /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
@@ -1167,6 +1524,7 @@ public struct Status: Codable, Equatable, Sendable {
         case clients = "clients"
         case devMode = "dev_mode"
         case emotion = "emotion"
+        case faces = "faces"
         case mode = "mode"
         case overlay = "overlay"
         case rttMS = "rtt_ms"
@@ -1180,12 +1538,13 @@ public struct Status: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, subtitle: String?, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
+    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, faces: Int?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, subtitle: String?, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
         self.devMode = devMode
         self.emotion = emotion
+        self.faces = faces
         self.mode = mode
         self.overlay = overlay
         self.rttMS = rttMS
@@ -1221,6 +1580,8 @@ public struct StatusFields: Codable, Equatable, Sendable {
     public let clients: Int?
     public let devMode: Bool?
     public let emotion: String?
+    /// Faces seen now (modes `capture` and `sensing`). Omitted in `idle`.
+    public let faces: Int?
     public let mode: CommonMode?
     public let overlay: Overlay?
     /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
@@ -1238,6 +1599,7 @@ public struct StatusFields: Codable, Equatable, Sendable {
         case clients = "clients"
         case devMode = "dev_mode"
         case emotion = "emotion"
+        case faces = "faces"
         case mode = "mode"
         case overlay = "overlay"
         case rttMS = "rtt_ms"
@@ -1248,12 +1610,13 @@ public struct StatusFields: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, subtitle: String?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
+    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, faces: Int?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, subtitle: String?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
         self.devMode = devMode
         self.emotion = emotion
+        self.faces = faces
         self.mode = mode
         self.overlay = overlay
         self.rttMS = rttMS
@@ -1276,6 +1639,8 @@ public struct StatusPayload: Codable, Equatable, Sendable {
     public let clients: Int
     public let devMode: Bool
     public let emotion: String
+    /// Faces seen now (modes `capture` and `sensing`). Omitted in `idle`.
+    public let faces: Int?
     public let mode: CommonMode
     public let overlay: Overlay
     /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
@@ -1293,6 +1658,7 @@ public struct StatusPayload: Codable, Equatable, Sendable {
         case clients = "clients"
         case devMode = "dev_mode"
         case emotion = "emotion"
+        case faces = "faces"
         case mode = "mode"
         case overlay = "overlay"
         case rttMS = "rtt_ms"
@@ -1303,12 +1669,13 @@ public struct StatusPayload: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool, clients: Int, devMode: Bool, emotion: String, mode: CommonMode, overlay: Overlay, rttMS: Double?, subtitle: String?, theme: String, thermalState: CommonThermalState, uptimeS: Double, view: CommonView) {
+    public init(batteryLevel: Double?, charging: Bool, clients: Int, devMode: Bool, emotion: String, faces: Int?, mode: CommonMode, overlay: Overlay, rttMS: Double?, subtitle: String?, theme: String, thermalState: CommonThermalState, uptimeS: Double, view: CommonView) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
         self.devMode = devMode
         self.emotion = emotion
+        self.faces = faces
         self.mode = mode
         self.overlay = overlay
         self.rttMS = rttMS
@@ -1359,10 +1726,13 @@ public struct Subscribe: Codable, Equatable, Sendable {
     }
 }
 
-/// Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2.
+/// Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`;
+/// `gps` and `env` arrive later.
 public enum CommonTopic: String, Codable, Equatable, Sendable {
+    case faces = "faces"
     case imu = "imu"
     case log = "log"
+    case pose = "pose"
     case status = "status"
 }
 
@@ -1776,8 +2146,9 @@ public enum UnsubscribeType: String, Codable, Equatable, Sendable {
 /// the device description and what it supports.
 // MARK: - Welcome
 public struct Welcome: Codable, Equatable, Sendable {
-    /// Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`,
-    /// `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values.
+    /// Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`,
+    /// `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose`
+    /// (where the device supports them). Clients ignore unknown values.
     public let capabilities: [String]
     public let devMode: Bool
     public let device: WelcomeDevice

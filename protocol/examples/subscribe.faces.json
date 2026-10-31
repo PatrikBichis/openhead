@@ -1,0 +1,8 @@
+{
+  "type": "subscribe",
+  "ts": 1793462400000,
+  "seq": 47,
+  "id": "s-3",
+  "topic": "faces",
+  "rate_hz": 15
+}

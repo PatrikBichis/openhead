@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pose",
+  "description": "Where the head is, up to 60 Hz while mode is `sensing` (ARKit world tracking). World frame: origin where tracking started, +y up (against gravity), +x and +z horizontal; position in metres. `q` turns the device frame of `imu` into the world frame ([x, y, z, w]). Every payload field is present unless the subscription named `fields`.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "pose"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "fields": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Metres in the world frame."
+        },
+        "q": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Unit quaternion [x, y, z, w], device frame to world frame."
+        },
+        "tracking_state": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "limited",
+            "not_available"
+          ]
+        },
+        "tracking_reason": {
+          "type": "string",
+          "enum": [
+            "initializing",
+            "excessive_motion",
+            "insufficient_features",
+            "relocalizing"
+          ],
+          "description": "Why tracking is `limited`."
+        },
+        "frame": {
+          "type": "string",
+          "enum": [
+            "world"
+          ]
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
+      "required": [
+        "position",
+        "q",
+        "tracking_state",
+        "frame",
+        "sensor_time_s"
+      ]
+    }
+  }
+}

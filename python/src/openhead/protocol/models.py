@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
 class OpenHeadProtocol(RootModel[Any]):
     root: Any = Field(..., title="OpenHeadProtocol")
     """
-    All OpenHead protocol 0.1.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
+    All OpenHead protocol 0.2.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
     """
 
 
@@ -121,6 +121,23 @@ class FaceEnvelope(Envelope):
     level: float = Field(..., ge=0.0, le=1.0, title="CommonUnit")
 
 
+class FaceListHudInfo(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    name: str = Field(..., pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName")
+    """
+    Lower-case identifier used for themes and emotions.
+    """
+    title: str
+    version: str | None = Field(
+        None, pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$", title="CommonVersion"
+    )
+    """
+    Semantic version, MAJOR.MINOR.PATCH.
+    """
+
+
 class FaceListThemeInfo(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
@@ -144,6 +161,74 @@ class FaceListThemeInfo(BaseModel):
     """
     Theme-specific expressions, e.g. `cackle`.
     """
+
+
+class FacesBox(BaseModel):
+    """
+    Where the face is in the camera view as shown on screen, normalised 0-1, origin top-left.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    x: float = Field(..., ge=0.0, le=1.0)
+    y: float = Field(..., ge=0.0, le=1.0)
+    w: float = Field(..., ge=0.0, le=1.0)
+    h: float = Field(..., ge=0.0, le=1.0)
+
+
+class FacesFace(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    id: int = Field(..., ge=0)
+    """
+    Stable while the face stays in view.
+    """
+    bearing: float = Field(..., ge=-90.0, le=90.0)
+    """
+    Degrees, + to the head's left.
+    """
+    elevation: float = Field(..., ge=-90.0, le=90.0)
+    """
+    Degrees, + up.
+    """
+    size: float = Field(..., ge=0.0, le=1.0)
+    """
+    Face width as a share of the camera's field of view: bigger is closer.
+    """
+    distance_m: float | None = Field(None, ge=0.0)
+    """
+    Metres, when the depth camera measures it (`sensing`).
+    """
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    box: FacesBox | None = None
+    locked: bool | None = None
+    """
+    The face the HUD and `look_at {frame: face}` follow.
+    """
+
+
+class FacesFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    faces: list[FacesFace] | None = Field(None, max_length=16)
+    source: Literal["vision", "arkit", "sim"] | None = None
+    sensor_time_s: float | None = Field(None, ge=0.0)
+
+
+class FacesPayload(FacesFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    faces: list[FacesFace] = Field(..., max_length=16)
+    source: Literal["vision", "arkit", "sim"]
+    sensor_time_s: float = Field(..., ge=0.0)
 
 
 class Hello(Envelope):
@@ -269,6 +354,53 @@ class PairRequired(Envelope):
     attempts_left: int = Field(..., ge=0)
 
 
+class PoseFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    position: list[float] | None = Field(None, max_length=3, min_length=3)
+    """
+    Metres in the world frame.
+    """
+    q: list[float] | None = Field(None, max_length=4, min_length=4)
+    """
+    Unit quaternion [x, y, z, w], device frame to world frame.
+    """
+    tracking_state: Literal["normal", "limited", "not_available"] | None = None
+    tracking_reason: (
+        Literal[
+            "initializing", "excessive_motion", "insufficient_features", "relocalizing"
+        ]
+        | None
+    ) = None
+    """
+    Why tracking is `limited`.
+    """
+    frame: Literal["world"] | None = None
+    sensor_time_s: float | None = Field(None, ge=0.0)
+
+
+class PosePayload(PoseFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    position: list[float] = Field(..., max_length=3, min_length=3)
+    """
+    Metres in the world frame.
+    """
+    q: list[float] = Field(..., max_length=4, min_length=4)
+    """
+    Unit quaternion [x, y, z, w], device frame to world frame.
+    """
+    tracking_state: Literal["normal", "limited", "not_available"]
+    frame: Literal["world"]
+    sensor_time_s: float = Field(..., ge=0.0)
+
+
 class StatusFields(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
@@ -281,7 +413,7 @@ class StatusFields(BaseModel):
     thermal_state: Literal["nominal", "fair", "serious", "critical"] | None = Field(
         None, title="CommonThermalState"
     )
-    view: Literal["face", "image", "video", "web"] | None = Field(
+    view: Literal["face", "image", "video", "web", "camera"] | None = Field(
         None, title="CommonView"
     )
     """
@@ -308,6 +440,10 @@ class StatusFields(BaseModel):
     """
     Camera ownership mode. Only `idle` is supported in 0.1.
     """
+    faces: int | None = Field(None, ge=0)
+    """
+    Faces seen now (modes `capture` and `sensing`). Omitted in `idle`.
+    """
     dev_mode: bool | None = None
     clients: int | None = Field(None, ge=0)
     """
@@ -332,7 +468,9 @@ class StatusPayload(StatusFields):
     thermal_state: Literal["nominal", "fair", "serious", "critical"] = Field(
         ..., title="CommonThermalState"
     )
-    view: Literal["face", "image", "video", "web"] = Field(..., title="CommonView")
+    view: Literal["face", "image", "video", "web", "camera"] = Field(
+        ..., title="CommonView"
+    )
     """
     What fills the screen.
     """
@@ -361,9 +499,11 @@ class SubscribeResult(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    topic: Literal["imu", "status", "log"] = Field(..., title="CommonTopic")
+    topic: Literal["imu", "status", "log", "faces", "pose"] = Field(
+        ..., title="CommonTopic"
+    )
     """
-    Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later.
     """
     rate_hz: float = Field(..., ge=0.0)
     """
@@ -662,7 +802,7 @@ class DisplayClear(Command):
 
 class DisplayShow(Command):
     """
-    Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.
+    Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. `camera` shows the front camera with a HUD theme (`hud`) drawn over it: boxes around faces, the locked target, text; it switches to mode `capture` if needed. With `overlay: face-corner` the face keeps running in a corner.
     """
 
     model_config = ConfigDict(
@@ -674,7 +814,9 @@ class DisplayShow(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    content: Literal["face", "image", "video", "web"] = Field(..., title="CommonView")
+    content: Literal["face", "image", "video", "web", "camera"] = Field(
+        ..., title="CommonView"
+    )
     """
     What fills the screen.
     """
@@ -689,6 +831,10 @@ class DisplayShow(Command):
     overlay: Literal["none", "face-corner"] | None = None
     """
     Default `none`.
+    """
+    hud: str | None = Field(None, pattern="^[a-z][a-z0-9-]{0,31}$")
+    """
+    `camera` only: HUD theme from `face.list` (`huds`), or `none` for the bare camera. Default `hunter`.
     """
     loop: bool | None = None
     """
@@ -800,7 +946,7 @@ class FaceBlink(Command):
 
 class FaceList(Command):
     """
-    List installed themes with their expressions.
+    List installed face themes with their expressions, and HUD themes for the camera view.
     """
 
     model_config = ConfigDict(
@@ -821,11 +967,15 @@ class FaceListResult(BaseModel):
     Lower-case identifier used for themes and emotions.
     """
     themes: list[FaceListThemeInfo]
+    huds: list[FaceListHudInfo] | None = None
+    """
+    HUD themes for `display.show {content: camera}` (0.2).
+    """
 
 
 class FaceLookAt(Command):
     """
-    Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The world frame needs pose and arrives in 0.2.
+    Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. `face`: follow a detected face (`faces` topic) until another `look_at`: `face_id`, or the locked (largest) face when omitted; the gaze rests when no face is seen. The world frame needs pose and arrives later.
     """
 
     model_config = ConfigDict(
@@ -837,11 +987,15 @@ class FaceLookAt(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    frame: Literal["screen", "head"]
+    frame: Literal["screen", "head", "face"]
     x: float | None = Field(None, ge=-1.0, le=1.0, title="CommonSignedUnit")
     y: float | None = Field(None, ge=-1.0, le=1.0, title="CommonSignedUnit")
     yaw: float | None = Field(None, ge=-90.0, le=90.0)
     pitch: float | None = Field(None, ge=-90.0, le=90.0)
+    face_id: int | None = Field(None, ge=0)
+    """
+    `face` only: the face to follow; default the locked (largest) face.
+    """
     duration_ms: int | None = Field(None, ge=0, le=600000, title="CommonDurationMs")
     """
     Hold the gaze, then return to idle motion. Omit to hold until the next `look_at`.
@@ -901,6 +1055,20 @@ class FaceSetTheme(Command):
     transition_ms: int | None = Field(None, ge=0, le=600000, title="CommonDurationMs")
     """
     Cross-fade time. Default 300.
+    """
+
+
+class Faces(Envelope, FacesFields):
+    """
+    People in front of the head, up to 15 Hz while mode is `capture` (front camera, several faces, with `box`) or `sensing` (ARKit, one face, no `box`). Angles are in the head frame like `face.look_at`: +bearing to the head's left, +elevation up, in degrees. An empty list means nobody is seen. Every payload field is present unless the subscription named `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["faces"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
 
 
@@ -984,7 +1152,7 @@ class ModeGet(Command):
 
 class ModeSet(Command):
     """
-    Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give `unsupported`.
+    Choose who owns the cameras. `idle`: no camera (default). `capture`: the front camera runs for the camera view and face detection (`faces` with boxes, several faces); pose only as orientation from `imu`. `sensing`: ARKit owns the cameras: world tracking gives `pose` (position and orientation) and one face is tracked with the depth camera (`faces` without boxes); no camera image. Asks for camera permission the first time; `unsupported` where the device cannot.
     """
 
     model_config = ConfigDict(
@@ -997,6 +1165,20 @@ class ModeSet(Command):
     mode: Literal["idle", "sensing", "capture"] = Field(..., title="CommonMode")
     """
     Camera ownership mode. Only `idle` is supported in 0.1.
+    """
+
+
+class Pose(Envelope, PoseFields):
+    """
+    Where the head is, up to 60 Hz while mode is `sensing` (ARKit world tracking). World frame: origin where tracking started, +y up (against gravity), +x and +z horizontal; position in metres. `q` turns the device frame of `imu` into the world frame ([x, y, z, w]). Every payload field is present unless the subscription named `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["pose"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
 
 
@@ -1026,9 +1208,11 @@ class Subscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log"] = Field(..., title="CommonTopic")
+    topic: Literal["imu", "status", "log", "faces", "pose"] = Field(
+        ..., title="CommonTopic"
+    )
     """
-    Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later.
     """
     rate_hz: float | None = Field(None, gt=0.0, le=1000.0)
     """
@@ -1288,9 +1472,11 @@ class Unsubscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log"] = Field(..., title="CommonTopic")
+    topic: Literal["imu", "status", "log", "faces", "pose"] = Field(
+        ..., title="CommonTopic"
+    )
     """
-    Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later.
     """
 
 
@@ -1345,7 +1531,7 @@ class Welcome(Envelope):
     device: WelcomeDevice
     capabilities: list[str]
     """
-    Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values.
+    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them). Clients ignore unknown values.
     """
     themes: list[str]
     dev_mode: bool

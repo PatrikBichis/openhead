@@ -3,61 +3,153 @@
   "title": "Welcome",
   "description": "Session accepted. Carries the client's token (new after pairing, unchanged on reconnect), the device description and what it supports.",
   "type": "object",
-  "allOf": [{ "$ref": "../envelope.json" }],
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    }
+  ],
   "properties": {
-    "type": { "const": "welcome" },
-    "token": { "type": "string", "minLength": 16, "maxLength": 256 },
-    "protocol_version": { "$ref": "../common.json#/$defs/version" },
-    "device": { "$ref": "#/$defs/device" },
+    "type": {
+      "const": "welcome"
+    },
+    "token": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256
+    },
+    "protocol_version": {
+      "$ref": "../common.json#/$defs/version"
+    },
+    "device": {
+      "$ref": "#/$defs/device"
+    },
     "capabilities": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]*$" },
-      "description": "Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values."
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_.-]*$"
+      },
+      "description": "Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them). Clients ignore unknown values."
     },
     "themes": {
       "type": "array",
-      "items": { "$ref": "../common.json#/$defs/name" }
+      "items": {
+        "$ref": "../common.json#/$defs/name"
+      }
     },
-    "dev_mode": { "type": "boolean" }
+    "dev_mode": {
+      "type": "boolean"
+    }
   },
-  "required": ["type", "token", "protocol_version", "device", "capabilities", "themes", "dev_mode"],
+  "required": [
+    "type",
+    "token",
+    "protocol_version",
+    "device",
+    "capabilities",
+    "themes",
+    "dev_mode"
+  ],
   "unevaluatedProperties": false,
   "$defs": {
     "device": {
       "type": "object",
       "properties": {
-        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "platform": { "type": "string", "enum": ["ios", "ipados", "android", "sim"] },
-        "model": { "type": "string", "description": "Hardware identifier, e.g. `iPhone13,2`." },
-        "os_version": { "type": "string" },
-        "app_version": { "type": "string" },
-        "screen": { "$ref": "#/$defs/screen" }
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "ios",
+            "ipados",
+            "android",
+            "sim"
+          ]
+        },
+        "model": {
+          "type": "string",
+          "description": "Hardware identifier, e.g. `iPhone13,2`."
+        },
+        "os_version": {
+          "type": "string"
+        },
+        "app_version": {
+          "type": "string"
+        },
+        "screen": {
+          "$ref": "#/$defs/screen"
+        }
       },
-      "required": ["name", "platform", "model", "os_version", "app_version", "screen"],
+      "required": [
+        "name",
+        "platform",
+        "model",
+        "os_version",
+        "app_version",
+        "screen"
+      ],
       "additionalProperties": false
     },
     "screen": {
       "type": "object",
       "properties": {
-        "width": { "type": "number", "exclusiveMinimum": 0, "description": "Points." },
-        "height": { "type": "number", "exclusiveMinimum": 0, "description": "Points." },
-        "scale": { "type": "number", "exclusiveMinimum": 0 },
-        "safe_area": { "$ref": "#/$defs/insets" }
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Points."
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Points."
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "safe_area": {
+          "$ref": "#/$defs/insets"
+        }
       },
-      "required": ["width", "height", "scale", "safe_area"],
+      "required": [
+        "width",
+        "height",
+        "scale",
+        "safe_area"
+      ],
       "additionalProperties": false
     },
     "insets": {
       "type": "object",
       "description": "Safe-area insets in points.",
       "properties": {
-        "top": { "type": "number", "minimum": 0 },
-        "left": { "type": "number", "minimum": 0 },
-        "bottom": { "type": "number", "minimum": 0 },
-        "right": { "type": "number", "minimum": 0 }
+        "top": {
+          "type": "number",
+          "minimum": 0
+        },
+        "left": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bottom": {
+          "type": "number",
+          "minimum": 0
+        },
+        "right": {
+          "type": "number",
+          "minimum": 0
+        }
       },
-      "required": ["top", "left", "bottom", "right"],
+      "required": [
+        "top",
+        "left",
+        "bottom",
+        "right"
+      ],
       "additionalProperties": false
     }
   }

@@ -60,6 +60,11 @@
         "mode": {
           "$ref": "../common.json#/$defs/mode"
         },
+        "faces": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Faces seen now (modes `capture` and `sensing`). Omitted in `idle`."
+        },
         "dev_mode": {
           "type": "boolean"
         },

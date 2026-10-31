@@ -1,0 +1,20 @@
+{
+  "type": "pose",
+  "ts": 1793462400000,
+  "seq": 43,
+  "position": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "q": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "tracking_state": "limited",
+  "tracking_reason": "initializing",
+  "frame": "world",
+  "sensor_time_s": 81240.0
+}

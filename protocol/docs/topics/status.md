@@ -97,6 +97,7 @@
 | - [theme](#allOf_i1_theme )                 | No      | string           | No         | In ../common.json#/$defs/name          | Lower-case identifier used for themes and emotions.                                   |
 | - [emotion](#allOf_i1_emotion )             | No      | string           | No         | Same as [theme](#allOf_i1_theme )      | Lower-case identifier used for themes and emotions.                                   |
 | - [mode](#allOf_i1_mode )                   | No      | enum (of string) | No         | In ../common.json#/$defs/mode          | Camera ownership mode. Only \`idle\` is supported in 0.1.                             |
+| - [faces](#allOf_i1_faces )                 | No      | integer          | No         | -                                      | Faces seen now (modes \`capture\` and \`sensing\`). Omitted in \`idle\`.              |
 | - [dev_mode](#allOf_i1_dev_mode )           | No      | boolean          | No         | -                                      | -                                                                                     |
 | - [clients](#allOf_i1_clients )             | No      | integer          | No         | -                                      | Connected, authenticated clients.                                                     |
 | - [rtt_ms](#allOf_i1_rtt_ms )               | No      | number           | No         | -                                      | Round-trip time to the receiving client, from WebSocket ping. Omitted until measured. |
@@ -152,6 +153,7 @@ Must be one of:
 * "image"
 * "video"
 * "web"
+* "camera"
 
 ### <a name="allOf_i1_overlay"></a>2.5. Property `Status > allOf > item 1 > overlay`
 
@@ -216,14 +218,27 @@ Must be one of:
 * "sensing"
 * "capture"
 
-### <a name="allOf_i1_dev_mode"></a>2.10. Property `Status > allOf > item 1 > dev_mode`
+### <a name="allOf_i1_faces"></a>2.10. Property `Status > allOf > item 1 > faces`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+
+**Description:** Faces seen now (modes `capture` and `sensing`). Omitted in `idle`.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 0 |
+
+### <a name="allOf_i1_dev_mode"></a>2.11. Property `Status > allOf > item 1 > dev_mode`
 
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
 
-### <a name="allOf_i1_clients"></a>2.11. Property `Status > allOf > item 1 > clients`
+### <a name="allOf_i1_clients"></a>2.12. Property `Status > allOf > item 1 > clients`
 
 |              |           |
 | ------------ | --------- |
@@ -236,7 +251,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-### <a name="allOf_i1_rtt_ms"></a>2.12. Property `Status > allOf > item 1 > rtt_ms`
+### <a name="allOf_i1_rtt_ms"></a>2.13. Property `Status > allOf > item 1 > rtt_ms`
 
 |              |          |
 | ------------ | -------- |
@@ -249,7 +264,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-### <a name="allOf_i1_uptime_s"></a>2.13. Property `Status > allOf > item 1 > uptime_s`
+### <a name="allOf_i1_uptime_s"></a>2.14. Property `Status > allOf > item 1 > uptime_s`
 
 |              |          |
 | ------------ | -------- |

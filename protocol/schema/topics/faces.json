@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Faces",
+  "description": "People in front of the head, up to 15 Hz while mode is `capture` (front camera, several faces, with `box`) or `sensing` (ARKit, one face, no `box`). Angles are in the head frame like `face.look_at`: +bearing to the head's left, +elevation up, in degrees. An empty list means nobody is seen. Every payload field is present unless the subscription named `fields`.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "faces"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "box": {
+      "type": "object",
+      "description": "Where the face is in the camera view as shown on screen, normalised 0-1, origin top-left.",
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "w": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "h": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "additionalProperties": false
+    },
+    "face": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Stable while the face stays in view."
+        },
+        "bearing": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Degrees, + to the head's left."
+        },
+        "elevation": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Degrees, + up."
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Face width as a share of the camera's field of view: bigger is closer."
+        },
+        "distance_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Metres, when the depth camera measures it (`sensing`)."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "box": {
+          "$ref": "#/$defs/box"
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "The face the HUD and `look_at {frame: face}` follow."
+        }
+      },
+      "required": [
+        "id",
+        "bearing",
+        "elevation",
+        "size",
+        "confidence"
+      ],
+      "additionalProperties": false
+    },
+    "fields": {
+      "type": "object",
+      "properties": {
+        "faces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/face"
+          },
+          "maxItems": 16
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "vision",
+            "arkit",
+            "sim"
+          ]
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
+      "required": [
+        "faces",
+        "source",
+        "sensor_time_s"
+      ]
+    }
+  }
+}

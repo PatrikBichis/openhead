@@ -9,7 +9,7 @@
 | **Additional properties** | Any type allowed |
 | **Defined in**            |                  |
 
-**Description:** List installed themes with their expressions.
+**Description:** List installed face themes with their expressions, and HUD themes for the camera view.
 
 | Property         | Pattern | Type    | Deprecated | Definition | Title/Description                                            |
 | ---------------- | ------- | ------- | ---------- | ---------- | ------------------------------------------------------------ |

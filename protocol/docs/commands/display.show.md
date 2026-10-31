@@ -8,17 +8,18 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-**Description:** Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.
+**Description:** Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. `camera` shows the front camera with a HUD theme (`hud`) drawn over it: boxes around faces, the locked target, text; it switches to mode `capture` if needed. With `overlay: face-corner` the face keeps running in a corner.
 
-| Property                       | Pattern | Type             | Deprecated | Definition                           | Title/Description                                                                              |
-| ------------------------------ | ------- | ---------------- | ---------- | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| + [type](#type )               | No      | const            | No         | -                                    | -                                                                                              |
-| + [content](#content )         | No      | enum (of string) | No         | In ../common.json#/$defs/view        | What fills the screen.                                                                         |
-| - [source](#source )           | No      | string           | No         | -                                    | Required for \`image\`, \`video\` and \`web\`. \`video\` and \`web\` accept http(s) URLs only. |
-| - [overlay](#overlay )         | No      | enum (of string) | No         | -                                    | Default \`none\`.                                                                              |
-| - [loop](#loop )               | No      | boolean          | No         | -                                    | \`video\` only: start again at the end. Default false.                                         |
-| - [muted](#muted )             | No      | boolean          | No         | -                                    | \`video\` only: no sound. Default false.                                                       |
-| - [duration_ms](#duration_ms ) | No      | integer          | No         | In ../common.json#/$defs/duration_ms | Return to the face after this time. Omit to hold.                                              |
+| Property                       | Pattern | Type             | Deprecated | Definition                           | Title/Description                                                                                              |
+| ------------------------------ | ------- | ---------------- | ---------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| + [type](#type )               | No      | const            | No         | -                                    | -                                                                                                              |
+| + [content](#content )         | No      | enum (of string) | No         | In ../common.json#/$defs/view        | What fills the screen.                                                                                         |
+| - [source](#source )           | No      | string           | No         | -                                    | Required for \`image\`, \`video\` and \`web\`. \`video\` and \`web\` accept http(s) URLs only.                 |
+| - [overlay](#overlay )         | No      | enum (of string) | No         | -                                    | Default \`none\`.                                                                                              |
+| - [hud](#hud )                 | No      | string           | No         | -                                    | \`camera\` only: HUD theme from \`face.list\` (\`huds\`), or \`none\` for the bare camera. Default \`hunter\`. |
+| - [loop](#loop )               | No      | boolean          | No         | -                                    | \`video\` only: start again at the end. Default false.                                                         |
+| - [muted](#muted )             | No      | boolean          | No         | -                                    | \`video\` only: no sound. Default false.                                                                       |
+| - [duration_ms](#duration_ms ) | No      | integer          | No         | In ../common.json#/$defs/duration_ms | Return to the face after this time. Omit to hold.                                                              |
 
 | All of(Requirement)  |
 | -------------------- |
@@ -174,6 +175,7 @@ Must be one of:
 * "image"
 * "video"
 * "web"
+* "camera"
 
 ## <a name="source"></a>6. Property `DisplayShow > source`
 
@@ -202,7 +204,20 @@ Must be one of:
 * "none"
 * "face-corner"
 
-## <a name="loop"></a>8. Property `DisplayShow > loop`
+## <a name="hud"></a>8. Property `DisplayShow > hud`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** `camera` only: HUD theme from `face.list` (`huds`), or `none` for the bare camera. Default `hunter`.
+
+| Restrictions                      |                                                                                                           |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^[a-z][a-z0-9-]{0,31}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z%5D%5Ba-z0-9-%5D%7B0%2C31%7D%24) |
+
+## <a name="loop"></a>9. Property `DisplayShow > loop`
 
 |              |           |
 | ------------ | --------- |
@@ -211,7 +226,7 @@ Must be one of:
 
 **Description:** `video` only: start again at the end. Default false.
 
-## <a name="muted"></a>9. Property `DisplayShow > muted`
+## <a name="muted"></a>10. Property `DisplayShow > muted`
 
 |              |           |
 | ------------ | --------- |
@@ -220,7 +235,7 @@ Must be one of:
 
 **Description:** `video` only: no sound. Default false.
 
-## <a name="duration_ms"></a>10. Property `DisplayShow > duration_ms`
+## <a name="duration_ms"></a>11. Property `DisplayShow > duration_ms`
 
 |                |                                   |
 | -------------- | --------------------------------- |

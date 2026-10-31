@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "OpenHeadProtocol",
-  "description": "All OpenHead protocol 0.1.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
+  "description": "All OpenHead protocol 0.2.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
   "$defs": {
     "Ack": {
       "title": "Ack",
@@ -108,9 +108,11 @@
       "enum": [
         "imu",
         "status",
-        "log"
+        "log",
+        "faces",
+        "pose"
       ],
-      "description": "Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2."
+      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later."
     },
     "CommonUnit": {
       "title": "CommonUnit",
@@ -131,7 +133,8 @@
         "face",
         "image",
         "video",
-        "web"
+        "web",
+        "camera"
       ],
       "description": "What fills the screen."
     },
@@ -156,7 +159,7 @@
     },
     "DisplayShow": {
       "title": "DisplayShow",
-      "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.",
+      "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. `camera` shows the front camera with a HUD theme (`hud`) drawn over it: boxes around faces, the locked target, text; it switches to mode `capture` if needed. With `overlay: face-corner` the face keeps running in a corner.",
       "type": "object",
       "allOf": [
         {
@@ -220,6 +223,11 @@
             "face-corner"
           ],
           "description": "Default `none`."
+        },
+        "hud": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "description": "`camera` only: HUD theme from `face.list` (`huds`), or `none` for the bare camera. Default `hunter`."
         },
         "loop": {
           "type": "boolean",
@@ -588,7 +596,7 @@
     },
     "FaceList": {
       "title": "FaceList",
-      "description": "List installed themes with their expressions.",
+      "description": "List installed face themes with their expressions, and HUD themes for the camera view.",
       "type": "object",
       "allOf": [
         {
@@ -605,6 +613,26 @@
       ],
       "unevaluatedProperties": false
     },
+    "FaceListHudInfo": {
+      "title": "FaceListHudInfo",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/CommonVersion"
+        }
+      },
+      "required": [
+        "name",
+        "title"
+      ],
+      "additionalProperties": false
+    },
     "FaceListResult": {
       "title": "FaceListResult",
       "type": "object",
@@ -617,6 +645,13 @@
           "items": {
             "$ref": "#/$defs/FaceListThemeInfo"
           }
+        },
+        "huds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FaceListHudInfo"
+          },
+          "description": "HUD themes for `display.show {content: camera}` (0.2)."
         }
       },
       "required": [
@@ -663,7 +698,7 @@
     },
     "FaceLookAt": {
       "title": "FaceLookAt",
-      "description": "Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The world frame needs pose and arrives in 0.2.",
+      "description": "Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. `face`: follow a detected face (`faces` topic) until another `look_at`: `face_id`, or the locked (largest) face when omitted; the gaze rests when no face is seen. The world frame needs pose and arrives later.",
       "type": "object",
       "allOf": [
         {
@@ -682,8 +717,17 @@
               "x",
               "y"
             ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "frame": {
+                "const": "head"
+              }
+            }
           },
-          "else": {
+          "then": {
             "required": [
               "yaw",
               "pitch"
@@ -699,7 +743,8 @@
           "type": "string",
           "enum": [
             "screen",
-            "head"
+            "head",
+            "face"
           ]
         },
         "x": {
@@ -717,6 +762,11 @@
           "type": "number",
           "minimum": -90,
           "maximum": 90
+        },
+        "face_id": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "`face` only: the face to follow; default the locked (largest) face."
         },
         "duration_ms": {
           "$ref": "#/$defs/CommonDurationMs",
@@ -794,6 +844,156 @@
         "name"
       ],
       "unevaluatedProperties": false
+    },
+    "Faces": {
+      "title": "Faces",
+      "description": "People in front of the head, up to 15 Hz while mode is `capture` (front camera, several faces, with `box`) or `sensing` (ARKit, one face, no `box`). Angles are in the head frame like `face.look_at`: +bearing to the head's left, +elevation up, in degrees. An empty list means nobody is seen. Every payload field is present unless the subscription named `fields`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/FacesFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "faces"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "FacesBox": {
+      "title": "FacesBox",
+      "type": "object",
+      "description": "Where the face is in the camera view as shown on screen, normalised 0-1, origin top-left.",
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "w": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "h": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "additionalProperties": false
+    },
+    "FacesFace": {
+      "title": "FacesFace",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Stable while the face stays in view."
+        },
+        "bearing": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Degrees, + to the head's left."
+        },
+        "elevation": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Degrees, + up."
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Face width as a share of the camera's field of view: bigger is closer."
+        },
+        "distance_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Metres, when the depth camera measures it (`sensing`)."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "box": {
+          "$ref": "#/$defs/FacesBox"
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "The face the HUD and `look_at {frame: face}` follow."
+        }
+      },
+      "required": [
+        "id",
+        "bearing",
+        "elevation",
+        "size",
+        "confidence"
+      ],
+      "additionalProperties": false
+    },
+    "FacesFields": {
+      "title": "FacesFields",
+      "type": "object",
+      "properties": {
+        "faces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FacesFace"
+          },
+          "maxItems": 16
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "vision",
+            "arkit",
+            "sim"
+          ]
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "FacesPayload": {
+      "title": "FacesPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/FacesFields"
+        }
+      ],
+      "required": [
+        "faces",
+        "source",
+        "sensor_time_s"
+      ]
     },
     "Hello": {
       "title": "Hello",
@@ -1016,7 +1216,7 @@
     },
     "ModeSet": {
       "title": "ModeSet",
-      "description": "Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give `unsupported`.",
+      "description": "Choose who owns the cameras. `idle`: no camera (default). `capture`: the front camera runs for the camera view and face detection (`faces` with boxes, several faces); pose only as orientation from `imu`. `sensing`: ARKit owns the cameras: world tracking gives `pose` (position and orientation) and one face is tracked with the depth camera (`faces` without boxes); no camera image. Asks for camera permission the first time; `unsupported` where the device cannot.",
       "type": "object",
       "allOf": [
         {
@@ -1102,6 +1302,99 @@
       ],
       "unevaluatedProperties": false
     },
+    "Pose": {
+      "title": "Pose",
+      "description": "Where the head is, up to 60 Hz while mode is `sensing` (ARKit world tracking). World frame: origin where tracking started, +y up (against gravity), +x and +z horizontal; position in metres. `q` turns the device frame of `imu` into the world frame ([x, y, z, w]). Every payload field is present unless the subscription named `fields`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/PoseFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "pose"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "PoseFields": {
+      "title": "PoseFields",
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Metres in the world frame."
+        },
+        "q": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Unit quaternion [x, y, z, w], device frame to world frame."
+        },
+        "tracking_state": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "limited",
+            "not_available"
+          ]
+        },
+        "tracking_reason": {
+          "type": "string",
+          "enum": [
+            "initializing",
+            "excessive_motion",
+            "insufficient_features",
+            "relocalizing"
+          ],
+          "description": "Why tracking is `limited`."
+        },
+        "frame": {
+          "type": "string",
+          "enum": [
+            "world"
+          ]
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "PosePayload": {
+      "title": "PosePayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/PoseFields"
+        }
+      ],
+      "required": [
+        "position",
+        "q",
+        "tracking_state",
+        "frame",
+        "sensor_time_s"
+      ]
+    },
     "Status": {
       "title": "Status",
       "description": "Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.",
@@ -1163,6 +1456,11 @@
         },
         "mode": {
           "$ref": "#/$defs/CommonMode"
+        },
+        "faces": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Faces seen now (modes `capture` and `sensing`). Omitted in `idle`."
         },
         "dev_mode": {
           "type": "boolean"
@@ -1928,7 +2226,7 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9_.-]*$"
           },
-          "description": "Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values."
+          "description": "Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them). Clients ignore unknown values."
         },
         "themes": {
           "type": "array",

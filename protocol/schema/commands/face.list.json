@@ -1,42 +1,101 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FaceList",
-  "description": "List installed themes with their expressions.",
+  "description": "List installed face themes with their expressions, and HUD themes for the camera view.",
   "type": "object",
-  "allOf": [{ "$ref": "../command.json" }],
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
   "properties": {
-    "type": { "const": "face.list" }
+    "type": {
+      "const": "face.list"
+    }
   },
-  "required": ["type"],
+  "required": [
+    "type"
+  ],
   "unevaluatedProperties": false,
   "$defs": {
     "result": {
       "type": "object",
       "properties": {
-        "active": { "$ref": "../common.json#/$defs/name" },
-        "themes": { "type": "array", "items": { "$ref": "#/$defs/theme_info" } }
+        "active": {
+          "$ref": "../common.json#/$defs/name"
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/theme_info"
+          }
+        },
+        "huds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hud_info"
+          },
+          "description": "HUD themes for `display.show {content: camera}` (0.2)."
+        }
       },
-      "required": ["active", "themes"],
+      "required": [
+        "active",
+        "themes"
+      ],
       "additionalProperties": false
     },
     "theme_info": {
       "type": "object",
       "properties": {
-        "name": { "$ref": "../common.json#/$defs/name" },
-        "version": { "$ref": "../common.json#/$defs/version" },
-        "title": { "type": "string" },
+        "name": {
+          "$ref": "../common.json#/$defs/name"
+        },
+        "version": {
+          "$ref": "../common.json#/$defs/version"
+        },
+        "title": {
+          "type": "string"
+        },
         "expressions": {
           "type": "array",
-          "items": { "$ref": "../common.json#/$defs/name" },
+          "items": {
+            "$ref": "../common.json#/$defs/name"
+          },
           "description": "Shared emotion names the theme defines."
         },
         "extras": {
           "type": "array",
-          "items": { "$ref": "../common.json#/$defs/name" },
+          "items": {
+            "$ref": "../common.json#/$defs/name"
+          },
           "description": "Theme-specific expressions, e.g. `cackle`."
         }
       },
-      "required": ["name", "version", "expressions", "extras"],
+      "required": [
+        "name",
+        "version",
+        "expressions",
+        "extras"
+      ],
+      "additionalProperties": false
+    },
+    "hud_info": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "../common.json#/$defs/name"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "$ref": "../common.json#/$defs/version"
+        }
+      },
+      "required": [
+        "name",
+        "title"
+      ],
       "additionalProperties": false
     }
   }
