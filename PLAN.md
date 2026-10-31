@@ -25,6 +25,8 @@ Planen utgår från följande val. De är Patriks att ändra; agenten ska inte a
 | Licens | Apache 2.0 från första commit. |
 | Visning: bild, video, undertexter | Bild, SVG, animerad GIF, video och undertexter ritas i samma webblager som ansiktet (`face/src/screen.ts`), på iOS och i simulatorn. Webbsidor (`web`) visas native på iOS; webblagret blir då genomskinligt så att ansiktet i hörnet och undertexterna ligger ovanpå. En implementation, testbar med golden-bilder (beslutat 2026-10-31). |
 | Video, undertexter och kameravy | Video och undertexter ingår i v0.1, tillsammans med en testsvit för bild, video, SVG, animering och undertexter. Kameravy med HUD-teman (överlagring med ansiktsrutor, låsning, text) och ansiktsföljning blir första steget i v0.2, tillsammans med `faces`-strömmen (beslutat 2026-10-31). |
+| Kamera och ARKit (v0.2) | Två lägen, eftersom ARKit äger kamerorna och aldrig ger frontkamerans bild: `capture` visar frontkameran med HUD, Vision/AVFoundation hittar flera ansikten (rutor, låsning, `faces`), pose från IMU:n (bara orientering); `sensing` kör ARKit världsspårning (bakkameran) för full `pose` och följer ett ansikte med djupsensorn, HUD:en visar data utan kamerabild. Värden byter med `mode.set`; `display.show {content: camera}` byter själv till `capture` (beslutat 2026-10-31). |
+| HUD-teman | Data, som ansiktsteman: `face/huds/<namn>/hud.json` (färgton på kameran, rutor, låsning, textblock, uppstartstext). Tre teman inspirerade av sci-fi-filmer men med egna namn och utan varumärken: `hunter` (röd analys), `camcorder` (grön inspelning), `boot` (terminaltext) (beslutat 2026-10-31). |
 | Webbplats och policyer | GitHub Pages från `main`, mappen `docs/` (ingen byggjobb): presentation (`index.html`), integritetspolicy (`privacy.html`) och support (`support.html`); App Store Connect pekar dit (beslutat 2026-10-31). |
 | CI och testning | All testning sker lokalt (`tools/check.py`, körs som pre-push-hook). GitHub Actions används bara för signerat iOS-bygge och uppladdning till TestFlight, startat manuellt, med så få macOS-minuter som möjligt (beslutat 2026-10-31). |
 
@@ -111,8 +113,8 @@ Topics (prenumeration med `subscribe {topic, rate_hz, fields?}`; enheten klampar
 | `imu` | 100 | `q[4]`, `gyro[3]`, `accel[3]`, `frame` | 0.1 |
 | `status` | 1 | batteri, laddning, termiskt läge, aktiv vy, aktivt tema, aktiv känsla, länkkvalitet, uptime | 0.1 |
 | `log` | händelsestyrt | `level`, `subsystem`, `message`, `seq_ref?` | 0.1 |
-| `pose` | 60 | position, orientering, `tracking_state`, `frame: world` | 0.2 |
-| `faces` | 15 | lista med `id`, `bearing`, `elevation`, `size`, `confidence` | 0.2 |
+| `pose` | 60 | `position[3]` (m), `q[4]`, `tracking_state`, `frame: world` (endast `sensing`) | 0.2 |
+| `faces` | 15 | lista med `id`, `bearing`, `elevation` (grader, huvudram), `size`, `confidence`, `box` (normaliserad i kamerabilden, för HUD) och `source: vision\|arkit` | 0.2 |
 | `gps` | 1 | lat, lon, alt, noggrannhet | 0.2 |
 | `env` | 10 | barometer, magnetometer, närhet | 0.2 |
 
@@ -184,7 +186,7 @@ Moduler:
 - `Settings`: anslutning (port, namn), dev-läge, monteringsoffset, temaval för frånkopplat läge, prenumerationsöversikt.
 - `Screenshot`: `UIGraphicsImageRenderer` över rotvyn plus `WKWebView.takeSnapshot` för webbinnehållet; sammansatt PNG via den inbyggda HTTP-servern.
 
-Lägen (`mode.set`): `sensing` (ARKit äger kamerorna, v0.2), `capture` (fri AVCapture, v0.2), `idle` (inga kameror; standard i v0.1).
+Lägen (`mode.set`): `sensing` (ARKit äger kamerorna: världsspårning för pose, ansiktsspårning med djupsensorn för ett ansikte; ingen frontkamerabild), `capture` (fri AVCapture av frontkameran: kameravy med HUD, flera ansikten, pose bara som orientering från IMU), `idle` (inga kameror; standard).
 
 Universell app:
 
@@ -312,7 +314,13 @@ Varje steg har ett acceptanskriterium som agenten verifierar innan nästa påbö
 9. **IMU och envelope.** `imu`-topic med monteringsoffset; envelope-driven mun; latensmätning skärmdump-till-skärmdump. *Klart när envelope på 25 Hz ger synlig munrörelse utan hack på iPhone 12.*
 10. **Video, undertexter och testsvit.** `display.show` med video, SVG och GIF; `display.subtitle`; visningen flyttad till webblagret på iOS. Testsvit: golden-bilder för bild, SVG, video (fast tidpunkt), animering (fast tid), undertexter och ansiktet i hörnet; scenariot `scenarios/display.yaml` mot sim och enhet. *Klart när testsviten är grön lokalt och `display.yaml` är grön mot sim och enhet.*
 11. **Tagga 0.1.0.** CHANGELOG, release-notes, robotrepot byter från `main` till taggen.
-12. **v0.2-spår** (ordning efter behov): kameravy med HUD-teman och ansiktsföljning (`faces`-strömmen) först, sedan ARKit-pose och lägen, kameror, teman vid körning, Streamable HTTP, TLS.
+12. **v0.2: kamera, HUD, ansikten och pose.**
+    1. *Protokoll 0.2:* `mode.set` med `capture` och `sensing`, `display.show {content: camera, hud}`, topics `faces` och `pose`, `face.look_at {frame: face}` (ögonen följer ett ansikte), HUD-teman i `face.list`. *Klart när exempel validerar och modeller är genererade.*
+    2. *HUD i webblagret:* tre HUD-teman, rutor och låsning från `faces`, syntetisk kamerascen i simulatorn. *Klart när golden-bilder för varje HUD-tema finns och Playwright är grön.*
+    3. *Simulator och klient:* syntetiska ansikten som rör sig, syntetisk pose, `faces`/`pose`-prenumeration, CLI och MCP (`wait_for` på ansikten). *Klart när `scenarios/camera.yaml` är grön mot sim.*
+    4. *iOS:* frontkamera med `AVCaptureMetadataOutput` (ansikten med id), förhandsbild under webblagret, senaste bildruta till skärmdumpar; ARKit-session för `sensing` med pose 60 Hz och ett ansikte; kamerabehörighet. *Klart när `camera.yaml` är grön mot enheten och pose rör sig rimligt när telefonen flyttas.*
+    5. *Dokumentation:* README, webbplatsen (kamera/HUD, ARKit, sensordata med plottar från riktiga inspelningar), integritetspolicyn uppdaterad för kameran före släpp.
+13. **Senare:** GPS, `env`, teman vid körning, Streamable HTTP, TLS.
 
 Steg 3–5 kan drivas parallellt av flera agentinstanser; steg 7 beror på 2–4 och 6.
 
