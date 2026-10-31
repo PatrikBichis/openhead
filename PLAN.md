@@ -23,6 +23,8 @@ Planen utgår från följande val. De är Patriks att ändra; agenten ska inte a
 | Språk | Kod, README och protokolldokumentation på engelska. Den här planen på svenska. |
 | Namn | **OpenHead** (beslutat 2026-10-31). Repo `openhead`, Python-paket och CLI `openhead`, Swift-mål `OpenHead`, mDNS `_openhead._tcp`, MCP-resurser `openhead://`, Bundle ID `<omvänd domän>.openhead`. Kontrollera GitHub, PyPI och npm före första push; vid krock på PyPI publiceras paketet som `openhead-head` med oförändrat importnamn. Kontrollerat 2026-10-31: `openhead` ledigt på PyPI och npm, repot skapat som `PatrikBichis/openhead`. |
 | Licens | Apache 2.0 från första commit. |
+| Visning: bild, video, undertexter | Bild, SVG, animerad GIF, video och undertexter ritas i samma webblager som ansiktet (`face/src/screen.ts`), på iOS och i simulatorn. Webbsidor (`web`) visas native på iOS; webblagret blir då genomskinligt så att ansiktet i hörnet och undertexterna ligger ovanpå. En implementation, testbar med golden-bilder (beslutat 2026-10-31). |
+| Video, undertexter och kameravy | Video och undertexter ingår i v0.1, tillsammans med en testsvit för bild, video, SVG, animering och undertexter. Kameravy med HUD-teman (överlagring med ansiktsrutor, låsning, text) och ansiktsföljning blir första steget i v0.2, tillsammans med `faces`-strömmen (beslutat 2026-10-31). |
 | CI och testning | All testning sker lokalt (`tools/check.py`, körs som pre-push-hook). GitHub Actions används bara för signerat iOS-bygge och uppladdning till TestFlight, startat manuellt, med så få macOS-minuter som möjligt (beslutat 2026-10-31). |
 
 ## Omfattning för v0.1
@@ -31,7 +33,7 @@ v0.1 är klar när en agent på en PC kan parkoppla med en iPhone, byta tema, s�
 
 Ingår:
 
-- Protokoll: hello/pair, subscribe, `face.*`, `display.show` (bild och webb), `system.status`, `system.screenshot`, `log`-topic, `imu`-topic, `status`-topic.
+- Protokoll: hello/pair, subscribe, `face.*`, `display.show` (bild inklusive SVG och GIF, video, webb), `display.subtitle` (undertexter, även strömmande text som ett AI-svar), `system.status`, `system.screenshot`, `log`-topic, `imu`-topic, `status`-topic.
 - Ansiktsmotor med tre teman: `cartoon`, `minimal`, `halloween`. Tio gemensamma uttryck. Envelope-driven mun.
 - iOS-app: ansikte, parkopplingsvy, inställningar, statusrad, IMU-ström, skärmdump, logg. Universell layout.
 - Python: klientbibliotek, simulator med fönster, MCP-server (stdio), exempel-skript, scenariokörare.
@@ -40,7 +42,7 @@ Ingår:
 
 Väntar till v0.2 och senare:
 
-- `pose` (ARKit), `faces` (ansiktsdetektion), kameror, GPS, video och WebRTC.
+- `pose` (ARKit), `faces` (ansiktsdetektion), kameror (kameravy med HUD först), GPS och WebRTC.
 - Teman pushade vid körning, Streamable HTTP för MCP, TLS.
 - `look_at` i världsram (kräver pose).
 
@@ -123,7 +125,8 @@ Kommandon i v0.1:
 | `face.blink` | – | ack |
 | `face.envelope` | `level 0–1` (skickas som ström, ingen ack) | – |
 | `face.list` | – | teman med uttryck och extra uttryck |
-| `display.show` | `type: face\|image\|web`, `source` (url/base64), `overlay: none\|face-corner`, `duration_ms?` | ack |
+| `display.show` | `content: face\|image\|video\|web`, `source` (url/base64; video som url), `overlay: none\|face-corner`, `loop?`, `muted?`, `duration_ms?` | ack |
+| `display.subtitle` | `text`, `mode: replace\|append\|clear`, `position: bottom\|top`, `duration_ms?`, `mouth?` (munnen rör sig med texten när det inte finns ljud) | ack |
 | `display.clear` | – | ack |
 | `system.status` | – | samma som `status`-topic |
 | `system.screenshot` | `scale?` | `{url}` eller base64 PNG |
@@ -306,8 +309,9 @@ Varje steg har ett acceptanskriterium som agenten verifierar innan nästa påbö
 7. **iOS-skal, del 1.** Länk, parkoppling, WKWebView med motorn, statusrad, inställningar, logg, skärmdump. *Klart när första TestFlight-bygget är Ready to Test och Patrik ser cartoon-ansiktet på iPhone, iPad mini och iPad.*
 8. **Enhet i slingan.** Parkoppla skrivbordsenheten med agentens maskin; kör `smoke.yaml` mot enheten; verifiera skärmdump och logg via MCP. *Klart när samma scenario är grönt mot sim och enhet.*
 9. **IMU och envelope.** `imu`-topic med monteringsoffset; envelope-driven mun; latensmätning skärmdump-till-skärmdump. *Klart när envelope på 25 Hz ger synlig munrörelse utan hack på iPhone 12.*
-10. **Tagga 0.1.0.** CHANGELOG, release-notes, robotrepot byter från `main` till taggen.
-11. **v0.2-spår** (ordning efter behov): ARKit-pose och lägen, ansiktsdetektion, kameror, teman vid körning, Streamable HTTP, TLS.
+10. **Video, undertexter och testsvit.** `display.show` med video, SVG och GIF; `display.subtitle`; visningen flyttad till webblagret på iOS. Testsvit: golden-bilder för bild, SVG, video (fast tidpunkt), animering (fast tid), undertexter och ansiktet i hörnet; scenariot `scenarios/display.yaml` mot sim och enhet. *Klart när testsviten är grön lokalt och `display.yaml` är grön mot sim och enhet.*
+11. **Tagga 0.1.0.** CHANGELOG, release-notes, robotrepot byter från `main` till taggen.
+12. **v0.2-spår** (ordning efter behov): kameravy med HUD-teman och ansiktsföljning (`faces`-strömmen) först, sedan ARKit-pose och lägen, kameror, teman vid körning, Streamable HTTP, TLS.
 
 Steg 3–5 kan drivas parallellt av flera agentinstanser; steg 7 beror på 2–4 och 6.
 
