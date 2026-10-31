@@ -156,6 +156,17 @@ test.describe("video", () => {
     expect(events.join("\n")).toContain('"reason":"video ended"');
   });
 
+  test("freezeVideo shows the current frame as a still (for iOS snapshots)", async ({ page }) => {
+    await open(page);
+    await show(page, "video", "/media/clip.mp4", { muted: true });
+    await seek(page, 2.5);
+    await page.evaluate(() => window.openhead.freezeVideo(true));
+    await page.evaluate(() => document.querySelector("video")!.style.visibility = "hidden");
+    await expect(page).toHaveScreenshot("screen-video-2.5s.png", { maxDiffPixelRatio: 0.02 });
+    await page.evaluate(() => window.openhead.freezeVideo(false));
+    expect(await page.locator("canvas.frame").count()).toBe(0);
+  });
+
   test("loops when asked", async ({ page }) => {
     await open(page);
     await show(page, "video", "/media/clip.mp4", { muted: true, loop: true });

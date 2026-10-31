@@ -37,7 +37,11 @@ enum Screenshot {
     static func capture(model: AppModel, scale: Double) async throws -> (Data, Int, Int) {
         guard let window = keyWindow else { throw LinkError("busy", "no window to capture") }
         let webView = model.face.webView
+        // Snapshots leave video black; the page shows the current frame as a still meanwhile.
+        let video = model.display == .video
+        if video { try? await model.face.call("window.openhead.freezeVideo(true); return true") }
         let faceImage = try? await webView.takeSnapshot(configuration: nil)
+        if video { try? await model.face.call("window.openhead.freezeVideo(false); return true") }
         let faceFrame = webView.convert(webView.bounds, to: window)
         let format = UIGraphicsImageRendererFormat()
         format.scale = window.screen.scale * scale

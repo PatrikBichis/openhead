@@ -16,6 +16,8 @@ export interface OpenHead extends FaceEngine {
   clear(): void;
   subtitle(text?: string, opts?: SubtitleOptions): void;
   screen(): ScreenState;
+  /** Before/after a WebKit snapshot: show the current video frame as a still. */
+  freezeVideo(on: boolean): void;
 }
 
 declare global {
@@ -51,6 +53,7 @@ window.openhead = Object.assign(engine, {
   clear: () => screen.clear(),
   subtitle: (text?: string, opts?: SubtitleOptions) => screen.subtitle(text, opts),
   screen: () => screen.state(),
+  freezeVideo: (on: boolean) => screen.freezeVideo(on),
 });
 
 await engine.setTheme(query.get("theme") ?? "cartoon", 0);

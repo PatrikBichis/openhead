@@ -163,6 +163,23 @@ export class Screen {
     }
   }
 
+  /**
+   * WebKit snapshots (iOS screenshots) leave video black: while `on`, the current frame is
+   * drawn into a canvas over the video. Drawing a cross-origin frame is allowed; only reading
+   * the pixels back from script would not be.
+   */
+  freezeVideo(on: boolean) {
+    this.display.querySelector("canvas.frame")?.remove();
+    const video = this.display.querySelector("video");
+    if (!on || !video || !video.videoWidth) return;
+    const frame = document.createElement("canvas");
+    frame.className = "frame";
+    frame.width = video.videoWidth;
+    frame.height = video.videoHeight;
+    frame.getContext("2d")!.drawImage(video, 0, 0);
+    this.display.append(frame);
+  }
+
   state(): ScreenState {
     return { view: this.view, overlay: this.overlay, subtitle: this.text };
   }
@@ -184,6 +201,7 @@ export class Screen {
   }
 
   private stopVideo() {
+    this.display.querySelector("canvas.frame")?.remove();
     const old = this.display.querySelector("video");
     if (old) {
       old.onended = null;
