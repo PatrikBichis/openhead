@@ -1,15 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Expressions",
-  "description": "A theme's `expressions.json`: a face parameter preset per emotion. Only `neutral` is required; missing shared names fall back to it. Parameters a preset leaves out keep the theme's neutral value.",
+  "description": "A theme's `expressions.json`: a face parameter preset per shared emotion name, plus theme-specific ones under `extra`. Only `neutral` is required and must set every parameter; missing shared names fall back to it. Parameters a preset leaves out keep the neutral value.",
   "type": "object",
   "properties": {
-    "expressions": {
-      "type": "object",
-      "propertyNames": { "enum": ["neutral", "happy", "curious", "thinking", "surprised", "sad", "angry", "sleepy", "scared", "mischievous"] },
-      "additionalProperties": { "$ref": "#/$defs/params" },
-      "required": ["neutral"]
-    },
+    "neutral": { "$ref": "#/$defs/params" },
+    "happy": { "$ref": "#/$defs/params" },
+    "curious": { "$ref": "#/$defs/params" },
+    "thinking": { "$ref": "#/$defs/params" },
+    "surprised": { "$ref": "#/$defs/params" },
+    "sad": { "$ref": "#/$defs/params" },
+    "angry": { "$ref": "#/$defs/params" },
+    "sleepy": { "$ref": "#/$defs/params" },
+    "scared": { "$ref": "#/$defs/params" },
+    "mischievous": { "$ref": "#/$defs/params" },
     "extra": {
       "type": "object",
       "propertyNames": { "$ref": "common.json#/$defs/name" },
@@ -17,7 +21,7 @@
       "description": "Theme-specific expressions, e.g. `cackle`."
     }
   },
-  "required": ["expressions"],
+  "required": ["neutral"],
   "additionalProperties": false,
   "$defs": {
     "params": {

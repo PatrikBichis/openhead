@@ -259,9 +259,9 @@ class StatusPayload(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    battery_level: float | None = Field(..., ge=0.0, le=1.0)
+    battery_level: float | None = Field(None, ge=0.0, le=1.0)
     """
-    Null when unknown (e.g. simulator).
+    Omitted when unknown (e.g. simulator).
     """
     charging: bool
     thermal_state: Literal["nominal", "fair", "serious", "critical"] = Field(
@@ -289,9 +289,9 @@ class StatusPayload(BaseModel):
     """
     Connected, authenticated clients.
     """
-    rtt_ms: float | None = Field(..., ge=0.0)
+    rtt_ms: float | None = Field(None, ge=0.0)
     """
-    Round-trip time to the receiving client, from WebSocket ping. Null until measured.
+    Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
     """
     uptime_s: float = Field(..., ge=0.0)
 
@@ -645,27 +645,22 @@ class DisplayShow(Command):
 
 class Expressions(BaseModel):
     """
-    A theme's `expressions.json`: a face parameter preset per emotion. Only `neutral` is required; missing shared names fall back to it. Parameters a preset leaves out keep the theme's neutral value.
+    A theme's `expressions.json`: a face parameter preset per shared emotion name, plus theme-specific ones under `extra`. Only `neutral` is required and must set every parameter; missing shared names fall back to it. Parameters a preset leaves out keep the neutral value.
     """
 
     model_config = ConfigDict(
         extra="ignore",
     )
-    expressions: dict[
-        Literal[
-            "neutral",
-            "happy",
-            "curious",
-            "thinking",
-            "surprised",
-            "sad",
-            "angry",
-            "sleepy",
-            "scared",
-            "mischievous",
-        ],
-        ExpressionsParams,
-    ]
+    neutral: ExpressionsParams
+    happy: ExpressionsParams | None = None
+    curious: ExpressionsParams | None = None
+    thinking: ExpressionsParams | None = None
+    surprised: ExpressionsParams | None = None
+    sad: ExpressionsParams | None = None
+    angry: ExpressionsParams | None = None
+    sleepy: ExpressionsParams | None = None
+    scared: ExpressionsParams | None = None
+    mischievous: ExpressionsParams | None = None
     extra: (
         dict[constr(pattern=r"^[a-z][a-z0-9_-]{0,31}$"), ExpressionsParams] | None
     ) = None

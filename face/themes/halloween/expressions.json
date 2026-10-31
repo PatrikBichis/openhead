@@ -1,22 +1,19 @@
 {
-  "expressions": {
-    "neutral": {
-      "open_l": 0.95, "open_r": 0.95, "tilt_l": 0, "tilt_r": 0, "pupil": 0.5,
-      "gaze_x": 0, "gaze_y": 0, "squint": 0,
-      "open": 0.25, "width": 0.6, "curve": 0.2, "asym": 0, "teeth": 0,
-      "head_tilt": 0, "breath_rate": 0.25, "blink_rate": 0.3, "jitter": 0.1
-    },
-    "happy": { "squint": 0.25, "curve": 0.6, "width": 0.85, "open": 0.55 },
-    "curious": { "open_l": 1, "open_r": 0.7, "tilt_l": -0.3, "tilt_r": 0.15, "pupil": 0.9, "gaze_y": 0.2, "asym": 0.4, "width": 0.5, "open": 0.2, "head_tilt": 0.35 },
-    "thinking": { "open_l": 0.7, "open_r": 0.7, "gaze_x": 0.6, "gaze_y": 0.5, "squint": 0.2, "asym": -0.5, "width": 0.4, "open": 0.12, "head_tilt": -0.25 },
-    "surprised": { "open_l": 1, "open_r": 1, "pupil": 0.1, "open": 0.95, "width": 0.45, "curve": 0 },
-    "sad": { "open_l": 0.6, "open_r": 0.6, "tilt_l": -0.6, "tilt_r": -0.6, "gaze_y": -0.4, "curve": -0.6, "width": 0.5, "open": 0.2, "head_tilt": 0.15 },
-    "angry": { "open_l": 0.6, "open_r": 0.6, "tilt_l": 0.8, "tilt_r": 0.8, "squint": 0.35, "pupil": 0.2, "curve": -0.4, "width": 0.7, "open": 0.4, "jitter": 0.4 },
-    "sleepy": { "open_l": 0.25, "open_r": 0.3, "gaze_y": -0.3, "open": 0.1, "width": 0.45, "head_tilt": 0.25, "blink_rate": 0.1, "breath_rate": 0.1 },
-    "scared": { "open_l": 1, "open_r": 1, "pupil": 0.05, "tilt_l": -0.5, "tilt_r": -0.5, "open": 0.6, "width": 0.55, "curve": -0.4, "jitter": 0.8 },
-    "mischievous": { "open_l": 0.6, "open_r": 0.9, "tilt_l": 0.45, "tilt_r": -0.05, "squint": 0.25, "gaze_x": -0.4, "curve": 0.5, "asym": 0.5, "width": 0.7, "open": 0.3 }
+  "neutral": {
+    "open_l": 0.95, "open_r": 0.95, "tilt_l": 0, "tilt_r": 0, "pupil": 0.5, "gaze_x": 0,
+    "gaze_y": 0, "squint": 0, "open": 0.25, "width": 0.6, "curve": 0.2, "asym": 0,
+    "teeth": 0, "head_tilt": 0, "breath_rate": 0.25, "blink_rate": 0.3, "jitter": 0.1
   },
+  "happy": {"squint": 0.25, "curve": 0.6, "width": 0.85, "open": 0.55},
+  "curious": {"open_l": 1, "open_r": 0.7, "tilt_l": -0.3, "tilt_r": 0.15, "pupil": 0.9, "gaze_y": 0.2, "asym": 0.4, "width": 0.5, "open": 0.2, "head_tilt": 0.35},
+  "thinking": {"open_l": 0.7, "open_r": 0.7, "gaze_x": 0.6, "gaze_y": 0.5, "squint": 0.2, "asym": -0.5, "width": 0.4, "open": 0.12, "head_tilt": -0.25},
+  "surprised": {"open_l": 1, "open_r": 1, "pupil": 0.1, "open": 0.95, "width": 0.45, "curve": 0},
+  "sad": {"open_l": 0.6, "open_r": 0.6, "tilt_l": -0.6, "tilt_r": -0.6, "gaze_y": -0.4, "curve": -0.6, "width": 0.5, "open": 0.2, "head_tilt": 0.15},
+  "angry": {"open_l": 0.6, "open_r": 0.6, "tilt_l": 0.8, "tilt_r": 0.8, "squint": 0.35, "pupil": 0.2, "curve": -0.4, "width": 0.7, "open": 0.4, "jitter": 0.4},
+  "sleepy": {"open_l": 0.25, "open_r": 0.3, "gaze_y": -0.3, "open": 0.1, "width": 0.45, "head_tilt": 0.25, "blink_rate": 0.1, "breath_rate": 0.1},
+  "scared": {"open_l": 1, "open_r": 1, "pupil": 0.05, "tilt_l": -0.5, "tilt_r": -0.5, "open": 0.6, "width": 0.55, "curve": -0.4, "jitter": 0.8},
+  "mischievous": {"open_l": 0.6, "open_r": 0.9, "tilt_l": 0.45, "tilt_r": -0.05, "squint": 0.25, "gaze_x": -0.4, "curve": 0.5, "asym": 0.5, "width": 0.7, "open": 0.3},
   "extra": {
-    "cackle": { "open_l": 0.5, "open_r": 0.5, "squint": 0.5, "tilt_l": 0.3, "tilt_r": 0.3, "curve": 0.9, "width": 1, "open": 1, "head_tilt": 0.3, "jitter": 1 }
+    "cackle": {"open_l": 0.5, "open_r": 0.5, "squint": 0.5, "tilt_l": 0.3, "tilt_r": 0.3, "curve": 0.9, "width": 1, "open": 1, "head_tilt": 0.3, "jitter": 1}
   }
 }

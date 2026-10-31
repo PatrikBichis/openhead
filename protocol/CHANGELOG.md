@@ -13,7 +13,14 @@ All changes to `protocol/schema` are recorded here, in the same commit as the ch
 - `face.envelope` stream message (no `id`, no reply).
 - Theme pack schemas: `theme.schema.json`, `expressions.schema.json`.
 
+### Changed
+
+- `expressions.json`: shared emotion presets sit at the top level next to `extra`, as in the plan (was nested under `expressions`).
+- `status`: `battery_level` and `rtt_ms` are omitted when unknown instead of sent as `null`, so generated Swift models (which omit nil) stay valid.
+
 ### Notes
+
+- Swift models are generated from the bundle with quicktype into `apps/ios/OpenHead/Protocol/`; `error` is `ProtocolError` and `ack` is `ACK` in Swift.
 
 - `display.show` names its view parameter `content` (not `type`) so it does not clash with the envelope's `type`.
 - `protocol_version` is carried in `hello` and `welcome` only, not in every message.

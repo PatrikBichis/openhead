@@ -22,7 +22,7 @@ Schemas: [theme](../protocol/docs/theme.schema.md), [expressions](../protocol/do
 
 Parameters: eyes `open_l`, `open_r`, `tilt_l`, `tilt_r` (positive lowers the inner corner), `pupil`, `gaze_x`, `gaze_y`, `squint`; mouth `open`, `width`, `curve` (+ smile), `asym`, `teeth`; global `head_tilt`, `breath_rate`, `blink_rate`, `jitter`. `_l` is the eye on the left of the screen.
 
-`neutral` must set every parameter; other presets only set what differs. Active emotions blend as weighted differences from `neutral` and tween over 250 ms. `resting_emotion` is shown whenever no other emotion is held.
+Shared presets sit at the top level of `expressions.json`, extras under `extra`. `neutral` must set every parameter; other presets only set what differs. Active emotions blend as weighted differences from `neutral` and tween over 250 ms. `resting_emotion` is shown whenever no other emotion is held.
 
 Shared names every theme should define: `neutral`, `happy`, `curious`, `thinking`, `surprised`, `sad`, `angry`, `sleepy`, `scared`, `mischievous`. Extras go under `extra` and are reported by `face.list`.
 

@@ -16,6 +16,7 @@ export const SHARED_EMOTIONS = [
   "scared",
   "mischievous",
 ] as const;
+export type SharedEmotion = (typeof SHARED_EMOTIONS)[number];
 
 export const DEFAULT_PARAMS: FaceParams = {
   open_l: 0.9,

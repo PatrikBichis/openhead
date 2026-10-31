@@ -2,7 +2,7 @@ import { Blender } from "./blender";
 import { Idle } from "./idle";
 import { applyPreset, clamp, clampParam, DEFAULT_PARAMS, PARAM_NAMES, type FaceParams } from "./params";
 import { Renderer } from "./renderer";
-import { loadTheme, themeInfo, themeNames, type ThemeInfo, type ThemePack } from "./themes";
+import { loadTheme, presetFor, themeInfo, themeNames, type ThemeInfo, type ThemePack } from "./themes";
 
 export type LogLevel = "debug" | "info" | "notice" | "warning" | "error";
 
@@ -74,13 +74,12 @@ export class FaceEngine {
 
   setEmotion(name: string, intensity = 1, blend: "replace" | "add" = "replace", durationMs?: number) {
     const pack = this.requirePack();
-    const { expressions, extra } = pack.expressions;
-    let preset = expressions[name] ?? extra?.[name];
+    let preset = presetFor(pack.expressions, name);
     let used = name;
     if (!preset) {
       this.log("warning", `emotion ${name} not in theme ${pack.theme.name}; using neutral`);
       used = "neutral";
-      preset = expressions.neutral;
+      preset = pack.expressions.neutral;
     }
     this.blender.set(used, preset, clamp(intensity, 0, 1), blend, durationMs);
     this.log("info", `emotion=${used} intensity=${clamp(intensity, 0, 1).toFixed(2)} blend=${blend}`);
@@ -191,13 +190,12 @@ export class FaceEngine {
   private restIfIdle(pack: ThemePack) {
     const resting = pack.theme.resting_emotion;
     if (!resting || resting === "neutral" || this.blender.dominant()) return;
-    const { expressions, extra } = pack.expressions;
-    const preset = expressions[resting] ?? extra?.[resting];
+    const preset = presetFor(pack.expressions, resting);
     if (preset) this.blender.set(resting, preset, 1, "replace");
   }
 
   private composeBase(pack: ThemePack): FaceParams {
-    return this.blender.compose(applyPreset(DEFAULT_PARAMS, pack.expressions.expressions.neutral));
+    return this.blender.compose(applyPreset(DEFAULT_PARAMS, pack.expressions.neutral));
   }
 
   private requirePack(): ThemePack {

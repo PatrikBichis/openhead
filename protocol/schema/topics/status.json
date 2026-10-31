@@ -17,10 +17,10 @@
       "type": "object",
       "properties": {
         "battery_level": {
-          "type": ["number", "null"],
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Null when unknown (e.g. simulator)."
+          "description": "Omitted when unknown (e.g. simulator)."
         },
         "charging": { "type": "boolean" },
         "thermal_state": { "$ref": "../common.json#/$defs/thermal_state" },
@@ -32,15 +32,15 @@
         "dev_mode": { "type": "boolean" },
         "clients": { "type": "integer", "minimum": 0, "description": "Connected, authenticated clients." },
         "rtt_ms": {
-          "type": ["number", "null"],
+          "type": "number",
           "minimum": 0,
-          "description": "Round-trip time to the receiving client, from WebSocket ping. Null until measured."
+          "description": "Round-trip time to the receiving client, from WebSocket ping. Omitted until measured."
         },
         "uptime_s": { "type": "number", "minimum": 0 }
       },
       "required": [
-        "battery_level", "charging", "thermal_state", "view", "overlay", "theme",
-        "emotion", "mode", "dev_mode", "clients", "rtt_ms", "uptime_s"
+        "charging", "thermal_state", "view", "overlay", "theme",
+        "emotion", "mode", "dev_mode", "clients", "uptime_s"
       ]
     }
   }

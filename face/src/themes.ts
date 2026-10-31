@@ -1,5 +1,6 @@
-import type { Expressions } from "./generated/expressions";
+import type { Expressions, Params } from "./generated/expressions";
 import type { Shape, Theme } from "./generated/theme";
+import { SHARED_EMOTIONS, type SharedEmotion } from "./params";
 
 export interface ThemePack {
   theme: Theme;
@@ -29,6 +30,12 @@ const assets = import.meta.glob<string>("../themes/*/assets/*", {
 
 const themeKey = (name: string) => `../themes/${name}/theme.json`;
 
+/** Preset for an emotion: a shared name at the top level, or a theme extra. */
+export function presetFor(expr: Expressions, name: string): Params | undefined {
+  const shared = (SHARED_EMOTIONS as readonly string[]).includes(name);
+  return shared ? expr[name as SharedEmotion] : expr.extra?.[name];
+}
+
 export function themeNames(): string[] {
   return Object.keys(themes)
     .map((key) => key.split("/")[2])
@@ -43,7 +50,7 @@ export function themeInfo(name: string): ThemeInfo {
     name,
     version: theme.version,
     title: theme.title ?? name,
-    expressions: Object.keys(expr.expressions),
+    expressions: Object.keys(expr).filter((k) => k !== "extra"),
     extras: Object.keys(expr.extra ?? {}),
   };
 }
