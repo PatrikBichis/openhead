@@ -290,8 +290,8 @@ openhead mcp --device localhost               # expose it to an agent
 
 Early development. The protocol is unstable until `0.1.0` is tagged; robot integrations should track `main` until then and pin a tag afterwards.
 
-- [ ] 1. Repo skeleton, CI for schema validation
-- [ ] 2. Protocol schemas 0.1 with generated models and docs
+- [x] 1. Repo skeleton, CI for schema validation
+- [x] 2. Protocol schemas 0.1 with generated models and docs
 - [ ] 3. Face engine with three themes and golden-image tests
 - [ ] 4. Simulator, Python client, CLI, smoke scenario
 - [ ] 5. MCP server (stdio)
