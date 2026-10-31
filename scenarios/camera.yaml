@@ -42,7 +42,8 @@ steps:
   # sensing: ARKit pose and one face without a box
   - set_mode: sensing
   - expect_status: { mode: sensing }
-  - expect_pose: { tracking_state: normal, timeout_ms: 8000 }
+  # a phone standing still may stay "limited" (ARKit wants some movement); pose must arrive
+  - expect_pose: { tracking_state: [normal, limited], timeout_ms: 8000 }
   - expect_faces: { min: 1 }
 
   - set_mode: idle

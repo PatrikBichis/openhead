@@ -214,13 +214,15 @@ class _Runner:
                 raise StepFailed(f"no faces message with at least {want} faces") from exc
 
     async def step_expect_pose(self, arg: dict) -> str:
-        """Wait for a `pose` with `tracking_state` (default normal); `{tracking_state: normal}`."""
+        """Wait for a `pose` with `tracking_state` (default normal; a list accepts any of them):
+        `{tracking_state: [normal, limited]}`."""
         arg = arg or {}
         want = arg.get("tracking_state", "normal")
+        wanted = want if isinstance(want, list) else [want]
         async with self.head.subscribe("pose", 30) as sub:
             async def first() -> str:
                 async for msg in sub:
-                    if msg.tracking_state == want:
+                    if msg.tracking_state in wanted:
                         return f"{want} at {[round(v, 2) for v in msg.position]}"
                 raise StepFailed("pose subscription ended")
             try:

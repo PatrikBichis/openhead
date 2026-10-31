@@ -36,6 +36,10 @@ There is no Swift for the iOS SDK on Windows, but the generated models only use 
 
 An iPhone 12 (baseline) or the iPhone 18 Pro stands charged with the latest TestFlight build, app in the foreground, dev mode on, paired with the agent's machine. TestFlight automatic updates bring new builds to it without hands. The agent runs `openhead run scenarios/x.yaml --device head-01.local` or uses the MCP tools: `take_screenshot` to see, `tail_logs` to understand, `get_diagnostics` when something is wrong. This is the only way to verify the iOS shell, ARKit, cameras, performance and thermals without a Mac.
 
+**Keep the app in front.** iOS freezes an app in the background but keeps its port open, so a client then connects and times out "during opening handshake". Using the test phone for anything else (including chatting with the agent over Remote Control) does this; use another device for that, or Guided Access on the phone.
+
+**Known limitation:** screenshots taken while a video plays show black where the video is on iOS (the frame copy for the snapshot comes out black even with CORS); playback itself is fine.
+
 ### Latency and smoothness (step 9)
 
 `tools/latency.py` measures a head: command round trip, how far the mouth lags a 25 Hz envelope (a 0.5 Hz sine, read back from screenshots) and whether it follows smoothly, and frame rate and thermal state. Dev mode on.
