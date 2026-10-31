@@ -11,7 +11,11 @@ struct RootView: View {
             ZStack {
                 Color.black
                 content
-                face(in: geo.size)
+                // geo.size is the safe area; the face fills the whole screen (edge to edge,
+                // under the Dynamic Island), so add the insets back.
+                face(in: CGSize(
+                    width: geo.size.width + geo.safeAreaInsets.leading + geo.safeAreaInsets.trailing,
+                    height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom))
                 StatusStrip()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .padding(.top, 8)
