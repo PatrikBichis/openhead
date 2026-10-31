@@ -369,7 +369,7 @@ Mount the phone in landscape and start the app: the face fills the screen. A lon
 
 ## Status
 
-Protocol `0.1.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.1.0)); robot integrations pin a tag. v0.2 (camera view with HUD, face tracking, ARKit pose) is in progress on `main`.
+Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.2.0)): camera view with HUD, faces and ARKit pose on top of 0.1. Robot integrations pin a tag.
 
 - [x] 1. Repo skeleton, local schema validation
 - [x] 2. Protocol schemas 0.1 with generated models and docs
@@ -382,7 +382,7 @@ Protocol `0.1.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 - [ ] 9. IMU stream and envelope-driven mouth
 - [x] 10. Video, subtitles and a display test suite
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
-- [ ] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (simulator done; iOS in TestFlight testing)
+- [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
 
 ---
 
