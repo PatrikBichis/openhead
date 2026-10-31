@@ -10,19 +10,37 @@
 
 **Description:** A theme's `expressions.json`: a face parameter preset per shared emotion name, plus theme-specific ones under `extra`. Only `neutral` is required and must set every parameter; missing shared names fall back to it. Parameters a preset leaves out keep the neutral value.
 
-| Property                       | Pattern | Type   | Deprecated | Definition                   | Title/Description                                                               |
-| ------------------------------ | ------- | ------ | ---------- | ---------------------------- | ------------------------------------------------------------------------------- |
-| + [neutral](#neutral )         | No      | object | No         | In #/$defs/params            | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [happy](#happy )             | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [curious](#curious )         | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [thinking](#thinking )       | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [surprised](#surprised )     | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [sad](#sad )                 | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [angry](#angry )             | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [sleepy](#sleepy )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [scared](#scared )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [mischievous](#mischievous ) | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
-| - [extra](#extra )             | No      | object | No         | -                            | Theme-specific expressions, e.g. \`cackle\`.                                    |
+| Property                         | Pattern | Type   | Deprecated | Definition                   | Title/Description                                                               |
+| -------------------------------- | ------- | ------ | ---------- | ---------------------------- | ------------------------------------------------------------------------------- |
+| + [neutral](#neutral )           | No      | object | No         | In #/$defs/params            | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [happy](#happy )               | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [curious](#curious )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [thinking](#thinking )         | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [surprised](#surprised )       | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [sad](#sad )                   | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [angry](#angry )               | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [sleepy](#sleepy )             | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [scared](#scared )             | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [mischievous](#mischievous )   | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [confused](#confused )         | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [shocked](#shocked )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [excited](#excited )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [bored](#bored )               | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [skeptical](#skeptical )       | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [worried](#worried )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [disgusted](#disgusted )       | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [embarrassed](#embarrassed )   | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [proud](#proud )               | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [determined](#determined )     | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [relieved](#relieved )         | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [annoyed](#annoyed )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [suspicious](#suspicious )     | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [laughing](#laughing )         | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [disappointed](#disappointed ) | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [focused](#focused )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [nervous](#nervous )           | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [smug](#smug )                 | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
+| - [extra](#extra )               | No      | object | No         | -                            | Theme-specific expressions, e.g. \`cackle\`.                                    |
 
 ## <a name="neutral"></a>1. Property `Expressions > neutral`
 
@@ -306,7 +324,205 @@
 
 **Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
 
-## <a name="extra"></a>11. Property `Expressions > extra`
+## <a name="confused"></a>11. Property `Expressions > confused`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="shocked"></a>12. Property `Expressions > shocked`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="excited"></a>13. Property `Expressions > excited`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="bored"></a>14. Property `Expressions > bored`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="skeptical"></a>15. Property `Expressions > skeptical`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="worried"></a>16. Property `Expressions > worried`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="disgusted"></a>17. Property `Expressions > disgusted`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="embarrassed"></a>18. Property `Expressions > embarrassed`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="proud"></a>19. Property `Expressions > proud`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="determined"></a>20. Property `Expressions > determined`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="relieved"></a>21. Property `Expressions > relieved`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="annoyed"></a>22. Property `Expressions > annoyed`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="suspicious"></a>23. Property `Expressions > suspicious`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="laughing"></a>24. Property `Expressions > laughing`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="disappointed"></a>25. Property `Expressions > disappointed`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="focused"></a>26. Property `Expressions > focused`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="nervous"></a>27. Property `Expressions > nervous`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="smug"></a>28. Property `Expressions > smug`
+
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Not allowed         |
+| **Same definition as**    | [neutral](#neutral) |
+
+**Description:** Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.
+
+## <a name="extra"></a>29. Property `Expressions > extra`
 
 |                           |                                                                                    |
 | ------------------------- | ---------------------------------------------------------------------------------- |
@@ -320,7 +536,7 @@
 | ---------------------------------- | ------- | ------ | ---------- | ---------------------------- | ------------------------------------------------------------------------------- |
 | - [](#extra_additionalProperties ) | No      | object | No         | Same as [neutral](#neutral ) | Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised. |
 
-### <a name="extra_additionalProperties"></a>11.1. Property `Expressions > extra > params`
+### <a name="extra_additionalProperties"></a>29.1. Property `Expressions > extra > params`
 
 |                           |                     |
 | ------------------------- | ------------------- |

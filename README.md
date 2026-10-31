@@ -147,6 +147,7 @@ face/themes/halloween/
 
 Shared emotion names, required in every theme (missing ones fall back to `neutral`):
 `neutral` · `happy` · `curious` · `thinking` · `surprised` · `sad` · `angry` · `sleepy` · `scared` · `mischievous`
+`confused` · `shocked` · `excited` · `bored` · `skeptical` · `worried` · `disgusted` · `embarrassed` · `proud` · `determined` · `relieved` · `annoyed` · `suspicious` · `laughing` · `disappointed` · `focused` · `nervous` · `smug`
 
 Built-in themes in v0.1: `cartoon`, `minimal`, `halloween`. Hosts discover themes and their extra expressions with `face.list`.
 

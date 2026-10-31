@@ -9,7 +9,7 @@
 | **Additional properties** | Any type allowed |
 | **Defined in**            |                  |
 
-**Description:** Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.
+**Description:** Blend towards an emotion, independently of speech (the mouth envelope is added on top). Shared names, defined by every built-in theme: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous, confused, shocked, excited, bored, skeptical, worried, disgusted, embarrassed, proud, determined, relieved, annoyed, suspicious, laughing, disappointed, focused, nervous, smug. Themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.
 
 | Property                       | Pattern | Type             | Deprecated | Definition                           | Title/Description                                                                 |
 | ------------------------------ | ------- | ---------------- | ---------- | ------------------------------------ | --------------------------------------------------------------------------------- |

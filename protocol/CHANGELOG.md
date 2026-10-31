@@ -19,6 +19,7 @@ All changes to `protocol/schema` are recorded here, in the same commit as the ch
 - `status`: `battery_level` and `rtt_ms` are omitted when unknown instead of sent as `null`, so generated Swift models (which omit nil) stay valid.
 - `imu.accel` sign convention spelled out: specific force, +9.81 on +y at rest upright (ROS convention); the example now follows it.
 - Topics `imu`, `status`, `log`: a subscription with `fields` gets only those fields, so topic messages no longer require every payload field; `$defs/payload` (used by `system.status` and `system.logs`) still does.
+- Shared emotion names extended from 10 to 28: `confused`, `shocked`, `excited`, `bored`, `skeptical`, `worried`, `disgusted`, `embarrassed`, `proud`, `determined`, `relieved`, `annoyed`, `suspicious`, `laughing`, `disappointed`, `focused`, `nervous`, `smug` (`expressions.schema.json`, `face.set_emotion`).
 
 ### Notes
 

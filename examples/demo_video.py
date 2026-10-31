@@ -30,7 +30,9 @@ from openhead.tokens import TokenStore
 RATE = 22050  # Hz, mono 16-bit for all speech
 ENVELOPE_HZ = 25
 EMOTIONS = ["neutral", "happy", "curious", "thinking", "surprised", "sad", "angry", "sleepy",
-            "scared", "mischievous"]
+            "scared", "mischievous", "confused", "shocked", "excited", "bored", "skeptical",
+            "worried", "disgusted", "embarrassed", "proud", "determined", "relieved", "annoyed",
+            "suspicious", "laughing", "disappointed", "focused", "nervous", "smug"]
 LINES = {
     "intro": "Hello! I am Open Head. A phone, working as a robot's face.",
     "cartoon": "This is the cartoon theme. Round eyes, a warm palette, and a clear mouth.",
@@ -136,7 +138,7 @@ class Demo:
             await self.pause(0.6)
             await self.say(theme)
             extras = ["cackle"] if theme == "halloween" else []
-            await self.emotions(EMOTIONS + extras)
+            await self.emotions(EMOTIONS + extras, hold=1.0 if theme == "cartoon" else 0.6)
 
         await face.set_theme("cartoon", 500)
         await self.caption("speaking while angry")

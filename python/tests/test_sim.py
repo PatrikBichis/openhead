@@ -123,7 +123,7 @@ async def test_face_list(head):
     result = await head.face.list()
     assert result.active == "cartoon"
     halloween = next(t for t in result.themes if t.name == "halloween")
-    assert halloween.extras == ["cackle"] and len(halloween.expressions) == 10
+    assert halloween.extras == ["cackle"] and len(halloween.expressions) == 28
 
 
 async def test_look_at_and_blink(head, sim):

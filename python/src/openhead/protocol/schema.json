@@ -317,6 +317,60 @@
         "mischievous": {
           "$ref": "#/$defs/ExpressionsParams"
         },
+        "confused": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "shocked": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "excited": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "bored": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "skeptical": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "worried": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "disgusted": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "embarrassed": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "proud": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "determined": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "relieved": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "annoyed": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "suspicious": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "laughing": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "disappointed": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "focused": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "nervous": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "smug": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
         "extra": {
           "type": "object",
           "propertyNames": {
@@ -582,7 +636,7 @@
     },
     "FaceSetEmotion": {
       "title": "FaceSetEmotion",
-      "description": "Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.",
+      "description": "Blend towards an emotion, independently of speech (the mouth envelope is added on top). Shared names, defined by every built-in theme: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous, confused, shocked, excited, bored, skeptical, worried, disgusted, embarrassed, proud, determined, relieved, annoyed, suspicious, laughing, disappointed, focused, nervous, smug. Themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.",
       "type": "object",
       "allOf": [
         {

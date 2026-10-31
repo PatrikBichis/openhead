@@ -160,7 +160,7 @@ face/themes/halloween/
 
 `theme.json` i korthet: `palette` (bg, sclera, iris, pupil, lid, mouth, teeth, accent), `shapes.eye` och `shapes.mouth` som antingen `preset` (`round`, `almond`, `slit`, `pixel`, `line`) eller `path` (SVG-bana i normaliserade koordinater) eller `image` (referens till assets, med ankare och skalning), `render` (stroke, glow, scanlines, pixelate), `idle` (blink_interval, saccade, breath).
 
-Gemensamma uttrycksnamn, obligatoriska i varje tema: `neutral`, `happy`, `curious`, `thinking`, `surprised`, `sad`, `angry`, `sleepy`, `scared`, `mischievous`. Saknas ett faller motorn på `neutral` och loggar en varning. Teman får lägga till egna; `face.list` rapporterar dem.
+Gemensamma uttrycksnamn, obligatoriska i varje tema (utökat från tio till 28 den 2026-10-31): `neutral`, `happy`, `curious`, `thinking`, `surprised`, `sad`, `angry`, `sleepy`, `scared`, `mischievous`, `confused`, `shocked`, `excited`, `bored`, `skeptical`, `worried`, `disgusted`, `embarrassed`, `proud`, `determined`, `relieved`, `annoyed`, `suspicious`, `laughing`, `disappointed`, `focused`, `nervous`, `smug`. Saknas ett faller motorn på `neutral` och loggar en varning. Teman får lägga till egna; `face.list` rapporterar dem.
 
 Layout: motorn renderar i valfri aspekt och placerar ögon och mun relativt en enhet som är kortaste sidan, men som på breda skärmar får växa till 1,35 × höjden, så att ansiktet fyller en liggande telefon (huvudfallet) och ändå har samma proportioner i porträtt, på iPad och i simulatorfönstret. Teman kan ange per-aspekt-justeringar men behöver inte.
 

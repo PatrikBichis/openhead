@@ -26,7 +26,7 @@ Parameters: eyes `open_l`, `open_r`, `tilt_l`, `tilt_r` (positive lowers the inn
 
 Shared presets sit at the top level of `expressions.json`, extras under `extra`. `neutral` must set every parameter; other presets only set what differs. Active emotions blend as weighted differences from `neutral` and tween over 250 ms. `resting_emotion` is shown whenever no other emotion is held.
 
-Shared names every theme should define: `neutral`, `happy`, `curious`, `thinking`, `surprised`, `sad`, `angry`, `sleepy`, `scared`, `mischievous`. Extras go under `extra` and are reported by `face.list`.
+Shared names every theme should define: `neutral`, `happy`, `curious`, `thinking`, `surprised`, `sad`, `angry`, `sleepy`, `scared`, `mischievous`, `confused`, `shocked`, `excited`, `bored`, `skeptical`, `worried`, `disgusted`, `embarrassed`, `proud`, `determined`, `relieved`, `annoyed`, `suspicious`, `laughing`, `disappointed`, `focused`, `nervous`, `smug`. Extras go under `extra` and are reported by `face.list`.
 
 ## Adding a theme
 

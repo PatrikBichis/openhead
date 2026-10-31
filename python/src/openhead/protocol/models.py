@@ -708,6 +708,24 @@ class Expressions(BaseModel):
     sleepy: ExpressionsParams | None = None
     scared: ExpressionsParams | None = None
     mischievous: ExpressionsParams | None = None
+    confused: ExpressionsParams | None = None
+    shocked: ExpressionsParams | None = None
+    excited: ExpressionsParams | None = None
+    bored: ExpressionsParams | None = None
+    skeptical: ExpressionsParams | None = None
+    worried: ExpressionsParams | None = None
+    disgusted: ExpressionsParams | None = None
+    embarrassed: ExpressionsParams | None = None
+    proud: ExpressionsParams | None = None
+    determined: ExpressionsParams | None = None
+    relieved: ExpressionsParams | None = None
+    annoyed: ExpressionsParams | None = None
+    suspicious: ExpressionsParams | None = None
+    laughing: ExpressionsParams | None = None
+    disappointed: ExpressionsParams | None = None
+    focused: ExpressionsParams | None = None
+    nervous: ExpressionsParams | None = None
+    smug: ExpressionsParams | None = None
     extra: (
         dict[constr(pattern=r"^[a-z][a-z0-9_-]{0,31}$"), ExpressionsParams] | None
     ) = None
@@ -782,7 +800,7 @@ class FaceLookAt(Command):
 
 class FaceSetEmotion(Command):
     """
-    Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.
+    Blend towards an emotion, independently of speech (the mouth envelope is added on top). Shared names, defined by every built-in theme: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous, confused, shocked, excited, bored, skeptical, worried, disgusted, embarrassed, proud, determined, relieved, annoyed, suspicious, laughing, disappointed, focused, nervous, smug. Themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.
     """
 
     model_config = ConfigDict(

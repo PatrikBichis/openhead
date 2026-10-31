@@ -1,12 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FaceSetEmotion",
-  "description": "Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.",
+  "description": "Blend towards an emotion, independently of speech (the mouth envelope is added on top). Shared names, defined by every built-in theme: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous, confused, shocked, excited, bored, skeptical, worried, disgusted, embarrassed, proud, determined, relieved, annoyed, suspicious, laughing, disappointed, focused, nervous, smug. Themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.",
   "type": "object",
-  "allOf": [{ "$ref": "../command.json" }],
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
   "properties": {
-    "type": { "const": "face.set_emotion" },
-    "name": { "$ref": "../common.json#/$defs/name" },
+    "type": {
+      "const": "face.set_emotion"
+    },
+    "name": {
+      "$ref": "../common.json#/$defs/name"
+    },
     "intensity": {
       "$ref": "../common.json#/$defs/unit",
       "description": "Weight of the emotion. Default 1."
@@ -17,10 +25,16 @@
     },
     "blend": {
       "type": "string",
-      "enum": ["replace", "add"],
+      "enum": [
+        "replace",
+        "add"
+      ],
       "description": "`replace` fades out other emotions; `add` layers on top. Default `replace`."
     }
   },
-  "required": ["type", "name"],
+  "required": [
+    "type",
+    "name"
+  ],
   "unevaluatedProperties": false
 }

@@ -12,7 +12,7 @@ Protocol version 0.1.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `face.envelope` | [FaceEnvelope](commands/face.envelope.md) | Mouth envelope from the host's speech audio, sent as a stream at 20-30 Hz while speaking. |
 | `face.list` | [FaceList](commands/face.list.md) | List installed themes with their expressions. |
 | `face.look_at` | [FaceLookAt](commands/face.look_at.md) | Point the gaze. |
-| `face.set_emotion` | [FaceSetEmotion](commands/face.set_emotion.md) | Blend towards an emotion. |
+| `face.set_emotion` | [FaceSetEmotion](commands/face.set_emotion.md) | Blend towards an emotion, independently of speech (the mouth envelope is added on top). |
 | `face.set_theme` | [FaceSetTheme](commands/face.set_theme.md) | Switch the face to an installed theme. |
 | `hello` | [Hello](messages/hello.md) | First message on a new connection. |
 | `imu` | [Imu](topics/imu.md) | Inertial sample, up to 100 Hz. |
