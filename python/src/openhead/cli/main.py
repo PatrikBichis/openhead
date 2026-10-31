@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import contextlib
+import json
 import logging
 import os
 import sys
@@ -20,6 +21,8 @@ EPILOG = """examples:
   openhead emotion curious --device localhost
   openhead show clip.mp4 --overlay face-corner      play a local video (served from here)
   openhead subtitle "Hello there" --mouth           text on screen, mouth moving
+  openhead camera hunter --follow                   camera view with HUD; the eyes follow a face
+  openhead watch faces -n 5                         print the faces stream
   openhead screenshot -o face.png --device localhost
   openhead run scenarios/smoke.yaml --device localhost
 
@@ -79,6 +82,19 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--web", action="store_true", help="treat source as a web page URL")
     p.add_argument("--overlay", choices=["none", "face-corner"], default="none")
     p.add_argument("--duration-ms", type=int)
+
+    p = sub.add_parser("camera", parents=[common], help="show the front camera with a HUD (mode capture)")
+    p.add_argument("hud", nargs="?", default="hunter", help="HUD theme (see `themes`), or none")
+    p.add_argument("--overlay", choices=["none", "face-corner"], default="none")
+    p.add_argument("--follow", action="store_true", help="the eyes follow the locked face")
+
+    p = sub.add_parser("mode", parents=[common], help="show or set who owns the cameras")
+    p.add_argument("mode", nargs="?", choices=["idle", "capture", "sensing"])
+
+    p = sub.add_parser("watch", parents=[common], help="print a stream: faces, pose, imu or status")
+    p.add_argument("topic", choices=["faces", "pose", "imu", "status"])
+    p.add_argument("--rate", type=float)
+    p.add_argument("-n", type=int, default=0, help="stop after n messages (0: until Ctrl+C)")
 
     p = sub.add_parser("subtitle", parents=[common], help="show text on top of the screen")
     p.add_argument("text", nargs="*", help="omit with --mode clear")
@@ -212,6 +228,22 @@ async def _command(head: Head, args: argparse.Namespace) -> int:
                     source = Path(source).read_bytes()
                 await head.display.show_image(source, overlay=args.overlay,
                                               duration_ms=args.duration_ms)
+        case "camera":
+            await head.display.show_camera(args.hud, overlay=args.overlay)
+            if args.follow:
+                await head.face.look_at_face()
+        case "mode":
+            if args.mode:
+                await head.mode.set(args.mode)
+            print(await head.mode.get())
+        case "watch":
+            count = 0
+            async with head.subscribe(args.topic, args.rate) as sub:
+                async for msg in sub:
+                    print(json.dumps(msg.model_dump(exclude_none=True, exclude={"type"})), flush=True)
+                    count += 1
+                    if args.n and count >= args.n:
+                        break
         case "subtitle":
             await head.display.subtitle(" ".join(args.text), mode=args.mode, position=args.position,
                                         duration_ms=args.duration_ms, mouth=args.mouth)

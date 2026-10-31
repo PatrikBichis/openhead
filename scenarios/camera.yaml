@@ -1,0 +1,41 @@
+# Camera test (protocol 0.2): camera view with each HUD, faces, gaze following, ARKit pose.
+#   openhead run scenarios/camera.yaml --device localhost        simulator (synthetic people)
+#   openhead run scenarios/camera.yaml                           the phone in .env (stand in front of it)
+# People move, so camera screenshots are saved but not compared (golden: false).
+name: camera
+steps:
+  - set_theme: cartoon
+  - set_emotion: happy
+  - set_mode: idle
+
+  # capture: the front camera with a HUD; several faces with boxes
+  - show_camera: hunter
+  - expect_status: { view: camera, mode: capture }
+  - expect_faces: { min: 1, boxes: true }
+  - wait_ms: 800
+  - screenshot: { file: hud-hunter.png, golden: false }
+  - show_camera: { hud: camcorder, overlay: face-corner }
+  - look_at_face
+  - wait_ms: 800
+  - screenshot: { file: hud-camcorder-face-corner.png, golden: false }
+  - expect_log: { contains: "hud=camcorder" }
+  - show_camera: boot
+  - wait_ms: 2200
+  - screenshot: { file: hud-boot.png, golden: false }
+
+  # back to the face, still following the person with the eyes
+  - show_face
+  - expect_status: { view: face, mode: capture }
+  - wait_ms: 600
+  - screenshot: { file: face-following.png, golden: false }
+  - look_at: { frame: screen, x: 0, y: 0 }
+
+  # sensing: ARKit pose and one face without a box
+  - set_mode: sensing
+  - expect_status: { mode: sensing }
+  - expect_pose: { tracking_state: normal, timeout_ms: 8000 }
+  - expect_faces: { min: 1 }
+
+  - set_mode: idle
+  - expect_status: { mode: idle, view: face }
+  - set_emotion: neutral

@@ -32,8 +32,10 @@ Controls an OpenHead robot head: a phone showing an expressive face.
   happy, curious, confused, shocked, worried, laughing; themes may add extras). Use
   intensity 0-1, duration_ms for a short reaction, blend="add" to layer one on another.
 - Look: look_at with x, y in [-1, 1] on the screen (+x right, +y up).
-- Show things: show_image and show_video (URL or local file), show_web (URL), show_face to
-  go back. subtitle writes text on screen (append to stream an answer; mouth=True to "speak").
+- Show things: show_image and show_video (URL or local file), show_web (URL), show_camera
+  (what the head sees, with a HUD), show_face to go back.
+- Sense people and place: set_mode capture (camera, several faces) or sensing (ARKit pose and
+  one face); get_faces, get_pose; look_at_face makes the eyes follow someone. subtitle writes text on screen (append to stream an answer; mouth=True to "speak").
 - Check your work: take_screenshot shows what is on screen; tail_logs and get_status explain
   what happened; wait_for blocks until a status or log condition holds.
 - Screenshots, logs and diagnostics need dev mode on the device.
@@ -165,6 +167,63 @@ def build_server(link: HeadLink) -> MCPServer:
         head: x = yaw, y = pitch in degrees (+yaw is the head's left)."""
         await call(lambda h: h.face.look_at(x, y, frame=frame, duration_ms=duration_ms))
         return f"looking at {frame} ({x}, {y})"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def look_at_face(face_id: int | None = None, duration_ms: int | None = None) -> str:
+        """Make the eyes follow a person the camera sees (default: the locked, largest face)
+        until the next look_at. Needs mode capture or sensing (show_camera sets capture)."""
+        await call(lambda h: h.face.look_at_face(face_id, duration_ms=duration_ms))
+        return f"following face {face_id if face_id is not None else '(locked)'}"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def show_camera(hud: str = "hunter", overlay: Literal["none", "face-corner"] = "none",
+                          duration_ms: int | None = None) -> str:
+        """Show what the head's front camera sees, with a HUD theme drawn over it (boxes around
+        faces, the locked target, text). HUDs: hunter, camcorder, boot, or none. Switches the
+        head to mode capture."""
+        await call(lambda h: h.display.show_camera(hud, overlay=overlay, duration_ms=duration_ms))
+        return f"camera view with HUD {hud}"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def set_mode(mode: Literal["idle", "capture", "sensing"]) -> str:
+        """Who owns the cameras. capture: front camera, several faces with boxes. sensing: ARKit
+        pose (position and orientation in the world) and one face. idle: no camera."""
+        await call(lambda h: h.mode.set(mode))
+        return f"mode {mode}"
+
+    @mcp.tool(annotations=READ_ONLY)
+    async def get_faces(timeout_s: float = 3.0) -> dict:
+        """The people the head sees now: id, bearing and elevation in degrees (+ is the head's
+        left / up), size (bigger is closer), box on screen. Needs mode capture or sensing."""
+        head = await link.get()
+
+        async def first() -> dict:
+            async with head.subscribe("faces", 15) as sub:
+                async for msg in sub:
+                    return msg.model_dump(exclude_none=True, exclude={"type", "seq"})
+            raise ToolError("subscription ended")
+
+        try:
+            return await asyncio.wait_for(first(), timeout_s)
+        except TimeoutError as exc:
+            raise ToolError("no faces data: is the mode capture or sensing? (set_mode)") from exc
+
+    @mcp.tool(annotations=READ_ONLY)
+    async def get_pose(timeout_s: float = 3.0) -> dict:
+        """Where the head is (ARKit): position in metres and orientation in the world frame,
+        tracking state. Needs mode sensing."""
+        head = await link.get()
+
+        async def first() -> dict:
+            async with head.subscribe("pose", 30) as sub:
+                async for msg in sub:
+                    return msg.model_dump(exclude_none=True, exclude={"type", "seq"})
+            raise ToolError("subscription ended")
+
+        try:
+            return await asyncio.wait_for(first(), timeout_s)
+        except TimeoutError as exc:
+            raise ToolError("no pose: is the mode sensing? (set_mode)") from exc
 
     @mcp.tool(annotations=CHANGES_FACE)
     async def show_image(url_or_path: str,

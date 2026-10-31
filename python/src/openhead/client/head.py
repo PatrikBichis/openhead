@@ -327,6 +327,11 @@ class _Face:
         coords = {"x": x, "y": y} if frame == "screen" else {"yaw": x, "pitch": y}
         await self._h.command("face.look_at", frame=frame, duration_ms=duration_ms, **coords)
 
+    async def look_at_face(self, face_id: int | None = None, *, duration_ms: int | None = None) -> None:
+        """The eyes follow a detected face (default: the locked, largest one) until the next
+        `look_at`. Needs mode `capture` or `sensing`."""
+        await self._h.command("face.look_at", frame="face", face_id=face_id, duration_ms=duration_ms)
+
     async def blink(self) -> None:
         await self._h.command("face.blink")
 
@@ -379,6 +384,13 @@ class _Display:
         await self._h.command("display.subtitle", text=text if mode != "clear" else None,
                               mode=mode, position=position, duration_ms=duration_ms,
                               mouth=mouth or None)
+
+    async def show_camera(self, hud: str = "hunter", *, overlay: str = "none",
+                          duration_ms: int | None = None) -> None:
+        """The front camera with a HUD theme over it (`none` for the bare camera); switches the
+        head to mode `capture`."""
+        await self._h.command("display.show", content="camera", hud=hud, overlay=overlay,
+                              duration_ms=duration_ms)
 
     async def show_web(self, url: str, *, overlay: str = "none",
                        duration_ms: int | None = None) -> None:

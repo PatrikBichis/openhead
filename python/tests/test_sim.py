@@ -204,10 +204,41 @@ async def test_settings_and_diagnostics(head):
 
 async def test_modes(head):
     assert await head.mode.get() == "idle"
-    await head.mode.set("idle")
+    assert (await head.system.status()).faces is None  # no camera, no count
+    for mode in ("capture", "sensing", "idle"):
+        await head.mode.set(mode)
+        assert await head.mode.get() == mode
+
+
+async def test_camera_view_switches_to_capture_and_streams_faces(head):
+    await head.display.show_camera("camcorder", overlay="face-corner")
+    status = await head.system.status()
+    assert (status.view, status.overlay, status.mode) == ("camera", "face-corner", "capture")
+    async with head.subscribe("faces", 15) as sub:
+        msg = await anext(sub)
+        while not msg.faces:
+            msg = await anext(sub)
+    assert msg.source == "sim" and all(f.box for f in msg.faces)
+    assert (await head.face.list()).huds[0].name == "boot"
     with pytest.raises(HeadError) as err:
-        await head.mode.set("sensing")
-    assert err.value.code == "unsupported"
+        await head.display.show_camera("nope")
+    assert err.value.code == "invalid_params"
+    await head.mode.set("idle")
+    assert (await head.system.status()).view == "face"  # idle closes the camera view
+
+
+async def test_sensing_streams_pose_and_one_face_without_box(head):
+    with pytest.raises(HeadError):  # following a face needs a camera mode
+        await head.face.look_at_face()
+    await head.mode.set("sensing")
+    async with head.subscribe("pose", 30) as sub:
+        pose = await anext(sub)
+    assert pose.frame == "world" and len(pose.position) == 3
+    async with head.subscribe("faces", 15) as sub:
+        faces = await anext(sub)
+    assert len(faces.faces) == 1 and faces.faces[0].box is None and faces.faces[0].distance_m
+    await head.face.look_at_face()
+    await head.mode.set("idle")
 
 
 # --- streams -----------------------------------------------------------------

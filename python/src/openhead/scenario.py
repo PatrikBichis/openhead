@@ -11,8 +11,9 @@ steps:
   - expect_status: { theme: halloween, emotion: scared }
 ```
 
-Steps: set_theme, set_emotion, look_at, blink, show_image, show_video, show_web, show_face,
-clear_display, subtitle, envelope, wait_ms, screenshot, expect_log, expect_status.
+Steps: set_theme, set_emotion, look_at, look_at_face, blink, show_image, show_video, show_web,
+show_camera, show_face, clear_display, subtitle, set_mode, envelope, wait_ms, screenshot,
+expect_log, expect_status, expect_faces, expect_pose.
 Local files (`assets/clip.mp4`) are relative to the scenario: images go inline, videos are
 served to the head over HTTP from this machine.
 """
@@ -176,6 +177,51 @@ class _Runner:
         frame = arg.get("frame", "screen")
         x, y = (arg["x"], arg["y"]) if frame == "screen" else (arg["yaw"], arg["pitch"])
         await self.head.face.look_at(x, y, frame=frame, duration_ms=arg.get("duration_ms"))
+
+    async def step_look_at_face(self, arg: Any) -> None:
+        """`look_at_face` (the locked face) or `{face_id: 2, duration_ms: 3000}`"""
+        a = self._args(arg, "face_id")
+        await self.head.face.look_at_face(a.get("face_id"), duration_ms=a.get("duration_ms"))
+
+    async def step_set_mode(self, arg: str) -> None:
+        await self.head.mode.set(arg)
+
+    async def step_show_camera(self, arg: Any) -> None:
+        """`hunter` or `{hud: camcorder, overlay: face-corner}`"""
+        a = self._args(arg or "hunter", "hud")
+        await self.head.display.show_camera(a.get("hud", "hunter"), overlay=a.get("overlay", "none"),
+                                            duration_ms=a.get("duration_ms"))
+
+    async def step_expect_faces(self, arg: dict) -> str:
+        """Wait for a `faces` message with at least `min` (default 1) faces, optionally with
+        boxes; `{min: 1, boxes: true, timeout_ms: 3000}`."""
+        arg = arg or {}
+        want = arg.get("min", 1)
+        async with self.head.subscribe("faces", 15) as sub:
+            async def first() -> str:
+                async for msg in sub:
+                    if len(msg.faces) >= want and (not arg.get("boxes") or all(f.box for f in msg.faces)):
+                        return f"{len(msg.faces)} faces from {msg.source}"
+                raise StepFailed("faces subscription ended")
+            try:
+                return await asyncio.wait_for(first(), arg.get("timeout_ms", 3000) / 1000)
+            except TimeoutError as exc:
+                raise StepFailed(f"no faces message with at least {want} faces") from exc
+
+    async def step_expect_pose(self, arg: dict) -> str:
+        """Wait for a `pose` with `tracking_state` (default normal); `{tracking_state: normal}`."""
+        arg = arg or {}
+        want = arg.get("tracking_state", "normal")
+        async with self.head.subscribe("pose", 30) as sub:
+            async def first() -> str:
+                async for msg in sub:
+                    if msg.tracking_state == want:
+                        return f"{want} at {[round(v, 2) for v in msg.position]}"
+                raise StepFailed("pose subscription ended")
+            try:
+                return await asyncio.wait_for(first(), arg.get("timeout_ms", 5000) / 1000)
+            except TimeoutError as exc:
+                raise StepFailed(f"no pose with tracking_state {want}") from exc
 
     async def step_blink(self, _: Any) -> None:
         await self.head.face.blink()

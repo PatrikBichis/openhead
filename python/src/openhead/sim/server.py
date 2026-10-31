@@ -29,15 +29,17 @@ from ..protocol import (
     now_ms,
     validate,
 )
-from . import imu
+from . import imu, scene
 from .face import BrowserFace, FaceError
 from .shots import ShotServer
 
 log = logging.getLogger("openhead.sim")
 
 DEVICE_MESSAGES = {"ack", "error", "welcome", "pair_required", "imu", "status", "log"}
-CAPABILITIES = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu", "status", "log", "screenshot"]
-TOPIC_RATES = {"imu": (50.0, 100.0), "status": (1.0, 1.0), "log": (0.0, 0.0)}  # default, max
+CAPABILITIES = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
+                "status", "log", "screenshot", "camera", "faces", "pose"]
+TOPIC_RATES = {"imu": (50.0, 100.0), "status": (1.0, 1.0), "log": (0.0, 0.0),  # default, max
+               "faces": (15.0, 15.0), "pose": (30.0, 60.0)}
 LOG_LEVELS = ["debug", "info", "notice", "warning", "error", "fault"]
 PAIR_MAX_FAILURES = 5
 PAIR_LOCK_S = 300
@@ -112,6 +114,9 @@ class SimServer:
         self.logs: deque[dict] = deque(maxlen=2000)
         self.violations: list[str] = []  # outgoing schema violations (validate_outgoing)
         self.mode = "idle"
+        self.mode_started = 0.0
+        self.faces: list[dict] = []  # latest synthetic faces while a camera mode runs
+        self._scene: asyncio.Task | None = None
         self.settings: dict[str, Any] = {
             "name": c.name, "port": c.port, "mount_offset": [0, 0, 0, 1], "offline_theme": c.theme,
         }
@@ -140,6 +145,8 @@ class SimServer:
                                  f"(screenshots on {self.port + 1})")
 
     async def stop(self) -> None:
+        if self._scene:
+            self._scene.cancel()
         for task in self._timers.values():
             task.cancel()
         for session in list(self.sessions):
@@ -383,7 +390,14 @@ class SimServer:
                 case "face.set_emotion":
                     await face.set_emotion(d["name"], d.get("intensity", 1.0),
                                            d.get("blend", "replace"), d.get("duration_ms"))
+                case "face.look_at" if d["frame"] == "face":
+                    if self.mode == "idle":
+                        raise SimError("invalid_params", "look_at frame face needs mode capture or sensing")
+                    await face.follow_face(d.get("face_id"))
+                    if "duration_ms" in d:
+                        self._timer("gaze", d["duration_ms"], lambda: face.follow_face(None, stop=True))
                 case "face.look_at":
+                    await face.follow_face(None, stop=True)
                     if d["frame"] == "screen":
                         x, y = d["x"], d["y"]
                     else:  # head frame: +yaw is the head's left, i.e. the viewer's right
@@ -396,7 +410,7 @@ class SimServer:
                     await face.blink()
                 case "face.list":
                     state = await face.state()
-                    return {"active": state["theme"], "themes": [
+                    return {"active": state["theme"], "huds": await face.list_huds(), "themes": [
                         {k: th[k] for k in ("name", "version", "title", "expressions", "extras")}
                         for th in await face.list_themes()
                     ]}
@@ -432,8 +446,7 @@ class SimServer:
                         self._set_setting(d["key"], d["value"])
                     return {"settings": self.settings}
                 case "mode.set":
-                    if d["mode"] != "idle":
-                        raise SimError("unsupported", f"mode {d['mode']} arrives in 0.2")
+                    await self._set_mode(d["mode"])
                 case "mode.get":
                     return {"mode": self.mode}
                 case _:
@@ -454,11 +467,55 @@ class SimServer:
             task = asyncio.create_task(self._stream(s, "imu", rate, fields, self._imu))
         elif topic == "status":
             task = asyncio.create_task(self._stream(s, "status", rate, fields, self._status))
+        elif topic == "faces":
+            task = asyncio.create_task(self._stream(s, "faces", rate, fields, self._faces))
+        elif topic == "pose":
+            task = asyncio.create_task(self._stream(s, "pose", rate, fields, self._pose))
         s.subs[topic] = (task, fields)
         return {"topic": topic, "rate_hz": rate}
 
     async def _imu(self, s: Session) -> dict:
         return imu.sample(time.monotonic() - self.started)
+
+    async def _faces(self, s: Session) -> dict | None:
+        if self.mode == "idle":
+            return None
+        return {"faces": self.faces, "source": "sim",
+                "sensor_time_s": round(time.monotonic() - self.started, 4)}
+
+    async def _pose(self, s: Session) -> dict | None:
+        return scene.pose_at(time.monotonic() - self.mode_started) if self.mode == "sensing" else None
+
+    async def _set_mode(self, mode: str) -> None:
+        """capture: synthetic people with boxes; sensing: one face without a box, plus pose."""
+        if mode == self.mode:
+            return
+        if self._scene:
+            self._scene.cancel()
+            self._scene = None
+        old, self.mode = self.mode, mode
+        self.mode_started = time.monotonic()
+        self.faces = []
+        if mode == "idle":
+            if (await self.face.state())["view"] == "camera":
+                await self._clear_display()
+            await self.face.follow_face(None, stop=True)
+            await self.face.set_faces([])
+        else:
+            self._scene = asyncio.create_task(self._run_scene(boxes=mode == "capture"))
+        self.log("info", "sensors", f"mode {old} -> {mode}")
+
+    async def _run_scene(self, boxes: bool) -> None:
+        start = time.monotonic()
+        try:
+            while True:
+                self.faces = scene.faces_at(time.monotonic() - start, boxes=boxes)
+                await self.face.set_faces(self.faces)
+                await asyncio.sleep(1 / 15)
+        except asyncio.CancelledError:
+            pass
+        except FaceError as exc:  # the page went away (shutdown)
+            log.debug("scene stopped: %s", exc)
 
     async def _stream(self, s: Session, topic: str, rate: float, fields: list[str] | None,
                       payload: Any) -> None:
@@ -467,6 +524,10 @@ class SimServer:
         try:
             while True:
                 data = await payload(s)
+                if data is None:  # nothing to report in this mode
+                    next_at += period
+                    await asyncio.sleep(max(0.0, next_at - time.monotonic()))
+                    continue
                 if fields:
                     data = {k: v for k, v in data.items() if k in fields}
                 await s.send(topic, **data)
@@ -486,6 +547,8 @@ class SimServer:
         }
         if state["subtitle"]:
             status["subtitle"] = state["subtitle"][-4000:]
+        if self.mode != "idle":
+            status["faces"] = len(self.faces)
         if s.ws.latency:
             status["rtt_ms"] = round(s.ws.latency * 1000, 1)
         return status
@@ -493,6 +556,13 @@ class SimServer:
     async def _display(self, d: dict) -> None:
         if d["content"] == "face":
             await self._clear_display()
+            return
+        if d["content"] == "camera":
+            if self.mode != "capture":
+                await self._set_mode("capture")
+            await self.face.show_camera(d.get("hud", "hunter"), d.get("overlay", "none"))
+            if "duration_ms" in d:
+                self._timer("display", d["duration_ms"], self._clear_display)
             return
         if d["content"] in ("web", "video") and not d["source"].startswith(("http://", "https://")):
             raise SimError("invalid_params", f"{d['content']} content needs an http(s) URL")

@@ -176,6 +176,23 @@ class BrowserFace:
     async def clear(self) -> None:
         await self._call("() => window.openhead.clear()")
 
+    async def show_camera(self, hud: str = "hunter", overlay: str = "none") -> None:
+        """Camera view with a HUD over the page's synthetic scene (people at the faces)."""
+        await self._call("([h, o]) => window.openhead.show('camera', '', {hud: h, overlay: o})", [hud, overlay])
+
+    async def set_faces(self, faces: list[dict]) -> None:
+        await self._call("(f) => window.openhead.setFaces(f)", faces)
+
+    async def follow_face(self, face_id: int | None, *, stop: bool = False) -> None:
+        """Eyes follow `face_id` (None: the locked face); `stop` ends following."""
+        if stop:
+            await self._call("() => window.openhead.followFace(undefined)")
+        else:
+            await self._call("(i) => window.openhead.followFace(i)", face_id)
+
+    async def list_huds(self) -> list[dict]:
+        return await self._call("() => window.openhead.listHuds()")
+
     async def subtitle(self, text: str = "", *, mode: str = "replace", position: str | None = None,
                        duration_ms: int | None = None, mouth: bool = False) -> None:
         opts = {"mode": mode, "mouth": mouth}
