@@ -281,11 +281,17 @@ class StatusFields(BaseModel):
     thermal_state: Literal["nominal", "fair", "serious", "critical"] | None = Field(
         None, title="CommonThermalState"
     )
-    view: Literal["face", "image", "web"] | None = Field(None, title="CommonView")
+    view: Literal["face", "image", "video", "web"] | None = Field(
+        None, title="CommonView"
+    )
     """
     What fills the screen.
     """
     overlay: Literal["none", "face-corner"] | None = None
+    subtitle: str | None = Field(None, max_length=4000)
+    """
+    Subtitle text on screen. Omitted when none.
+    """
     theme: str | None = Field(
         None, pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName"
     )
@@ -326,7 +332,7 @@ class StatusPayload(StatusFields):
     thermal_state: Literal["nominal", "fair", "serious", "critical"] = Field(
         ..., title="CommonThermalState"
     )
-    view: Literal["face", "image", "web"] = Field(..., title="CommonView")
+    view: Literal["face", "image", "video", "web"] = Field(..., title="CommonView")
     """
     What fills the screen.
     """
@@ -656,7 +662,7 @@ class DisplayClear(Command):
 
 class DisplayShow(Command):
     """
-    Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. With `overlay: face-corner` the face keeps running in a corner.
+    Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.
     """
 
     model_config = ConfigDict(
@@ -668,25 +674,69 @@ class DisplayShow(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    content: Literal["face", "image", "web"] = Field(..., title="CommonView")
+    content: Literal["face", "image", "video", "web"] = Field(..., title="CommonView")
     """
     What fills the screen.
     """
     source: str | None = Field(
         None,
         max_length=1400000,
-        pattern="^(https?://|data:image/(png|jpeg|gif|webp);base64,)",
+        pattern="^(https?://|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,)",
     )
     """
-    Required for `image` and `web`. `web` accepts http(s) URLs only.
+    Required for `image`, `video` and `web`. `video` and `web` accept http(s) URLs only.
     """
     overlay: Literal["none", "face-corner"] | None = None
     """
     Default `none`.
     """
+    loop: bool | None = None
+    """
+    `video` only: start again at the end. Default false.
+    """
+    muted: bool | None = None
+    """
+    `video` only: no sound. Default false.
+    """
     duration_ms: int | None = Field(None, ge=0, le=600000, title="CommonDurationMs")
     """
     Return to the face after this time. Omit to hold.
+    """
+
+
+class DisplaySubtitle(Command):
+    """
+    Text on top of whatever is shown (face, image, video, web page): for a robot without a speaker, or to show an AI answer as it streams in. `replace` shows `text` alone, `append` adds it to what is shown (send tokens as they arrive), `clear` removes it. The newest three lines stay visible. With `mouth` the face's mouth moves with the text at reading pace, as if speaking.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["display.subtitle"] = Field(
+        ..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$"
+    )
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+    text: str | None = Field(None, max_length=4000)
+    """
+    Plain text; a line break starts a new line. Required unless `mode` is `clear`.
+    """
+    mode: Literal["replace", "append", "clear"] | None = None
+    """
+    Default `replace`.
+    """
+    position: Literal["bottom", "top"] | None = None
+    """
+    Default `bottom`.
+    """
+    duration_ms: int | None = Field(None, ge=0, le=600000, title="CommonDurationMs")
+    """
+    Clear this long after the last update. Omit to hold until replaced or cleared.
+    """
+    mouth: bool | None = None
+    """
+    Move the mouth with the text at reading pace. Default false; ignored while `face.envelope` is streaming.
     """
 
 
@@ -1295,7 +1345,7 @@ class Welcome(Envelope):
     device: WelcomeDevice
     capabilities: list[str]
     """
-    Feature flags. Known in 0.1: `face`, `display.image`, `display.web`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values.
+    Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values.
     """
     themes: list[str]
     dev_mode: bool

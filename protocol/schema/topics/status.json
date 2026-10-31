@@ -46,6 +46,11 @@
             "face-corner"
           ]
         },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Subtitle text on screen. Omitted when none."
+        },
         "theme": {
           "$ref": "../common.json#/$defs/name"
         },

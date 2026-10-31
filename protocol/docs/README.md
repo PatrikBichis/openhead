@@ -7,6 +7,7 @@ Protocol version 0.1.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `ack` | [Ack](messages/ack.md) | Successful reply to a command. |
 | `display.clear` | [DisplayClear](commands/display.clear.md) | Remove any image or web page and show the face full screen. |
 | `display.show` | [DisplayShow](commands/display.show.md) | Change what fills the screen. |
+| `display.subtitle` | [DisplaySubtitle](commands/display.subtitle.md) | Text on top of whatever is shown (face, image, video, web page): for a robot without a speaker, or to show an AI answer as it streams in. |
 | `error` | [Error](messages/error.md) | Failed command (with `id`) or failed handshake (without). |
 | `face.blink` | [FaceBlink](commands/face.blink.md) | Blink once now, in the theme's blink style. |
 | `face.envelope` | [FaceEnvelope](commands/face.envelope.md) | Mouth envelope from the host's speech audio, sent as a stream at 20-30 Hz while speaking. |

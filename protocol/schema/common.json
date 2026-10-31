@@ -30,26 +30,51 @@
     },
     "thermal_state": {
       "type": "string",
-      "enum": ["nominal", "fair", "serious", "critical"]
+      "enum": [
+        "nominal",
+        "fair",
+        "serious",
+        "critical"
+      ]
     },
     "mode": {
       "type": "string",
-      "enum": ["idle", "sensing", "capture"],
+      "enum": [
+        "idle",
+        "sensing",
+        "capture"
+      ],
       "description": "Camera ownership mode. Only `idle` is supported in 0.1."
     },
     "view": {
       "type": "string",
-      "enum": ["face", "image", "web"],
+      "enum": [
+        "face",
+        "image",
+        "video",
+        "web"
+      ],
       "description": "What fills the screen."
     },
     "topic": {
       "type": "string",
-      "enum": ["imu", "status", "log"],
+      "enum": [
+        "imu",
+        "status",
+        "log"
+      ],
       "description": "Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2."
     },
     "log_level": {
       "type": "string",
-      "enum": ["debug", "info", "notice", "warning", "error", "fault"]
+      "enum": [
+        "debug",
+        "info",
+        "notice",
+        "warning",
+        "error",
+        "fault"
+      ]
     }
   }
 }

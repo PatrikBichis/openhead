@@ -130,6 +130,7 @@
       "enum": [
         "face",
         "image",
+        "video",
         "web"
       ],
       "description": "What fills the screen."
@@ -155,7 +156,7 @@
     },
     "DisplayShow": {
       "title": "DisplayShow",
-      "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. With `overlay: face-corner` the face keeps running in a corner.",
+      "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.",
       "type": "object",
       "allOf": [
         {
@@ -167,6 +168,7 @@
               "content": {
                 "enum": [
                   "image",
+                  "video",
                   "web"
                 ]
               }
@@ -176,6 +178,25 @@
             "required": [
               "source"
             ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content": {
+                "enum": [
+                  "video",
+                  "web"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "pattern": "^https?://"
+              }
+            }
           }
         }
       ],
@@ -189,8 +210,8 @@
         "source": {
           "type": "string",
           "maxLength": 1400000,
-          "pattern": "^(https?://|data:image/(png|jpeg|gif|webp);base64,)",
-          "description": "Required for `image` and `web`. `web` accepts http(s) URLs only."
+          "pattern": "^(https?://|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,)",
+          "description": "Required for `image`, `video` and `web`. `video` and `web` accept http(s) URLs only."
         },
         "overlay": {
           "type": "string",
@@ -200,6 +221,14 @@
           ],
           "description": "Default `none`."
         },
+        "loop": {
+          "type": "boolean",
+          "description": "`video` only: start again at the end. Default false."
+        },
+        "muted": {
+          "type": "boolean",
+          "description": "`video` only: no sound. Default false."
+        },
         "duration_ms": {
           "$ref": "#/$defs/CommonDurationMs",
           "description": "Return to the face after this time. Omit to hold."
@@ -208,6 +237,72 @@
       "required": [
         "type",
         "content"
+      ],
+      "unevaluatedProperties": false
+    },
+    "DisplaySubtitle": {
+      "title": "DisplaySubtitle",
+      "description": "Text on top of whatever is shown (face, image, video, web page): for a robot without a speaker, or to show an AI answer as it streams in. `replace` shows `text` alone, `append` adds it to what is shown (send tokens as they arrive), `clear` removes it. The newest three lines stay visible. With `mouth` the face's mouth moves with the text at reading pace, as if speaking.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "clear"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "else": {
+            "required": [
+              "text"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "display.subtitle"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Plain text; a line break starts a new line. Required unless `mode` is `clear`."
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "replace",
+            "append",
+            "clear"
+          ],
+          "description": "Default `replace`."
+        },
+        "position": {
+          "type": "string",
+          "enum": [
+            "bottom",
+            "top"
+          ],
+          "description": "Default `bottom`."
+        },
+        "duration_ms": {
+          "$ref": "#/$defs/CommonDurationMs",
+          "description": "Clear this long after the last update. Omit to hold until replaced or cleared."
+        },
+        "mouth": {
+          "type": "boolean",
+          "description": "Move the mouth with the text at reading pace. Default false; ignored while `face.envelope` is streaming."
+        }
+      },
+      "required": [
+        "type"
       ],
       "unevaluatedProperties": false
     },
@@ -1055,6 +1150,11 @@
             "face-corner"
           ]
         },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Subtitle text on screen. Omitted when none."
+        },
         "theme": {
           "$ref": "#/$defs/CommonName"
         },
@@ -1828,7 +1928,7 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9_.-]*$"
           },
-          "description": "Feature flags. Known in 0.1: `face`, `display.image`, `display.web`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values."
+          "description": "Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values."
         },
         "themes": {
           "type": "array",

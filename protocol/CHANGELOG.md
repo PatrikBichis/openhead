@@ -12,6 +12,9 @@ All changes to `protocol/schema` are recorded here, in the same commit as the ch
 - Commands: `face.set_theme`, `face.set_emotion`, `face.look_at` (screen and head frames), `face.blink`, `face.list`, `display.show`, `display.clear`, `system.status`, `system.screenshot`, `system.logs`, `system.diagnostics`, `system.settings`, `mode.set`, `mode.get`.
 - `face.envelope` stream message (no `id`, no reply).
 - Theme pack schemas: `theme.schema.json`, `expressions.schema.json`.
+- `display.show` plays video (`content: video`, http(s) URL, `loop`, `muted`) and accepts SVG data URIs; view `video` in `status`.
+- `display.subtitle`: subtitles on top of any view, `replace` / `append` (streamed text) / `clear`, `position`, `duration_ms`, and `mouth` to move the mouth with the text; `subtitle` in `status`.
+- Capabilities `display.video` and `display.subtitle` in `welcome`.
 
 ### Changed
 

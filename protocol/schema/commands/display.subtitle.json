@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DisplaySubtitle",
+  "description": "Text on top of whatever is shown (face, image, video, web page): for a robot without a speaker, or to show an AI answer as it streams in. `replace` shows `text` alone, `append` adds it to what is shown (send tokens as they arrive), `clear` removes it. The newest three lines stay visible. With `mouth` the face's mouth moves with the text at reading pace, as if speaking.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "clear"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "else": {
+        "required": [
+          "text"
+        ]
+      }
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "display.subtitle"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "Plain text; a line break starts a new line. Required unless `mode` is `clear`."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "replace",
+        "append",
+        "clear"
+      ],
+      "description": "Default `replace`."
+    },
+    "position": {
+      "type": "string",
+      "enum": [
+        "bottom",
+        "top"
+      ],
+      "description": "Default `bottom`."
+    },
+    "duration_ms": {
+      "$ref": "../common.json#/$defs/duration_ms",
+      "description": "Clear this long after the last update. Omit to hold until replaced or cleared."
+    },
+    "mouth": {
+      "type": "boolean",
+      "description": "Move the mouth with the text at reading pace. Default false; ignored while `face.envelope` is streaming."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false
+}

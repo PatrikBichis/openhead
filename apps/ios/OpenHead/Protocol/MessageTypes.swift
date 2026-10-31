@@ -7,6 +7,7 @@ public let messageTypes: [String: any Codable.Type] = [
     "ack": ACK.self,
     "display.clear": DisplayClear.self,
     "display.show": DisplayShow.self,
+    "display.subtitle": DisplaySubtitle.self,
     "error": ProtocolError.self,
     "face.blink": FaceBlink.self,
     "face.envelope": FaceEnvelope.self,

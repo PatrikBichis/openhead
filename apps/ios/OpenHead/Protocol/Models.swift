@@ -13,6 +13,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let ack: ACK?
     public let displayClear: DisplayClear?
     public let displayShow: DisplayShow?
+    public let displaySubtitle: DisplaySubtitle?
     public let faceBlink: FaceBlink?
     public let faceEnvelope: FaceEnvelope?
     public let faceList: FaceList?
@@ -58,6 +59,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case ack = "Ack"
         case displayClear = "DisplayClear"
         case displayShow = "DisplayShow"
+        case displaySubtitle = "DisplaySubtitle"
         case faceBlink = "FaceBlink"
         case faceEnvelope = "FaceEnvelope"
         case faceList = "FaceList"
@@ -100,10 +102,11 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, hello: Hello?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, hello: Hello?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
         self.displayShow = displayShow
+        self.displaySubtitle = displaySubtitle
         self.faceBlink = faceBlink
         self.faceEnvelope = faceEnvelope
         self.faceList = faceList
@@ -214,9 +217,11 @@ public enum DisplayClearType: String, Codable, Equatable, Sendable {
 
 
 /// Change what fills the screen. `content` is named so to avoid clashing with the envelope's
-/// `type`. Images come as an http(s) URL the device fetches, or as a
-/// `data:image/...;base64,` URI under 1 MB. With `overlay: face-corner` the face keeps
-/// running in a corner.
+/// `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the
+/// device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an
+/// http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without
+/// `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running
+/// in a corner.
 // MARK: - DisplayShow
 public struct DisplayShow: Codable, Equatable, Sendable {
     public let content: CommonView
@@ -224,11 +229,15 @@ public struct DisplayShow: Codable, Equatable, Sendable {
     public let durationMS: Int?
     /// Client-chosen id, echoed in the reply.
     public let id: String
+    /// `video` only: start again at the end. Default false.
+    public let loop: Bool?
+    /// `video` only: no sound. Default false.
+    public let muted: Bool?
     /// Default `none`.
     public let overlay: Overlay?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
-    /// Required for `image` and `web`. `web` accepts http(s) URLs only.
+    /// Required for `image`, `video` and `web`. `video` and `web` accept http(s) URLs only.
     public let source: String?
     /// Sender clock in milliseconds since the Unix epoch.
     public let ts: Int
@@ -238,6 +247,8 @@ public struct DisplayShow: Codable, Equatable, Sendable {
         case content = "content"
         case durationMS = "duration_ms"
         case id = "id"
+        case loop = "loop"
+        case muted = "muted"
         case overlay = "overlay"
         case seq = "seq"
         case source = "source"
@@ -245,10 +256,12 @@ public struct DisplayShow: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(content: CommonView, durationMS: Int?, id: String, overlay: Overlay?, seq: Int, source: String?, ts: Int, type: DisplayShowType) {
+    public init(content: CommonView, durationMS: Int?, id: String, loop: Bool?, muted: Bool?, overlay: Overlay?, seq: Int, source: String?, ts: Int, type: DisplayShowType) {
         self.content = content
         self.durationMS = durationMS
         self.id = id
+        self.loop = loop
+        self.muted = muted
         self.overlay = overlay
         self.seq = seq
         self.source = source
@@ -261,6 +274,7 @@ public struct DisplayShow: Codable, Equatable, Sendable {
 public enum CommonView: String, Codable, Equatable, Sendable {
     case face = "face"
     case image = "image"
+    case video = "video"
     case web = "web"
 }
 
@@ -272,6 +286,75 @@ public enum Overlay: String, Codable, Equatable, Sendable {
 
 public enum DisplayShowType: String, Codable, Equatable, Sendable {
     case displayShow = "display.show"
+}
+
+
+/// Text on top of whatever is shown (face, image, video, web page): for a robot without a
+/// speaker, or to show an AI answer as it streams in. `replace` shows `text` alone, `append`
+/// adds it to what is shown (send tokens as they arrive), `clear` removes it. The newest
+/// three lines stay visible. With `mouth` the face's mouth moves with the text at reading
+/// pace, as if speaking.
+// MARK: - DisplaySubtitle
+public struct DisplaySubtitle: Codable, Equatable, Sendable {
+    /// Clear this long after the last update. Omit to hold until replaced or cleared.
+    public let durationMS: Int?
+    /// Client-chosen id, echoed in the reply.
+    public let id: String
+    /// Default `replace`.
+    public let mode: Mode?
+    /// Move the mouth with the text at reading pace. Default false; ignored while
+    /// `face.envelope` is streaming.
+    public let mouth: Bool?
+    /// Default `bottom`.
+    public let position: Position?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Plain text; a line break starts a new line. Required unless `mode` is `clear`.
+    public let text: String?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: DisplaySubtitleType
+
+    public enum CodingKeys: String, CodingKey {
+        case durationMS = "duration_ms"
+        case id = "id"
+        case mode = "mode"
+        case mouth = "mouth"
+        case position = "position"
+        case seq = "seq"
+        case text = "text"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(durationMS: Int?, id: String, mode: Mode?, mouth: Bool?, position: Position?, seq: Int, text: String?, ts: Int, type: DisplaySubtitleType) {
+        self.durationMS = durationMS
+        self.id = id
+        self.mode = mode
+        self.mouth = mouth
+        self.position = position
+        self.seq = seq
+        self.text = text
+        self.ts = ts
+        self.type = type
+    }
+}
+
+/// Default `replace`.
+public enum Mode: String, Codable, Equatable, Sendable {
+    case append = "append"
+    case clear = "clear"
+    case replace = "replace"
+}
+
+/// Default `bottom`.
+public enum Position: String, Codable, Equatable, Sendable {
+    case bottom = "bottom"
+    case top = "top"
+}
+
+public enum DisplaySubtitleType: String, Codable, Equatable, Sendable {
+    case displaySubtitle = "display.subtitle"
 }
 
 
@@ -1068,6 +1151,8 @@ public struct Status: Codable, Equatable, Sendable {
     public let rttMS: Double?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
+    /// Subtitle text on screen. Omitted when none.
+    public let subtitle: String?
     public let theme: String?
     public let thermalState: CommonThermalState?
     /// Sender clock in milliseconds since the Unix epoch.
@@ -1086,6 +1171,7 @@ public struct Status: Codable, Equatable, Sendable {
         case overlay = "overlay"
         case rttMS = "rtt_ms"
         case seq = "seq"
+        case subtitle = "subtitle"
         case theme = "theme"
         case thermalState = "thermal_state"
         case ts = "ts"
@@ -1094,7 +1180,7 @@ public struct Status: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
+    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, subtitle: String?, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
@@ -1104,6 +1190,7 @@ public struct Status: Codable, Equatable, Sendable {
         self.overlay = overlay
         self.rttMS = rttMS
         self.seq = seq
+        self.subtitle = subtitle
         self.theme = theme
         self.thermalState = thermalState
         self.ts = ts
@@ -1138,6 +1225,8 @@ public struct StatusFields: Codable, Equatable, Sendable {
     public let overlay: Overlay?
     /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
     public let rttMS: Double?
+    /// Subtitle text on screen. Omitted when none.
+    public let subtitle: String?
     public let theme: String?
     public let thermalState: CommonThermalState?
     public let uptimeS: Double?
@@ -1152,13 +1241,14 @@ public struct StatusFields: Codable, Equatable, Sendable {
         case mode = "mode"
         case overlay = "overlay"
         case rttMS = "rtt_ms"
+        case subtitle = "subtitle"
         case theme = "theme"
         case thermalState = "thermal_state"
         case uptimeS = "uptime_s"
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
+    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, subtitle: String?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
@@ -1167,6 +1257,7 @@ public struct StatusFields: Codable, Equatable, Sendable {
         self.mode = mode
         self.overlay = overlay
         self.rttMS = rttMS
+        self.subtitle = subtitle
         self.theme = theme
         self.thermalState = thermalState
         self.uptimeS = uptimeS
@@ -1189,6 +1280,8 @@ public struct StatusPayload: Codable, Equatable, Sendable {
     public let overlay: Overlay
     /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
     public let rttMS: Double?
+    /// Subtitle text on screen. Omitted when none.
+    public let subtitle: String?
     public let theme: String
     public let thermalState: CommonThermalState
     public let uptimeS: Double
@@ -1203,13 +1296,14 @@ public struct StatusPayload: Codable, Equatable, Sendable {
         case mode = "mode"
         case overlay = "overlay"
         case rttMS = "rtt_ms"
+        case subtitle = "subtitle"
         case theme = "theme"
         case thermalState = "thermal_state"
         case uptimeS = "uptime_s"
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool, clients: Int, devMode: Bool, emotion: String, mode: CommonMode, overlay: Overlay, rttMS: Double?, theme: String, thermalState: CommonThermalState, uptimeS: Double, view: CommonView) {
+    public init(batteryLevel: Double?, charging: Bool, clients: Int, devMode: Bool, emotion: String, mode: CommonMode, overlay: Overlay, rttMS: Double?, subtitle: String?, theme: String, thermalState: CommonThermalState, uptimeS: Double, view: CommonView) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
@@ -1218,6 +1312,7 @@ public struct StatusPayload: Codable, Equatable, Sendable {
         self.mode = mode
         self.overlay = overlay
         self.rttMS = rttMS
+        self.subtitle = subtitle
         self.theme = theme
         self.thermalState = thermalState
         self.uptimeS = uptimeS
@@ -1681,8 +1776,8 @@ public enum UnsubscribeType: String, Codable, Equatable, Sendable {
 /// the device description and what it supports.
 // MARK: - Welcome
 public struct Welcome: Codable, Equatable, Sendable {
-    /// Feature flags. Known in 0.1: `face`, `display.image`, `display.web`, `imu`, `status`,
-    /// `log`, `screenshot`. Clients ignore unknown values.
+    /// Feature flags. Known in 0.1: `face`, `display.image`, `display.video`, `display.web`,
+    /// `display.subtitle`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values.
     public let capabilities: [String]
     public let devMode: Bool
     public let device: WelcomeDevice

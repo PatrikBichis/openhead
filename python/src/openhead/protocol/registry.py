@@ -11,6 +11,7 @@ MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "ack": models.Ack,
     "display.clear": models.DisplayClear,
     "display.show": models.DisplayShow,
+    "display.subtitle": models.DisplaySubtitle,
     "error": models.Error,
     "face.blink": models.FaceBlink,
     "face.envelope": models.FaceEnvelope,

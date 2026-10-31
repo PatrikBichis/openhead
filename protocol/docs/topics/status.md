@@ -93,6 +93,7 @@
 | - [thermal_state](#allOf_i1_thermal_state ) | No      | enum (of string) | No         | In ../common.json#/$defs/thermal_state | -                                                                                     |
 | - [view](#allOf_i1_view )                   | No      | enum (of string) | No         | In ../common.json#/$defs/view          | What fills the screen.                                                                |
 | - [overlay](#allOf_i1_overlay )             | No      | enum (of string) | No         | -                                      | -                                                                                     |
+| - [subtitle](#allOf_i1_subtitle )           | No      | string           | No         | -                                      | Subtitle text on screen. Omitted when none.                                           |
 | - [theme](#allOf_i1_theme )                 | No      | string           | No         | In ../common.json#/$defs/name          | Lower-case identifier used for themes and emotions.                                   |
 | - [emotion](#allOf_i1_emotion )             | No      | string           | No         | Same as [theme](#allOf_i1_theme )      | Lower-case identifier used for themes and emotions.                                   |
 | - [mode](#allOf_i1_mode )                   | No      | enum (of string) | No         | In ../common.json#/$defs/mode          | Camera ownership mode. Only \`idle\` is supported in 0.1.                             |
@@ -149,6 +150,7 @@ Must be one of:
 Must be one of:
 * "face"
 * "image"
+* "video"
 * "web"
 
 ### <a name="allOf_i1_overlay"></a>2.5. Property `Status > allOf > item 1 > overlay`
@@ -162,7 +164,20 @@ Must be one of:
 * "none"
 * "face-corner"
 
-### <a name="allOf_i1_theme"></a>2.6. Property `Status > allOf > item 1 > theme`
+### <a name="allOf_i1_subtitle"></a>2.6. Property `Status > allOf > item 1 > subtitle`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Subtitle text on screen. Omitted when none.
+
+| Restrictions   |      |
+| -------------- | ---- |
+| **Max length** | 4000 |
+
+### <a name="allOf_i1_theme"></a>2.7. Property `Status > allOf > item 1 > theme`
 
 |                |                            |
 | -------------- | -------------------------- |
@@ -176,7 +191,7 @@ Must be one of:
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-z][a-z0-9_-]{0,31}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z%5D%5Ba-z0-9_-%5D%7B0%2C31%7D%24) |
 
-### <a name="allOf_i1_emotion"></a>2.7. Property `Status > allOf > item 1 > emotion`
+### <a name="allOf_i1_emotion"></a>2.8. Property `Status > allOf > item 1 > emotion`
 
 |                        |                          |
 | ---------------------- | ------------------------ |
@@ -186,7 +201,7 @@ Must be one of:
 
 **Description:** Lower-case identifier used for themes and emotions.
 
-### <a name="allOf_i1_mode"></a>2.8. Property `Status > allOf > item 1 > mode`
+### <a name="allOf_i1_mode"></a>2.9. Property `Status > allOf > item 1 > mode`
 
 |                |                            |
 | -------------- | -------------------------- |
@@ -201,14 +216,14 @@ Must be one of:
 * "sensing"
 * "capture"
 
-### <a name="allOf_i1_dev_mode"></a>2.9. Property `Status > allOf > item 1 > dev_mode`
+### <a name="allOf_i1_dev_mode"></a>2.10. Property `Status > allOf > item 1 > dev_mode`
 
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
 
-### <a name="allOf_i1_clients"></a>2.10. Property `Status > allOf > item 1 > clients`
+### <a name="allOf_i1_clients"></a>2.11. Property `Status > allOf > item 1 > clients`
 
 |              |           |
 | ------------ | --------- |
@@ -221,7 +236,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-### <a name="allOf_i1_rtt_ms"></a>2.11. Property `Status > allOf > item 1 > rtt_ms`
+### <a name="allOf_i1_rtt_ms"></a>2.12. Property `Status > allOf > item 1 > rtt_ms`
 
 |              |          |
 | ------------ | -------- |
@@ -234,7 +249,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-### <a name="allOf_i1_uptime_s"></a>2.12. Property `Status > allOf > item 1 > uptime_s`
+### <a name="allOf_i1_uptime_s"></a>2.13. Property `Status > allOf > item 1 > uptime_s`
 
 |              |          |
 | ------------ | -------- |

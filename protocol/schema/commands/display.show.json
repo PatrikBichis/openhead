@@ -1,34 +1,87 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DisplayShow",
-  "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. With `overlay: face-corner` the face keeps running in a corner.",
+  "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images (PNG, JPEG, GIF including animated, WebP, SVG) come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. Video comes as an http(s) URL (H.264 or HEVC in MP4/MOV; the simulator plays H.264, VP9 and AV1); without `loop` the face returns when it ends. With `overlay: face-corner` the face keeps running in a corner.",
   "type": "object",
   "allOf": [
-    { "$ref": "../command.json" },
     {
-      "if": { "properties": { "content": { "enum": ["image", "web"] } } },
-      "then": { "required": ["source"] }
+      "$ref": "../command.json"
+    },
+    {
+      "if": {
+        "properties": {
+          "content": {
+            "enum": [
+              "image",
+              "video",
+              "web"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "source"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "content": {
+            "enum": [
+              "video",
+              "web"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "source": {
+            "pattern": "^https?://"
+          }
+        }
+      }
     }
   ],
   "properties": {
-    "type": { "const": "display.show" },
-    "content": { "$ref": "../common.json#/$defs/view" },
+    "type": {
+      "const": "display.show"
+    },
+    "content": {
+      "$ref": "../common.json#/$defs/view"
+    },
     "source": {
       "type": "string",
       "maxLength": 1400000,
-      "pattern": "^(https?://|data:image/(png|jpeg|gif|webp);base64,)",
-      "description": "Required for `image` and `web`. `web` accepts http(s) URLs only."
+      "pattern": "^(https?://|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,)",
+      "description": "Required for `image`, `video` and `web`. `video` and `web` accept http(s) URLs only."
     },
     "overlay": {
       "type": "string",
-      "enum": ["none", "face-corner"],
+      "enum": [
+        "none",
+        "face-corner"
+      ],
       "description": "Default `none`."
+    },
+    "loop": {
+      "type": "boolean",
+      "description": "`video` only: start again at the end. Default false."
+    },
+    "muted": {
+      "type": "boolean",
+      "description": "`video` only: no sound. Default false."
     },
     "duration_ms": {
       "$ref": "../common.json#/$defs/duration_ms",
       "description": "Return to the face after this time. Omit to hold."
     }
   },
-  "required": ["type", "content"],
+  "required": [
+    "type",
+    "content"
+  ],
   "unevaluatedProperties": false
 }

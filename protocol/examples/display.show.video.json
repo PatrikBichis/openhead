@@ -1,0 +1,11 @@
+{
+  "type": "display.show",
+  "ts": 1793462400000,
+  "seq": 22,
+  "id": "c-13",
+  "content": "video",
+  "source": "https://example.com/intro.mp4",
+  "overlay": "face-corner",
+  "loop": true,
+  "muted": true
+}
