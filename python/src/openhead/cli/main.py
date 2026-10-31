@@ -23,6 +23,7 @@ EPILOG = """examples:
   openhead subtitle "Hello there" --mouth           text on screen, mouth moving
   openhead camera hunter --follow                   camera view with HUD; the eyes follow a face
   openhead watch faces -n 5                         print the faces stream
+  openhead hud --set speed=0.4 --line "SPEED {speed} M/S" --widget compass
   openhead screenshot -o face.png --device localhost
   openhead run scenarios/smoke.yaml --device localhost
 
@@ -87,6 +88,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("hud", nargs="?", default="hunter", help="HUD theme (see `themes`), or none")
     p.add_argument("--overlay", choices=["none", "face-corner"], default="none")
     p.add_argument("--follow", action="store_true", help="the eyes follow the locked face")
+
+    p = sub.add_parser("hud", parents=[common], help="put your own values and lines on the camera HUD")
+    p.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
+                   help="a value for templates, e.g. --set speed=0.4 (repeatable)")
+    p.add_argument("--line", action="append", default=[], help='a text line, e.g. --line "SPEED {speed} M/S"')
+    p.add_argument("--at", default="bottom-left",
+                   choices=["top-left", "top-right", "bottom-left", "bottom-right", "left"])
+    p.add_argument("--widget", action="append", default=[], choices=["compass", "horizon", "battery"])
+    p.add_argument("--clear", action="store_true", help="remove what was added")
 
     p = sub.add_parser("mode", parents=[common], help="show or set who owns the cameras")
     p.add_argument("mode", nargs="?", choices=["idle", "capture", "sensing"])
@@ -232,6 +242,17 @@ async def _command(head: Head, args: argparse.Namespace) -> int:
             await head.display.show_camera(args.hud, overlay=args.overlay)
             if args.follow:
                 await head.face.look_at_face()
+        case "hud":
+            values = {}
+            for item in args.set:
+                key, _, raw = item.partition("=")
+                try:
+                    values[key] = float(raw) if "." in raw else int(raw)
+                except ValueError:
+                    values[key] = raw
+            await head.display.hud(values or None,
+                                   blocks=[{"at": args.at, "lines": args.line}] if args.line else None,
+                                   widgets=[{"type": w} for w in args.widget] or None, clear=args.clear)
         case "mode":
             if args.mode:
                 await head.mode.set(args.mode)

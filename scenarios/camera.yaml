@@ -19,6 +19,15 @@ steps:
   - wait_ms: 800
   - screenshot: { file: hud-camcorder-face-corner.png, golden: false }
   - expect_log: { contains: "hud=camcorder" }
+  - hud:
+      values: { task: SAY HELLO, speed: 0.4 }
+      blocks: [{ at: top-left, lines: ["", "", "TASK {task}", "SPEED {speed} M/S"] }]
+  - wait_ms: 400
+  - screenshot: { file: hud-camcorder-own-lines.png, golden: false }
+  - hud: { clear: true }
+  - show_camera: flight
+  - wait_ms: 600
+  - screenshot: { file: hud-flight.png, golden: false }
   - show_camera: boot
   - wait_ms: 2200
   - screenshot: { file: hud-boot.png, golden: false }

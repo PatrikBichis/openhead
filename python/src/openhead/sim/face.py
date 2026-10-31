@@ -190,6 +190,12 @@ class BrowserFace:
         else:
             await self._call("(i) => window.openhead.followFace(i)", face_id)
 
+    async def set_hud_values(self, values: dict) -> None:
+        await self._call("(v) => window.openhead.setHudValues(v)", values)
+
+    async def hud_extras(self, extras: dict) -> None:
+        await self._call("(x) => window.openhead.hudExtras(x)", extras)
+
     async def list_huds(self) -> list[dict]:
         return await self._call("() => window.openhead.listHuds()")
 

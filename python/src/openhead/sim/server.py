@@ -418,6 +418,8 @@ class SimServer:
                     await self._display(d)
                 case "display.clear":
                     await self._clear_display()
+                case "display.hud":
+                    await face.hud_extras({k: d[k] for k in ("values", "blocks", "widgets", "clear") if k in d})
                 case "display.subtitle":
                     await face.subtitle(d.get("text", ""), mode=d.get("mode", "replace"),
                                         position=d.get("position"),
@@ -509,8 +511,11 @@ class SimServer:
         start = time.monotonic()
         try:
             while True:
-                self.faces = scene.faces_at(time.monotonic() - start, boxes=boxes)
+                t = time.monotonic() - start
+                self.faces = scene.faces_at(t, boxes=boxes)
                 await self.face.set_faces(self.faces)
+                clients = sum(1 for x in self.sessions if x.token)
+                await self.face.set_hud_values(scene.hud_values(t, self.mode, clients))
                 await asyncio.sleep(1 / 15)
         except asyncio.CancelledError:
             pass

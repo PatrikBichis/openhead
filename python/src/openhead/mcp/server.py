@@ -185,6 +185,21 @@ def build_server(link: HeadLink) -> MCPServer:
         return f"camera view with HUD {hud}"
 
     @mcp.tool(annotations=CHANGES_FACE)
+    async def set_hud(values: dict[str, Any] | None = None, lines: list[str] | None = None,
+                      at: Literal["top-left", "top-right", "bottom-left", "bottom-right", "left"] = "bottom-left",
+                      widgets: list[Literal["compass", "horizon", "battery"]] | None = None,
+                      clear: bool = False) -> str:
+        """Put your own information on the camera HUD. values: names for templates, e.g.
+        {"speed": 0.4, "task": "DELIVER CUP"}; lines: text lines that may use them and the built-in
+        values ({battery} {thermal} {heading} {pitch} {roll} {faces} {target} {mode}), e.g.
+        ["TASK {task}", "SPEED {speed} M/S"]; widgets: compass, horizon, battery. clear removes
+        what was added."""
+        await call(lambda h: h.display.hud(values, blocks=[{"at": at, "lines": lines}] if lines else None,
+                                           widgets=[{"type": w} for w in widgets] if widgets else None,
+                                           clear=clear))
+        return "HUD cleared" if clear else "HUD updated"
+
+    @mcp.tool(annotations=CHANGES_FACE)
     async def set_mode(mode: Literal["idle", "capture", "sensing"]) -> str:
         """Who owns the cameras. capture: front camera, several faces with boxes. sensing: ARKit
         pose (position and orientation in the world) and one face. idle: no camera."""

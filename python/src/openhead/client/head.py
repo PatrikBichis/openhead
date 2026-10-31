@@ -392,6 +392,14 @@ class _Display:
         await self._h.command("display.show", content="camera", hud=hud, overlay=overlay,
                               duration_ms=duration_ms)
 
+    async def hud(self, values: dict | None = None, *, blocks: list[dict] | None = None,
+                  widgets: list[dict] | None = None, clear: bool = False) -> None:
+        """Your own information on the camera HUD: `values` for templates ({speed}), extra text
+        `blocks` ({"at": "bottom-left", "lines": ["SPEED {speed} M/S"]}) and `widgets`
+        ({"type": "compass"}). `clear` removes what was added this way."""
+        await self._h.command("display.hud", values=values, blocks=blocks, widgets=widgets,
+                              clear=clear or None)
+
     async def show_web(self, url: str, *, overlay: str = "none",
                        duration_ms: int | None = None) -> None:
         await self._h.command("display.show", content="web", source=url, overlay=overlay,

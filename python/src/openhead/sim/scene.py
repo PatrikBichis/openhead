@@ -40,6 +40,21 @@ def faces_at(t: float, *, boxes: bool = True) -> list[dict]:
     return out
 
 
+def hud_values(t: float, mode: str, clients: int) -> dict:
+    """What a phone reports to the HUD: battery, thermal state, heading, tilt, position."""
+    # The same slow look-around as the synthetic IMU (yaw, pitch, roll), seen from the front.
+    values = {"battery": 87, "charging": False, "thermal": "nominal",
+              "heading": round((90 + math.degrees(0.35 * math.sin(0.5 * t))) % 360, 1),
+              "pitch": round(math.degrees(0.12 * math.sin(0.31 * t + 1)), 1),
+              "roll": round(math.degrees(0.04 * math.sin(0.73 * t)), 1),
+              "mode": mode, "clients": clients}
+    if mode == "sensing":
+        pose = pose_at(t)
+        values.update(zip("xyz", pose["position"]))
+        values["tracking"] = pose["tracking_state"]
+    return values
+
+
 def pose_at(t: float) -> dict:
     """ARKit-like pose: tracking starts limited, then the head drifts on a small circle."""
     q = imu.sample(t)["q"]

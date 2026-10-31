@@ -12,7 +12,7 @@ steps:
 ```
 
 Steps: set_theme, set_emotion, look_at, look_at_face, blink, show_image, show_video, show_web,
-show_camera, show_face, clear_display, subtitle, set_mode, envelope, wait_ms, screenshot,
+show_camera, hud, show_face, clear_display, subtitle, set_mode, envelope, wait_ms, screenshot,
 expect_log, expect_status, expect_faces, expect_pose.
 Local files (`assets/clip.mp4`) are relative to the scenario: images go inline, videos are
 served to the head over HTTP from this machine.
@@ -191,6 +191,11 @@ class _Runner:
         a = self._args(arg or "hunter", "hud")
         await self.head.display.show_camera(a.get("hud", "hunter"), overlay=a.get("overlay", "none"),
                                             duration_ms=a.get("duration_ms"))
+
+    async def step_hud(self, arg: dict) -> None:
+        """`{values: {speed: 0.4}, blocks: [{at: bottom-left, lines: ["SPEED {speed}"]}]}`"""
+        await self.head.display.hud(arg.get("values"), blocks=arg.get("blocks"),
+                                    widgets=arg.get("widgets"), clear=arg.get("clear", False))
 
     async def step_expect_faces(self, arg: dict) -> str:
         """Wait for a `faces` message with at least `min` (default 1) faces, optionally with
