@@ -16,46 +16,6 @@ from urllib.parse import urlparse
 
 ORIGIN = "http://openhead.face"
 
-DISPLAY_CSS = """
-#display { position: fixed; inset: 0; z-index: 1; display: flex; align-items: center;
-           justify-content: center; background: #000; }
-#display[hidden] { display: none; }
-#display img { max-width: 100%; max-height: 100%; object-fit: contain; }
-#display iframe { border: 0; width: 100%; height: 100%; background: #fff; }
-body.face-corner #face { position: fixed; right: 12px; bottom: 12px; width: 32vw; height: 32vh;
-                         z-index: 2; border-radius: 16px; }
-"""
-
-SHOW_JS = """
-async ([content, source, overlay]) => {
-  let d = document.getElementById("display");
-  if (!d) {
-    d = document.createElement("div");
-    d.id = "display";
-    document.body.append(d);
-  }
-  const el = document.createElement(content === "image" ? "img" : "iframe");
-  const loaded = new Promise((ok, fail) => {
-    el.onload = ok;
-    el.onerror = () => fail(new Error(`could not load ${content}`));
-  });
-  el.src = source;
-  d.replaceChildren(el);
-  d.hidden = false;
-  document.body.classList.toggle("face-corner", overlay === "face-corner");
-  if (content === "image") await loaded;
-}
-"""
-
-CLEAR_JS = """
-() => {
-  const d = document.getElementById("display");
-  if (d) { d.hidden = true; d.replaceChildren(); }
-  document.body.classList.remove("face-corner");
-}
-"""
-
-
 CAPTION_JS = """
 (text) => {
   let c = document.getElementById("caption");
@@ -122,7 +82,12 @@ class BrowserFace:
 
         w, h = self.size
         self._pw = await async_playwright().start()
-        args = [] if self.headless else [f"--window-size={w},{h + 90}", "--app=about:blank"]
+        # Media comes from hosts on the LAN or this machine (MediaServer), which Chromium's
+        # private network rules would block for a page on a made-up origin; iOS allows it.
+        args = [("--disable-features=BlockInsecurePrivateNetworkRequests,"
+                "PrivateNetworkAccessSendPreflights,LocalNetworkAccessChecks")]
+        if not self.headless:
+            args += [f"--window-size={w},{h + 90}", "--app=about:blank"]
         self._browser = await self._pw.chromium.launch(headless=self.headless, args=args)
         video = {}
         if self.record_video_dir:
@@ -140,7 +105,6 @@ class BrowserFace:
         query = f"theme={theme}" + ("" if self.idle else "&idle=0")
         await self._page.goto(f"{ORIGIN}/index.html?{query}")
         await self._page.wait_for_function("document.documentElement.dataset.ready === '1'")
-        await self._page.add_style_tag(content=DISPLAY_CSS)
 
     async def close(self) -> None:
         if self._context:
@@ -197,15 +161,29 @@ class BrowserFace:
         return await self._call("() => window.openhead.listThemes()")
 
     async def state(self) -> dict:
+        """Theme, emotion and what is on screen (`view`, `overlay`, `subtitle`)."""
         return await self._call(
-            "() => { const s = window.openhead.state(); return {theme: s.theme, emotion: s.emotion}; }"
+            "() => { const s = window.openhead.state(); "
+            "return {theme: s.theme, emotion: s.emotion, ...window.openhead.screen()}; }"
         )
 
-    async def show(self, content: str, source: str, overlay: str) -> None:
-        await self._call(SHOW_JS, [content, source, overlay])
+    async def show(self, content: str, source: str, overlay: str = "none", *,
+                   loop: bool = False, muted: bool = False) -> None:
+        """Image, video or web page (iframe), drawn by the page's screen layer."""
+        await self._call("([c, s, o]) => window.openhead.show(c, s, o)",
+                         [content, source, {"overlay": overlay, "loop": loop, "muted": muted}])
 
     async def clear(self) -> None:
-        await self._call(CLEAR_JS)
+        await self._call("() => window.openhead.clear()")
+
+    async def subtitle(self, text: str = "", *, mode: str = "replace", position: str | None = None,
+                       duration_ms: int | None = None, mouth: bool = False) -> None:
+        opts = {"mode": mode, "mouth": mouth}
+        if position:
+            opts["position"] = position
+        if duration_ms is not None:
+            opts["durationMs"] = duration_ms
+        await self._call("([t, o]) => window.openhead.subtitle(t, o)", [text, opts])
 
     async def caption(self, text: str | None) -> None:
         """Simulator-only text strip at the top of the screen (demos, recordings)."""

@@ -11,8 +11,10 @@ steps:
   - expect_status: { theme: halloween, emotion: scared }
 ```
 
-Steps: set_theme, set_emotion, look_at, blink, show_image, show_web, show_face,
-clear_display, envelope, wait_ms, screenshot, expect_log, expect_status.
+Steps: set_theme, set_emotion, look_at, blink, show_image, show_video, show_web, show_face,
+clear_display, subtitle, envelope, wait_ms, screenshot, expect_log, expect_status.
+Local files (`assets/clip.mp4`) are relative to the scenario: images go inline, videos are
+served to the head over HTTP from this machine.
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ from typing import Any
 
 import yaml
 
-from .client import Head, HeadError
+from .client import Head, HeadError, MediaServer
 from .protocol import models
 
 LEVELS = ["debug", "info", "notice", "warning", "error", "fault"]
@@ -117,6 +119,7 @@ async def run_scenario(head: Head, path: Path, *, out_dir: Path | None = None,
             result.duration_ms = int((time.monotonic() - start) * 1000)
             report.steps.append(result)
     finally:
+        runner.close()
         await sub.close()
         collector.cancel()
         with contextlib.suppress(asyncio.CancelledError):
@@ -141,6 +144,19 @@ class _Runner:
         self.golden = golden
         self.update_golden = update_golden
         self.tolerance = tolerance
+        self.media: MediaServer | None = None
+
+    def close(self) -> None:
+        if self.media:
+            self.media.close()
+
+    def _url(self, source: str) -> str:
+        """http(s) URLs as they are; a local file is served to the head from this machine."""
+        if source.startswith(("http://", "https://")):
+            return source
+        if not self.media:
+            self.media = MediaServer().start()
+        return self.media.url_for(self.base / source, self.head)
 
     @staticmethod
     def _args(arg: Any, key: str) -> dict:
@@ -172,6 +188,20 @@ class _Runner:
         await self.head.display.show_image(source, overlay=a.get("overlay", "none"),
                                            duration_ms=a.get("duration_ms"))
 
+    async def step_show_video(self, arg: Any) -> None:
+        """`{source: assets/clip.mp4, loop: false, muted: true, overlay: face-corner}`"""
+        a = self._args(arg, "source")
+        await self.head.display.show_video(self._url(a["source"]), overlay=a.get("overlay", "none"),
+                                           loop=a.get("loop", False), muted=a.get("muted", False),
+                                           duration_ms=a.get("duration_ms"))
+
+    async def step_subtitle(self, arg: Any) -> None:
+        """`Hello` or `{text: ..., mode: append, position: top, duration_ms: 3000, mouth: true}`"""
+        a = self._args(arg, "text")
+        await self.head.display.subtitle(a.get("text", ""), mode=a.get("mode", "replace"),
+                                         position=a.get("position"),
+                                         duration_ms=a.get("duration_ms"), mouth=a.get("mouth", False))
+
     async def step_show_web(self, arg: Any) -> None:
         a = self._args(arg, "url")
         await self.head.display.show_web(a["url"], overlay=a.get("overlay", "none"),
@@ -201,7 +231,7 @@ class _Runner:
         png = await self.head.system.screenshot(a.get("scale"))
         target = self.out / a["file"]
         target.write_bytes(png)
-        if not self.golden:
+        if not self.golden or a.get("golden") is False:  # e.g. a playing video
             return str(target), ""
         golden = self.golden / a["file"]
         if self.update_golden or not golden.exists():

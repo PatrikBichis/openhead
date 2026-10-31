@@ -97,6 +97,13 @@ class Head:
     def paired(self) -> bool:
         return self.welcome is not None
 
+    @property
+    def local_host(self) -> str:
+        """This host's address on the connection to the head (for URLs the head fetches)."""
+        if not self._ws:
+            raise HeadError("not_connected", "not connected")
+        return self._ws.local_address[0]
+
     @classmethod
     async def connect(cls, host: str = "localhost", port: int = DEFAULT_PORT, *,
                       client: str = "openhead-python", token: str | None = None,
@@ -329,18 +336,48 @@ class _Face:
         return models.FaceListResult.model_validate(await self._h.command("face.list"))
 
 
+def image_mime(data: bytes) -> str:
+    """MIME type of image bytes, by signature (SVG by its text)."""
+    if data.startswith(b"\x89PNG"):
+        return "image/png"
+    if data.startswith(b"GIF8"):
+        return "image/gif"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
+    if data.startswith(b"\xff\xd8"):
+        return "image/jpeg"
+    if b"<svg" in data[:1024]:
+        return "image/svg+xml"
+    raise ValueError("not a PNG, JPEG, GIF, WebP or SVG image")
+
+
 class _Display:
     def __init__(self, head: Head):
         self._h = head
 
     async def show_image(self, source: str | bytes, *, overlay: str = "none",
                          duration_ms: int | None = None) -> None:
-        """`source` is an http(s) URL, a data: URI, or PNG/JPEG bytes (sent inline)."""
+        """`source` is an http(s) URL, a data: URI, or image bytes (PNG, JPEG, GIF, WebP, SVG;
+        sent inline)."""
         if isinstance(source, bytes):
-            mime = "image/png" if source.startswith(b"\x89PNG") else "image/jpeg"
-            source = f"data:{mime};base64,{base64.b64encode(source).decode()}"
+            source = f"data:{image_mime(source)};base64,{base64.b64encode(source).decode()}"
         await self._h.command("display.show", content="image", source=source, overlay=overlay,
                               duration_ms=duration_ms)
+
+    async def show_video(self, url: str, *, overlay: str = "none", loop: bool = False,
+                         muted: bool = False, duration_ms: int | None = None) -> None:
+        """An http(s) URL the device can reach (H.264 MP4 plays everywhere). Without `loop`
+        the face returns when the video ends."""
+        await self._h.command("display.show", content="video", source=url, overlay=overlay,
+                              loop=loop or None, muted=muted or None, duration_ms=duration_ms)
+
+    async def subtitle(self, text: str = "", *, mode: str = "replace", position: str | None = None,
+                       duration_ms: int | None = None, mouth: bool = False) -> None:
+        """Text on top of the screen. `mode="append"` adds to it (stream an AI answer token by
+        token); `mode="clear"` removes it. `mouth` moves the mouth with the text."""
+        await self._h.command("display.subtitle", text=text if mode != "clear" else None,
+                              mode=mode, position=position, duration_ms=duration_ms,
+                              mouth=mouth or None)
 
     async def show_web(self, url: str, *, overlay: str = "none",
                        duration_ms: int | None = None) -> None:

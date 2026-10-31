@@ -11,8 +11,6 @@ import asyncio
 import contextlib
 import json
 import logging
-import secrets
-import socket
 import time
 from collections import deque
 from pathlib import Path
@@ -23,7 +21,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 
 from .. import __version__
-from ..client import Head, HeadError, resolve_device
+from ..client import Head, HeadError, MediaServer, resolve_device
 from ..tokens import TokenStore
 
 log = logging.getLogger("openhead.mcp")
@@ -34,7 +32,8 @@ Controls an OpenHead robot head: a phone showing an expressive face.
   happy, curious, confused, shocked, worried, laughing; themes may add extras). Use
   intensity 0-1, duration_ms for a short reaction, blend="add" to layer one on another.
 - Look: look_at with x, y in [-1, 1] on the screen (+x right, +y up).
-- Show things: show_image (URL or local file), show_web (URL), show_face to go back.
+- Show things: show_image and show_video (URL or local file), show_web (URL), show_face to
+  go back. subtitle writes text on screen (append to stream an answer; mouth=True to "speak").
 - Check your work: take_screenshot shows what is on screen; tail_logs and get_status explain
   what happened; wait_for blocks until a status or log condition holds.
 - Screenshots, logs and diagnostics need dev mode on the device.
@@ -61,7 +60,7 @@ class HeadLink:
         self.logs: deque[dict] = deque(maxlen=500)
         self._lock = asyncio.Lock()
         self._tasks: list[asyncio.Task] = []
-        self._served: list[asyncio.Server] = []
+        self.media: MediaServer | None = None
 
     async def connect(self) -> Head:
         async with self._lock:
@@ -100,34 +99,17 @@ class HeadLink:
     async def close(self) -> None:
         for task in self._tasks:
             task.cancel()
-        for server in self._served:
-            server.close()
+        if self.media:
+            self.media.close()
         if self.head:
             await self.head.close()
 
-    async def serve_file(self, data: bytes, suffix: str) -> str:
-        """Serve bytes once over HTTP for 60 s so the head can fetch a large local file."""
-        name = f"{secrets.token_urlsafe(12)}{suffix}"
+    async def serve_file(self, path: Path) -> str:
+        """A URL on this machine for a local file the head should fetch (large image, video)."""
         head = await self.get()
-
-        async def handle(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
-            line = (await reader.readline()).decode("latin-1").split()
-            while (await reader.readline()) not in (b"\r\n", b"\n", b""):
-                pass
-            ok = len(line) > 1 and line[1] == f"/{name}"
-            body = data if ok else b"not found"
-            ctype = "image/png" if suffix == ".png" else "image/jpeg" if ok else "text/plain"
-            writer.write(f"HTTP/1.1 {'200 OK' if ok else '404 Not Found'}\r\nContent-Type: {ctype}"
-                         f"\r\nContent-Length: {len(body)}\r\nConnection: close\r\n\r\n"
-                         .encode("latin-1") + body)
-            await writer.drain()
-            writer.close()
-
-        server = await asyncio.start_server(handle, "0.0.0.0", 0)
-        self._served.append(server)
-        asyncio.get_running_loop().call_later(60, server.close)
-        port = server.sockets[0].getsockname()[1]
-        return f"http://{_route_ip(head.host)}:{port}/{name}"
+        if self.media is None:
+            self.media = MediaServer().start()
+        return self.media.url_for(path, head)
 
 
 def build_server(link: HeadLink) -> MCPServer:
@@ -188,7 +170,7 @@ def build_server(link: HeadLink) -> MCPServer:
     async def show_image(url_or_path: str,
                          overlay: Literal["none", "face-corner"] = "none",
                          duration_ms: int | None = None) -> str:
-        """Show an image: an http(s) URL, or a PNG/JPEG file on this machine.
+        """Show an image: an http(s) URL, or a PNG, JPEG, GIF, WebP or SVG file on this machine.
         overlay="face-corner" keeps the face running in a corner."""
         source: str | bytes = url_or_path
         if not url_or_path.startswith(("http://", "https://", "data:")):
@@ -196,11 +178,37 @@ def build_server(link: HeadLink) -> MCPServer:
             if not path.is_file():
                 raise ToolError(f"no such file: {path}")
             data = path.read_bytes()
-            source = (data if len(data) <= MAX_INLINE_IMAGE
-                      else await link.serve_file(data, path.suffix.lower()))
+            source = data if len(data) <= MAX_INLINE_IMAGE else await link.serve_file(path)
         await call(lambda h: h.display.show_image(source, overlay=overlay,
                                                   duration_ms=duration_ms))
         return f"showing {url_or_path}"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def show_video(url_or_path: str, overlay: Literal["none", "face-corner"] = "none",
+                         loop: bool = False, muted: bool = False,
+                         duration_ms: int | None = None) -> str:
+        """Play a video: an http(s) URL or a file on this machine (H.264 MP4 plays everywhere).
+        Without loop the face comes back when it ends."""
+        url = url_or_path
+        if not url.startswith(("http://", "https://")):
+            path = Path(url_or_path).expanduser()
+            if not path.is_file():
+                raise ToolError(f"no such file: {path}")
+            url = await link.serve_file(path)
+        await call(lambda h: h.display.show_video(url, overlay=overlay, loop=loop, muted=muted,
+                                                  duration_ms=duration_ms))
+        return f"playing {url_or_path}"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def subtitle(text: str = "", mode: Literal["replace", "append", "clear"] = "replace",
+                       position: Literal["bottom", "top"] = "bottom",
+                       duration_ms: int | None = None, mouth: bool = False) -> str:
+        """Show text on top of the screen, e.g. an answer when the robot has no speaker.
+        mode="append" adds to the text (stream an answer in pieces), "clear" removes it.
+        mouth=True moves the mouth with the text as if speaking."""
+        await call(lambda h: h.display.subtitle(text, mode=mode, position=position,
+                                                duration_ms=duration_ms, mouth=mouth))
+        return "subtitle cleared" if mode == "clear" else f"subtitle ({mode}): {text}"
 
     @mcp.tool(annotations=CHANGES_FACE)
     async def show_web(url: str, overlay: Literal["none", "face-corner"] = "none",
@@ -211,7 +219,7 @@ def build_server(link: HeadLink) -> MCPServer:
 
     @mcp.tool(annotations=CHANGES_FACE)
     async def show_face() -> str:
-        """Remove any image or web page and show the face full screen."""
+        """Remove any image, video or web page and show the face full screen."""
         await call(lambda h: h.display.show_face())
         return "showing the face"
 
@@ -313,16 +321,6 @@ def build_server(link: HeadLink) -> MCPServer:
 
 def _status_matches(status: dict, predicate: dict) -> bool:
     return all(status.get(k) == v for k, v in predicate.items())
-
-
-def _route_ip(host: str) -> str:
-    """Our address on the route to the head, so it can fetch files we serve."""
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        try:
-            sock.connect((socket.gethostbyname(host), 9))
-            return sock.getsockname()[0]
-        except OSError:
-            return "127.0.0.1"
 
 
 async def serve_stdio(device: str, client: str) -> None:

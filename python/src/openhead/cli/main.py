@@ -18,6 +18,8 @@ EPILOG = """examples:
   openhead pair 0000 --device localhost
   openhead pair --device 192.168.1.20            connects (the head shows a code), then asks for it
   openhead emotion curious --device localhost
+  openhead show clip.mp4 --overlay face-corner      play a local video (served from here)
+  openhead subtitle "Hello there" --mouth           text on screen, mouth moving
   openhead screenshot -o face.png --device localhost
   openhead run scenarios/smoke.yaml --device localhost
 
@@ -69,11 +71,21 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("themes", parents=[common], help="list themes and their expressions")
 
-    p = sub.add_parser("show", parents=[common], help="show an image (URL or file), a web page, or 'face'")
+    p = sub.add_parser("show", parents=[common],
+                       help="show an image or video (URL or file), a web page, or 'face'")
     p.add_argument("source")
+    p.add_argument("--loop", action="store_true", help="video: play again at the end")
+    p.add_argument("--muted", action="store_true", help="video: no sound")
     p.add_argument("--web", action="store_true", help="treat source as a web page URL")
     p.add_argument("--overlay", choices=["none", "face-corner"], default="none")
     p.add_argument("--duration-ms", type=int)
+
+    p = sub.add_parser("subtitle", parents=[common], help="show text on top of the screen")
+    p.add_argument("text", nargs="*", help="omit with --mode clear")
+    p.add_argument("--mode", choices=["replace", "append", "clear"], default="replace")
+    p.add_argument("--position", choices=["bottom", "top"])
+    p.add_argument("--duration-ms", type=int)
+    p.add_argument("--mouth", action="store_true", help="move the mouth with the text")
 
     p = sub.add_parser("run", parents=[common], help="run YAML scenarios")
     p.add_argument("scenarios", nargs="+", type=Path)
@@ -192,12 +204,17 @@ async def _command(head: Head, args: argparse.Namespace) -> int:
             elif args.web:
                 await head.display.show_web(args.source, overlay=args.overlay,
                                             duration_ms=args.duration_ms)
+            elif args.source.lower().endswith(VIDEO_SUFFIXES):
+                return await _show_video(head, args)
             else:
                 source = args.source
                 if not source.startswith(("http://", "https://", "data:")):
                     source = Path(source).read_bytes()
                 await head.display.show_image(source, overlay=args.overlay,
                                               duration_ms=args.duration_ms)
+        case "subtitle":
+            await head.display.subtitle(" ".join(args.text), mode=args.mode, position=args.position,
+                                        duration_ms=args.duration_ms, mouth=args.mouth)
         case "run":
             from ..scenario import run_scenario
 
@@ -243,6 +260,28 @@ def _load_dotenv() -> None:
                 if sep and key.startswith("OPENHEAD_") and value.strip():
                     os.environ.setdefault(key, value.strip().strip('"'))
             return
+
+
+VIDEO_SUFFIXES = (".mp4", ".m4v", ".mov", ".webm")
+
+
+async def _show_video(head: Head, args: argparse.Namespace) -> int:
+    """A video URL is shown as is; a local file is served from here until it has played."""
+    from ..client import MediaServer
+
+    if args.source.startswith(("http://", "https://")):
+        await head.display.show_video(args.source, overlay=args.overlay, loop=args.loop,
+                                      muted=args.muted, duration_ms=args.duration_ms)
+        return 0
+    async with MediaServer() as media:
+        url = media.url_for(Path(args.source), head)
+        await head.display.show_video(url, overlay=args.overlay, loop=args.loop, muted=args.muted,
+                                      duration_ms=args.duration_ms)
+        print(f"serving {args.source} until it has played (Ctrl+C stops)", flush=True)
+        with contextlib.suppress(asyncio.CancelledError):
+            while (await head.system.status()).view == "video":
+                await asyncio.sleep(1)
+    return 0
 
 
 def _hostname() -> str:

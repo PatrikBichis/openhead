@@ -36,7 +36,7 @@ from .shots import ShotServer
 log = logging.getLogger("openhead.sim")
 
 DEVICE_MESSAGES = {"ack", "error", "welcome", "pair_required", "imu", "status", "log"}
-CAPABILITIES = ["face", "display.image", "display.web", "imu", "status", "log", "screenshot"]
+CAPABILITIES = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu", "status", "log", "screenshot"]
 TOPIC_RATES = {"imu": (50.0, 100.0), "status": (1.0, 1.0), "log": (0.0, 0.0)}  # default, max
 LOG_LEVELS = ["debug", "info", "notice", "warning", "error", "fault"]
 PAIR_MAX_FAILURES = 5
@@ -111,8 +111,6 @@ class SimServer:
         self.sessions: set[Session] = set()
         self.logs: deque[dict] = deque(maxlen=2000)
         self.violations: list[str] = []  # outgoing schema violations (validate_outgoing)
-        self.view = "face"
-        self.overlay = "none"
         self.mode = "idle"
         self.settings: dict[str, Any] = {
             "name": c.name, "port": c.port, "mount_offset": [0, 0, 0, 1], "offline_theme": c.theme,
@@ -406,6 +404,10 @@ class SimServer:
                     await self._display(d)
                 case "display.clear":
                     await self._clear_display()
+                case "display.subtitle":
+                    await face.subtitle(d.get("text", ""), mode=d.get("mode", "replace"),
+                                        position=d.get("position"),
+                                        duration_ms=d.get("duration_ms"), mouth=d.get("mouth", False))
                 case "system.status":
                     return await self._status(s)
                 case "system.screenshot":
@@ -476,12 +478,14 @@ class SimServer:
     async def _status(self, s: Session) -> dict:
         state = await self.face.state()
         status = {
-            "charging": False, "thermal_state": "nominal", "view": self.view,
-            "overlay": self.overlay, "theme": state["theme"], "emotion": state["emotion"],
+            "charging": False, "thermal_state": "nominal", "view": state["view"],
+            "overlay": state["overlay"], "theme": state["theme"], "emotion": state["emotion"],
             "mode": self.mode, "dev_mode": self.config.dev_mode,
             "clients": sum(1 for x in self.sessions if x.token),
             "uptime_s": round(time.monotonic() - self.started, 1),
         }
+        if state["subtitle"]:
+            status["subtitle"] = state["subtitle"][-4000:]
         if s.ws.latency:
             status["rtt_ms"] = round(s.ws.latency * 1000, 1)
         return status
@@ -490,12 +494,12 @@ class SimServer:
         if d["content"] == "face":
             await self._clear_display()
             return
-        if d["content"] == "web" and not d["source"].startswith(("http://", "https://")):
-            raise SimError("invalid_params", "web content needs an http(s) URL")
-        # The schema already caps inline images (maxLength, about 1 MB of data).
-        await self.face.show(d["content"], d["source"], d.get("overlay", "none"))
-        self.view = d["content"]
-        self.overlay = d.get("overlay", "none")
+        if d["content"] in ("web", "video") and not d["source"].startswith(("http://", "https://")):
+            raise SimError("invalid_params", f"{d['content']} content needs an http(s) URL")
+        # The schema already caps inline images (maxLength, about 1 MB of data). A video that
+        # ends on its own returns to the face in the page; status reads the page's state.
+        await self.face.show(d["content"], d["source"], d.get("overlay", "none"),
+                             loop=d.get("loop", False), muted=d.get("muted", False))
         if "duration_ms" in d:
             self._timer("display", d["duration_ms"], self._clear_display)
 
@@ -503,8 +507,6 @@ class SimServer:
         if old := self._timers.pop("display", None):
             old.cancel()
         await self.face.clear()
-        self.view = "face"
-        self.overlay = "none"
 
     async def _screenshot(self, s: Session, d: dict) -> dict:
         self._require_dev("system.screenshot")

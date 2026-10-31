@@ -1,0 +1,55 @@
+# Display test: images (PNG, SVG, animated GIF), video and subtitles on any head.
+#   openhead run scenarios/display.yaml --device localhost        simulator (level 1, goldens)
+#   openhead run scenarios/display.yaml                           the phone in .env (level 2)
+# Local files are served to the head from this machine; screenshots of moving content
+# (GIF, video) are saved but not compared (golden: false).
+name: display
+steps:
+  - set_theme: cartoon
+  - set_emotion: happy
+  - subtitle: { mode: clear }
+
+  # images
+  - show_image: assets/test-card.svg
+  - wait_ms: 400
+  - expect_status: { view: image, overlay: none }
+  - screenshot: svg-full.png
+  - show_image: { source: assets/spinner.gif, overlay: face-corner }
+  - wait_ms: 400
+  - expect_status: { view: image, overlay: face-corner }
+  - screenshot: { file: gif-face-corner.png, golden: false }
+
+  # subtitles over the face
+  - show_face
+  - subtitle: "Hello! I can't speak, so I write."
+  - wait_ms: 400
+  - expect_status: { view: face, subtitle: "Hello! I can't speak, so I write." }
+  - screenshot: subtitle-face.png
+  - subtitle: { text: " Answers can stream in, word by word.", mode: append }
+  - expect_status: { subtitle: "Hello! I can't speak, so I write. Answers can stream in, word by word." }
+  - subtitle: { mode: clear }
+  - expect_status: { subtitle: null }
+  - subtitle: { text: "Top line over an image", position: top }
+  - show_image: assets/test-card.png
+  - wait_ms: 400
+  - screenshot: subtitle-top-image.png
+  - subtitle: { mode: clear }
+  - show_face
+  - subtitle: { text: "My mouth moves with this text.", mouth: true, duration_ms: 2500 }
+  - wait_ms: 500
+  - screenshot: { file: subtitle-mouth.png, golden: false }
+  - expect_status: { subtitle: null, timeout_ms: 3000 }
+
+  # video: back to the face when it ends; loop until duration_ms
+  - show_video: { source: assets/clip.mp4, muted: true, overlay: face-corner }
+  - expect_status: { view: video, overlay: face-corner }
+  - wait_ms: 1000
+  - screenshot: { file: video-face-corner.png, golden: false }
+  - expect_status: { view: face, timeout_ms: 6000 }
+  - expect_log: { contains: "video ended" }
+  - show_video: { source: assets/clip.mp4, muted: true, loop: true, duration_ms: 4000 }
+  - wait_ms: 3500
+  - expect_status: { view: video }
+  - expect_status: { view: face, timeout_ms: 2000 }
+
+  - set_emotion: neutral
