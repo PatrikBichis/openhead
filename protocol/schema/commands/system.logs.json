@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SystemLogs",
+  "description": "Most recent lines from the device's log ring buffer (2000 lines), oldest first. Dev mode only.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "system.logs" },
+    "n": { "type": "integer", "minimum": 1, "maximum": 2000, "description": "Default 100." },
+    "level": {
+      "$ref": "../common.json#/$defs/log_level",
+      "description": "Minimum level. Default `debug`."
+    }
+  },
+  "required": ["type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "entries": { "type": "array", "items": { "$ref": "../topics/log.json#/$defs/payload" } }
+      },
+      "required": ["entries"],
+      "additionalProperties": false
+    }
+  }
+}

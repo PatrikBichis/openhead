@@ -1,0 +1,14 @@
+{
+  "type": "system.settings",
+  "ts": 1793462400000,
+  "seq": 30,
+  "id": "c-21",
+  "action": "set",
+  "key": "mount_offset",
+  "value": [
+    0,
+    0,
+    0.7071068,
+    0.7071068
+  ]
+}

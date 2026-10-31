@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hello",
+  "description": "First message on a new connection. Without a valid token the device answers `pair_required`; with one it answers `welcome`. The major version must match the device's.",
+  "type": "object",
+  "allOf": [{ "$ref": "../envelope.json" }],
+  "properties": {
+    "type": { "const": "hello" },
+    "client": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Human-readable client name, shown on the pairing screen and in the client list."
+    },
+    "protocol_version": { "$ref": "../common.json#/$defs/version" },
+    "token": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256,
+      "description": "Token from an earlier `welcome`."
+    }
+  },
+  "required": ["type", "client", "protocol_version"],
+  "unevaluatedProperties": false
+}

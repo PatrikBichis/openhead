@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "name": "head-01",
+    "port": 8765,
+    "mount_offset": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "offline_theme": "cartoon"
+  }
+}

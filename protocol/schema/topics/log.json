@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Log",
+  "description": "One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "../envelope.json" },
+    { "$ref": "#/$defs/payload" }
+  ],
+  "properties": {
+    "type": { "const": "log" }
+  },
+  "required": ["type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "payload": {
+      "type": "object",
+      "properties": {
+        "time_ms": { "type": "integer", "minimum": 0, "description": "When the line was logged." },
+        "level": { "$ref": "../common.json#/$defs/log_level" },
+        "subsystem": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "description": "e.g. `link`, `face`, `display`, `sensors`."
+        },
+        "message": { "type": "string", "maxLength": 4096 },
+        "seq_ref": { "type": "integer", "minimum": 0, "description": "`seq` of the received message this line is about." }
+      },
+      "required": ["time_ms", "level", "subsystem", "message"]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaceSetTheme",
+  "description": "Switch the face to an installed theme. Unknown names give `invalid_params`.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "face.set_theme" },
+    "name": { "$ref": "../common.json#/$defs/name" },
+    "transition_ms": {
+      "$ref": "../common.json#/$defs/duration_ms",
+      "description": "Cross-fade time. Default 300."
+    }
+  },
+  "required": ["type", "name"],
+  "unevaluatedProperties": false
+}

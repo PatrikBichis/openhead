@@ -1,0 +1,17 @@
+{
+  "type": "status",
+  "ts": 1793462400000,
+  "seq": 34,
+  "battery_level": 0.82,
+  "charging": true,
+  "thermal_state": "nominal",
+  "view": "face",
+  "overlay": "none",
+  "theme": "cartoon",
+  "emotion": "curious",
+  "mode": "idle",
+  "dev_mode": true,
+  "clients": 2,
+  "rtt_ms": 7.5,
+  "uptime_s": 3605.2
+}

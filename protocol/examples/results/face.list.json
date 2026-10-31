@@ -1,0 +1,36 @@
+{
+  "active": "cartoon",
+  "themes": [
+    {
+      "name": "cartoon",
+      "version": "0.1.0",
+      "title": "Cartoon",
+      "expressions": [
+        "neutral",
+        "happy",
+        "curious",
+        "thinking",
+        "surprised",
+        "sad",
+        "angry",
+        "sleepy",
+        "scared",
+        "mischievous"
+      ],
+      "extras": []
+    },
+    {
+      "name": "halloween",
+      "version": "0.1.0",
+      "title": "Halloween",
+      "expressions": [
+        "neutral",
+        "happy",
+        "scared"
+      ],
+      "extras": [
+        "cackle"
+      ]
+    }
+  ]
+}

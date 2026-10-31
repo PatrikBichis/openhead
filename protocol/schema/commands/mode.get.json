@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModeGet",
+  "description": "Current camera ownership mode.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "mode.get" }
+  },
+  "required": ["type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "mode": { "$ref": "../common.json#/$defs/mode" }
+      },
+      "required": ["mode"],
+      "additionalProperties": false
+    }
+  }
+}

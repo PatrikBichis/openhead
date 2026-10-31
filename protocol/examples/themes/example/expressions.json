@@ -1,0 +1,15 @@
+{
+  "expressions": {
+    "neutral": {
+      "open_l": 0.9, "open_r": 0.9, "tilt_l": 0, "tilt_r": 0, "pupil": 0.5,
+      "gaze_x": 0, "gaze_y": 0, "squint": 0,
+      "open": 0, "width": 0.5, "curve": 0.1, "asym": 0, "teeth": 0,
+      "head_tilt": 0, "breath_rate": 0.3, "blink_rate": 0.5, "jitter": 0
+    },
+    "happy": { "squint": 0.3, "curve": 0.8, "width": 0.7, "open": 0.2 },
+    "sad": { "tilt_l": 0.4, "tilt_r": -0.4, "curve": -0.6, "gaze_y": -0.3 }
+  },
+  "extra": {
+    "wink": { "open_l": 0, "curve": 0.5, "asym": 0.4 }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "type": "welcome",
+  "ts": 1793462400000,
+  "seq": 4,
+  "token": "q3K9vX2mT8bLwE5nR1yZcA7hD4fJ6sGuP0oIkM9tVxw",
+  "protocol_version": "0.1.0",
+  "device": {
+    "name": "head-01",
+    "platform": "ios",
+    "model": "iPhone13,2",
+    "os_version": "17.6",
+    "app_version": "0.1.0 (42)",
+    "screen": {
+      "width": 390,
+      "height": 844,
+      "scale": 3,
+      "safe_area": {
+        "top": 47,
+        "left": 0,
+        "bottom": 34,
+        "right": 0
+      }
+    }
+  },
+  "capabilities": [
+    "face",
+    "display.image",
+    "display.web",
+    "imu",
+    "status",
+    "log",
+    "screenshot"
+  ],
+  "themes": [
+    "cartoon",
+    "minimal",
+    "halloween"
+  ],
+  "dev_mode": true
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaceSetEmotion",
+  "description": "Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "face.set_emotion" },
+    "name": { "$ref": "../common.json#/$defs/name" },
+    "intensity": {
+      "$ref": "../common.json#/$defs/unit",
+      "description": "Weight of the emotion. Default 1."
+    },
+    "duration_ms": {
+      "$ref": "../common.json#/$defs/duration_ms",
+      "description": "Return to the resting emotion after this time. Omit to hold."
+    },
+    "blend": {
+      "type": "string",
+      "enum": ["replace", "add"],
+      "description": "`replace` fades out other emotions; `add` layers on top. Default `replace`."
+    }
+  },
+  "required": ["type", "name"],
+  "unevaluatedProperties": false
+}

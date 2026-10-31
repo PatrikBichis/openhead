@@ -1,0 +1,10 @@
+{
+  "type": "display.show",
+  "ts": 1793462400000,
+  "seq": 20,
+  "id": "c-11",
+  "content": "image",
+  "source": "https://example.com/map.png",
+  "overlay": "face-corner",
+  "duration_ms": 10000
+}

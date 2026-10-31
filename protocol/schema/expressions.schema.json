@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Expressions",
+  "description": "A theme's `expressions.json`: a face parameter preset per emotion. Only `neutral` is required; missing shared names fall back to it. Parameters a preset leaves out keep the theme's neutral value.",
+  "type": "object",
+  "properties": {
+    "expressions": {
+      "type": "object",
+      "propertyNames": { "enum": ["neutral", "happy", "curious", "thinking", "surprised", "sad", "angry", "sleepy", "scared", "mischievous"] },
+      "additionalProperties": { "$ref": "#/$defs/params" },
+      "required": ["neutral"]
+    },
+    "extra": {
+      "type": "object",
+      "propertyNames": { "$ref": "common.json#/$defs/name" },
+      "additionalProperties": { "$ref": "#/$defs/params" },
+      "description": "Theme-specific expressions, e.g. `cackle`."
+    }
+  },
+  "required": ["expressions"],
+  "additionalProperties": false,
+  "$defs": {
+    "params": {
+      "type": "object",
+      "description": "Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.",
+      "properties": {
+        "open_l": { "$ref": "common.json#/$defs/unit" },
+        "open_r": { "$ref": "common.json#/$defs/unit" },
+        "tilt_l": { "$ref": "common.json#/$defs/signed_unit" },
+        "tilt_r": { "$ref": "common.json#/$defs/signed_unit" },
+        "pupil": { "$ref": "common.json#/$defs/unit" },
+        "gaze_x": { "$ref": "common.json#/$defs/signed_unit" },
+        "gaze_y": { "$ref": "common.json#/$defs/signed_unit" },
+        "squint": { "$ref": "common.json#/$defs/unit" },
+        "open": { "$ref": "common.json#/$defs/unit", "description": "Mouth opening." },
+        "width": { "$ref": "common.json#/$defs/unit", "description": "Mouth width." },
+        "curve": { "$ref": "common.json#/$defs/signed_unit", "description": "Smile (+) or frown (-)." },
+        "asym": { "$ref": "common.json#/$defs/signed_unit" },
+        "teeth": { "$ref": "common.json#/$defs/unit" },
+        "head_tilt": { "$ref": "common.json#/$defs/signed_unit" },
+        "breath_rate": { "$ref": "common.json#/$defs/unit" },
+        "blink_rate": { "$ref": "common.json#/$defs/unit" },
+        "jitter": { "$ref": "common.json#/$defs/unit" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

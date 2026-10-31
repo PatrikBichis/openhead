@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unsubscribe",
+  "description": "Close a stream. Acknowledged even if the topic was not subscribed.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "unsubscribe" },
+    "topic": { "$ref": "../common.json#/$defs/topic" }
+  },
+  "required": ["type", "topic"],
+  "unevaluatedProperties": false
+}

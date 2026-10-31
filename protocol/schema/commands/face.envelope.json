@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaceEnvelope",
+  "description": "Mouth envelope from the host's speech audio, sent as a stream at 20-30 Hz while speaking. Not a command: no `id` and no reply. The face decays to closed if no update arrives for 200 ms.",
+  "type": "object",
+  "allOf": [{ "$ref": "../envelope.json" }],
+  "properties": {
+    "type": { "const": "face.envelope" },
+    "level": { "$ref": "../common.json#/$defs/unit" }
+  },
+  "required": ["type", "level"],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,10 @@
+{
+  "type": "face.set_emotion",
+  "ts": 1793462400000,
+  "seq": 14,
+  "id": "c-3",
+  "name": "happy",
+  "intensity": 1,
+  "duration_ms": 2000,
+  "blend": "add"
+}

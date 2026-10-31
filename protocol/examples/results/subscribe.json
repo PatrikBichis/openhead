@@ -1,0 +1,4 @@
+{
+  "topic": "imu",
+  "rate_hz": 60
+}

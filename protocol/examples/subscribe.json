@@ -1,0 +1,8 @@
+{
+  "type": "subscribe",
+  "ts": 1793462400000,
+  "seq": 9,
+  "id": "s-1",
+  "topic": "imu",
+  "rate_hz": 100
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaceLookAt",
+  "description": "Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The world frame needs pose and arrives in 0.2.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "../command.json" },
+    {
+      "if": { "properties": { "frame": { "const": "screen" } } },
+      "then": { "required": ["x", "y"] },
+      "else": { "required": ["yaw", "pitch"] }
+    }
+  ],
+  "properties": {
+    "type": { "const": "face.look_at" },
+    "frame": { "type": "string", "enum": ["screen", "head"] },
+    "x": { "$ref": "../common.json#/$defs/signed_unit" },
+    "y": { "$ref": "../common.json#/$defs/signed_unit" },
+    "yaw": { "type": "number", "minimum": -90, "maximum": 90 },
+    "pitch": { "type": "number", "minimum": -90, "maximum": 90 },
+    "duration_ms": {
+      "$ref": "../common.json#/$defs/duration_ms",
+      "description": "Hold the gaze, then return to idle motion. Omit to hold until the next `look_at`."
+    }
+  },
+  "required": ["type", "frame"],
+  "unevaluatedProperties": false
+}

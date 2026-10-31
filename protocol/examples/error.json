@@ -1,0 +1,8 @@
+{
+  "type": "error",
+  "ts": 1793462400000,
+  "seq": 7,
+  "id": "c-9",
+  "code": "dev_mode_required",
+  "message": "system.screenshot needs dev mode"
+}

@@ -1,0 +1,32 @@
+{
+  "name": "example",
+  "version": "0.1.0",
+  "title": "Example",
+  "description": "Minimal valid theme used to test the schema. Real themes live in face/themes/.",
+  "palette": {
+    "bg": "#101418",
+    "sclera": "#F4F1EA",
+    "iris": "#3A7BD5",
+    "pupil": "#0B0B0B",
+    "lid": "#101418",
+    "mouth": "#E8505B",
+    "teeth": "#FFFFFF",
+    "accent": "#FFC857"
+  },
+  "shapes": {
+    "eye": { "preset": "round" },
+    "mouth": { "path": "M -1 0 Q 0 0.6 1 0" }
+  },
+  "layout": { "eye_spacing": 0.42, "eye_size": 0.22, "eye_y": 0.15, "mouth_width": 0.4, "mouth_y": -0.3 },
+  "render": { "stroke": 0, "glow": 0, "scanlines": false, "pixelate": 0 },
+  "idle": {
+    "blink_interval_ms": [2500, 6000],
+    "blink_duration_ms": 140,
+    "saccade_interval_ms": [800, 2500],
+    "saccade_amplitude": 0.15,
+    "breath_period_ms": 4000,
+    "breath_amplitude": 0.02
+  },
+  "envelope": { "gain": 1.2, "gamma": 0.8, "attack_ms": 30, "release_ms": 90 },
+  "resting_emotion": "neutral"
+}

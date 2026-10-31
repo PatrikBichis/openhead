@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Status",
+  "description": "Device status, up to 1 Hz. Also the result of `system.status`.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "../envelope.json" },
+    { "$ref": "#/$defs/payload" }
+  ],
+  "properties": {
+    "type": { "const": "status" }
+  },
+  "required": ["type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "payload": {
+      "type": "object",
+      "properties": {
+        "battery_level": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Null when unknown (e.g. simulator)."
+        },
+        "charging": { "type": "boolean" },
+        "thermal_state": { "$ref": "../common.json#/$defs/thermal_state" },
+        "view": { "$ref": "../common.json#/$defs/view" },
+        "overlay": { "type": "string", "enum": ["none", "face-corner"] },
+        "theme": { "$ref": "../common.json#/$defs/name" },
+        "emotion": { "$ref": "../common.json#/$defs/name" },
+        "mode": { "$ref": "../common.json#/$defs/mode" },
+        "dev_mode": { "type": "boolean" },
+        "clients": { "type": "integer", "minimum": 0, "description": "Connected, authenticated clients." },
+        "rtt_ms": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Round-trip time to the receiving client, from WebSocket ping. Null until measured."
+        },
+        "uptime_s": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "battery_level", "charging", "thermal_state", "view", "overlay", "theme",
+        "emotion", "mode", "dev_mode", "clients", "rtt_ms", "uptime_s"
+      ]
+    }
+  }
+}

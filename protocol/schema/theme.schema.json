@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Theme",
+  "description": "A theme's `theme.json`: look and idle behaviour of the face. Expressions live in `expressions.json` next to it; images in `assets/`. Lengths are fractions of the screen's shortest side.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "$ref": "common.json#/$defs/name",
+      "description": "Must equal the folder name."
+    },
+    "version": {
+      "$ref": "common.json#/$defs/version"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "palette": {
+      "title": "ThemePalette",
+      "type": "object",
+      "properties": {
+        "bg": {
+          "$ref": "#/$defs/color"
+        },
+        "sclera": {
+          "$ref": "#/$defs/color"
+        },
+        "iris": {
+          "$ref": "#/$defs/color"
+        },
+        "pupil": {
+          "$ref": "#/$defs/color"
+        },
+        "lid": {
+          "$ref": "#/$defs/color"
+        },
+        "mouth": {
+          "$ref": "#/$defs/color"
+        },
+        "teeth": {
+          "$ref": "#/$defs/color"
+        },
+        "accent": {
+          "$ref": "#/$defs/color"
+        }
+      },
+      "required": [
+        "bg",
+        "sclera",
+        "iris",
+        "pupil",
+        "lid",
+        "mouth",
+        "teeth",
+        "accent"
+      ],
+      "additionalProperties": false
+    },
+    "shapes": {
+      "title": "ThemeShapes",
+      "type": "object",
+      "properties": {
+        "eye": {
+          "$ref": "#/$defs/shape"
+        },
+        "mouth": {
+          "$ref": "#/$defs/shape"
+        }
+      },
+      "required": [
+        "eye",
+        "mouth"
+      ],
+      "additionalProperties": false
+    },
+    "layout": {
+      "title": "ThemeLayout",
+      "type": "object",
+      "description": "Placement relative to the screen centre. Defaults are the engine's.",
+      "properties": {
+        "eye_spacing": {
+          "$ref": "common.json#/$defs/unit"
+        },
+        "eye_size": {
+          "$ref": "common.json#/$defs/unit"
+        },
+        "eye_y": {
+          "$ref": "common.json#/$defs/signed_unit"
+        },
+        "mouth_width": {
+          "$ref": "common.json#/$defs/unit"
+        },
+        "mouth_y": {
+          "$ref": "common.json#/$defs/signed_unit"
+        }
+      },
+      "additionalProperties": false
+    },
+    "render": {
+      "title": "ThemeRender",
+      "type": "object",
+      "properties": {
+        "stroke": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1,
+          "description": "Outline width; 0 for none."
+        },
+        "glow": {
+          "$ref": "common.json#/$defs/unit"
+        },
+        "scanlines": {
+          "type": "boolean"
+        },
+        "pixelate": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "Pixel block size in points; 0 for off."
+        }
+      },
+      "additionalProperties": false
+    },
+    "idle": {
+      "title": "ThemeIdle",
+      "type": "object",
+      "properties": {
+        "blink_interval_ms": {
+          "$ref": "#/$defs/range_ms"
+        },
+        "blink_duration_ms": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 2000
+        },
+        "saccade_interval_ms": {
+          "$ref": "#/$defs/range_ms"
+        },
+        "saccade_amplitude": {
+          "$ref": "common.json#/$defs/unit"
+        },
+        "breath_period_ms": {
+          "type": "integer",
+          "minimum": 500,
+          "maximum": 20000
+        },
+        "breath_amplitude": {
+          "$ref": "common.json#/$defs/unit"
+        }
+      },
+      "required": [
+        "blink_interval_ms",
+        "blink_duration_ms"
+      ],
+      "additionalProperties": false
+    },
+    "envelope": {
+      "title": "ThemeEnvelope",
+      "type": "object",
+      "description": "How the speech envelope drives mouth `open`: open = gain * level^gamma, smoothed with attack/release.",
+      "properties": {
+        "gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "gamma": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 4
+        },
+        "attack_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "release_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "additionalProperties": false
+    },
+    "resting_emotion": {
+      "$ref": "common.json#/$defs/name",
+      "description": "Emotion shown when nothing else is set. Default `neutral`."
+    }
+  },
+  "required": [
+    "name",
+    "version",
+    "palette",
+    "shapes",
+    "idle"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$",
+      "description": "#RRGGBB or #RRGGBBAA."
+    },
+    "range_ms": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 60000
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[min, max] in milliseconds; a value is drawn uniformly each time."
+    },
+    "shape": {
+      "description": "One of: a built-in preset, an SVG path in normalised coordinates ([-1, 1] box), or an image from `assets/`.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "preset": {
+              "type": "string",
+              "enum": [
+                "round",
+                "almond",
+                "slit",
+                "pixel",
+                "line"
+              ]
+            }
+          },
+          "required": [
+            "preset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^assets/[A-Za-z0-9_./-]+\\.(png|svg)$"
+            },
+            "anchor": {
+              "type": "array",
+              "items": {
+                "$ref": "common.json#/$defs/unit"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Point in the image placed at the feature centre. Default [0.5, 0.5]."
+            },
+            "scale": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "image"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

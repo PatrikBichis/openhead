@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pair",
+  "description": "Pairing attempt with the code shown on the device. Answered with `welcome`, or `error` with `unauthorized` (wrong code) or `rate_limited` (locked for five minutes after five failures).",
+  "type": "object",
+  "allOf": [{ "$ref": "../envelope.json" }],
+  "properties": {
+    "type": { "const": "pair" },
+    "code": {
+      "type": "string",
+      "pattern": "^[0-9]{4,8}$",
+      "description": "Devices show six digits; the simulator accepts `0000` in dev mode."
+    }
+  },
+  "required": ["type", "code"],
+  "unevaluatedProperties": false
+}

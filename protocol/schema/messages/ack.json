@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ack",
+  "description": "Successful reply to a command. Commands that return data put it in `result`; its shape is the command schema's `$defs/result`.",
+  "type": "object",
+  "allOf": [{ "$ref": "../envelope.json" }],
+  "properties": {
+    "type": { "const": "ack" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "result": { "type": "object" }
+  },
+  "required": ["type", "id"],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,9 @@
+{
+  "type": "face.set_emotion",
+  "ts": 1793462400000,
+  "seq": 13,
+  "id": "c-2",
+  "name": "curious",
+  "intensity": 0.7,
+  "blend": "replace"
+}

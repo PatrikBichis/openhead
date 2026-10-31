@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SystemDiagnostics",
+  "description": "Health snapshot for debugging. Dev mode only.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "system.diagnostics"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "permission": {
+      "type": "string",
+      "enum": [
+        "granted",
+        "denied",
+        "not_determined",
+        "not_required"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "uptime_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "thermal_state": {
+          "$ref": "../common.json#/$defs/thermal_state"
+        },
+        "memory_mb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Memory used by the app."
+        },
+        "frame_rate": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Face render rate over the last second."
+        },
+        "permissions": {
+          "title": "DiagnosticsPermissions",
+          "type": "object",
+          "properties": {
+            "local_network": {
+              "$ref": "#/$defs/permission"
+            },
+            "motion": {
+              "$ref": "#/$defs/permission"
+            },
+            "camera": {
+              "$ref": "#/$defs/permission"
+            }
+          },
+          "required": [
+            "local_network",
+            "motion",
+            "camera"
+          ],
+          "additionalProperties": false
+        },
+        "arkit": {
+          "title": "DiagnosticsArkit",
+          "type": "object",
+          "properties": {
+            "world_tracking": {
+              "type": "boolean"
+            },
+            "face_tracking": {
+              "type": "boolean",
+              "description": "Front-camera face tracking concurrent with world tracking."
+            }
+          },
+          "required": [
+            "world_tracking",
+            "face_tracking"
+          ],
+          "additionalProperties": false
+        },
+        "last_crash": {
+          "title": "DiagnosticsLastCrash",
+          "type": "object",
+          "properties": {
+            "time_ms": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "time_ms",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "uptime_s",
+        "thermal_state",
+        "memory_mb",
+        "frame_rate",
+        "permissions",
+        "arkit"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

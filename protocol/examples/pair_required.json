@@ -1,0 +1,9 @@
+{
+  "type": "pair_required",
+  "ts": 1793462400000,
+  "seq": 2,
+  "code_hint": "6-digit code shown on head-01",
+  "code_length": 6,
+  "expires_in_ms": 60000,
+  "attempts_left": 5
+}

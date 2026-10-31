@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "time_ms": 1793462400000,
+      "level": "info",
+      "subsystem": "face",
+      "message": "emotion=curious intensity=0.70",
+      "seq_ref": 14
+    },
+    {
+      "time_ms": 1793462400000,
+      "level": "warning",
+      "subsystem": "link",
+      "message": "client jetson-01 rtt 120 ms"
+    }
+  ]
+}

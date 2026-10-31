@@ -1,0 +1,7 @@
+{
+  "type": "error",
+  "ts": 1793462400000,
+  "seq": 8,
+  "code": "rate_limited",
+  "message": "Pairing locked for 300 s after 5 failed attempts"
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Error",
+  "description": "Failed command (with `id`) or failed handshake (without).",
+  "type": "object",
+  "allOf": [{ "$ref": "../envelope.json" }],
+  "properties": {
+    "type": { "const": "error" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "code": {
+      "type": "string",
+      "enum": ["unauthorized", "unsupported", "busy", "invalid_params", "dev_mode_required", "rate_limited"]
+    },
+    "message": { "type": "string", "maxLength": 1024 },
+    "details": { "type": "object" }
+  },
+  "required": ["type", "code", "message"],
+  "unevaluatedProperties": false
+}

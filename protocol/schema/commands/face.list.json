@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaceList",
+  "description": "List installed themes with their expressions.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "face.list" }
+  },
+  "required": ["type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "active": { "$ref": "../common.json#/$defs/name" },
+        "themes": { "type": "array", "items": { "$ref": "#/$defs/theme_info" } }
+      },
+      "required": ["active", "themes"],
+      "additionalProperties": false
+    },
+    "theme_info": {
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "../common.json#/$defs/name" },
+        "version": { "$ref": "../common.json#/$defs/version" },
+        "title": { "type": "string" },
+        "expressions": {
+          "type": "array",
+          "items": { "$ref": "../common.json#/$defs/name" },
+          "description": "Shared emotion names the theme defines."
+        },
+        "extras": {
+          "type": "array",
+          "items": { "$ref": "../common.json#/$defs/name" },
+          "description": "Theme-specific expressions, e.g. `cackle`."
+        }
+      },
+      "required": ["name", "version", "expressions", "extras"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "hello",
+  "ts": 1793462400000,
+  "seq": 0,
+  "client": "jetson-01",
+  "protocol_version": "0.1.0"
+}

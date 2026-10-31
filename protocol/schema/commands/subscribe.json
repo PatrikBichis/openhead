@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Subscribe",
+  "description": "Open a stream. The device clamps `rate_hz` to what it supports and returns the actual rate. Subscribing again to the same topic replaces the earlier subscription.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "subscribe" },
+    "topic": { "$ref": "../common.json#/$defs/topic" },
+    "rate_hz": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1000,
+      "description": "Requested rate. Ignored for event-driven topics such as `log`."
+    },
+    "fields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" },
+      "description": "Only send these payload fields. Omit for all."
+    }
+  },
+  "required": ["type", "topic"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "topic": { "$ref": "../common.json#/$defs/topic" },
+        "rate_hz": { "type": "number", "minimum": 0, "description": "Actual rate; 0 for event-driven topics." }
+      },
+      "required": ["topic", "rate_hz"],
+      "additionalProperties": false
+    }
+  }
+}

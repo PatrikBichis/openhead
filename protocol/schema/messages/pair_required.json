@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PairRequired",
+  "description": "Sent by the device when `hello` has no valid token. The device shows a pairing code on screen.",
+  "type": "object",
+  "allOf": [{ "$ref": "../envelope.json" }],
+  "properties": {
+    "type": { "const": "pair_required" },
+    "code_hint": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "Where to find the code, e.g. \"6-digit code shown on head-01\"."
+    },
+    "code_length": { "type": "integer", "minimum": 4, "maximum": 8 },
+    "expires_in_ms": { "$ref": "../common.json#/$defs/duration_ms" },
+    "attempts_left": { "type": "integer", "minimum": 0 }
+  },
+  "required": ["type", "code_hint", "code_length", "expires_in_ms", "attempts_left"],
+  "unevaluatedProperties": false
+}

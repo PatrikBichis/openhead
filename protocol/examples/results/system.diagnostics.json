@@ -1,0 +1,15 @@
+{
+  "uptime_s": 3605.2,
+  "thermal_state": "fair",
+  "memory_mb": 142.5,
+  "frame_rate": 60,
+  "permissions": {
+    "local_network": "granted",
+    "motion": "granted",
+    "camera": "not_required"
+  },
+  "arkit": {
+    "world_tracking": true,
+    "face_tracking": true
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SystemScreenshot",
+  "description": "PNG of what is on screen. Dev mode only. With `delivery: url` the image is served by the device's HTTP server (WebSocket port + 1) for 60 s and must be fetched with the token in an `Authorization: Bearer` header.",
+  "type": "object",
+  "allOf": [{ "$ref": "../command.json" }],
+  "properties": {
+    "type": { "const": "system.screenshot" },
+    "scale": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Fraction of native resolution. Default 1."
+    },
+    "delivery": {
+      "type": "string",
+      "enum": ["url", "inline"],
+      "description": "Default `url`."
+    }
+  },
+  "required": ["type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "width": { "type": "integer", "minimum": 1, "description": "Pixels." },
+        "height": { "type": "integer", "minimum": 1, "description": "Pixels." },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "expires_ms": { "$ref": "../common.json#/$defs/duration_ms" },
+        "png_base64": { "type": "string", "contentEncoding": "base64", "contentMediaType": "image/png" }
+      },
+      "required": ["width", "height"],
+      "oneOf": [
+        { "required": ["url", "expires_ms"] },
+        { "required": ["png_base64"] }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

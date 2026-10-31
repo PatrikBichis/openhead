@@ -1,0 +1,8 @@
+{
+  "type": "hello",
+  "ts": 1793462400000,
+  "seq": 1,
+  "client": "jetson-01",
+  "protocol_version": "0.1.0",
+  "token": "q3K9vX2mT8bLwE5nR1yZcA7hD4fJ6sGuP0oIkM9tVxw"
+}

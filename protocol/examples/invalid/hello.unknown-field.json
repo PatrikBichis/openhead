@@ -1,0 +1,8 @@
+{
+  "type": "hello",
+  "ts": 1793462400000,
+  "seq": 37,
+  "client": "x",
+  "protocol_version": "0.1.0",
+  "colour": "red"
+}

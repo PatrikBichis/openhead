@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SystemSettings",
+  "description": "Read all settings, or set one. `set` needs dev mode. Known keys in 0.1: `name`, `port`, `mount_offset` ([x, y, z, w] quaternion), `offline_theme`.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "../command.json" },
+    {
+      "if": { "properties": { "action": { "const": "set" } } },
+      "then": { "required": ["key", "value"] }
+    }
+  ],
+  "properties": {
+    "type": { "const": "system.settings" },
+    "action": { "type": "string", "enum": ["get", "set"] },
+    "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "value": { "description": "Any JSON value valid for the key." }
+  },
+  "required": ["type", "action"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "settings": { "type": "object", "description": "All settings after the command." }
+      },
+      "required": ["settings"],
+      "additionalProperties": false
+    }
+  }
+}

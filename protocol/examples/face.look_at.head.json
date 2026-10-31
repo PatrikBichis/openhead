@@ -1,0 +1,10 @@
+{
+  "type": "face.look_at",
+  "ts": 1793462400000,
+  "seq": 16,
+  "id": "c-5",
+  "frame": "head",
+  "yaw": 20,
+  "pitch": -5,
+  "duration_ms": 1500
+}
