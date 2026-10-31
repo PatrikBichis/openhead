@@ -21,10 +21,6 @@ class CommonName(RootModel[str]):
     """
 
 
-class CommonUnit(RootModel[float]):
-    root: float = Field(..., ge=0.0, le=1.0, title="CommonUnit")
-
-
 class Envelope(BaseModel):
     """
     Fields carried by every OpenHead message.
@@ -140,11 +136,11 @@ class FaceListThemeInfo(BaseModel):
     Semantic version, MAJOR.MINOR.PATCH.
     """
     title: str | None = None
-    expressions: list[CommonName]
+    expressions: list[str]
     """
     Shared emotion names the theme defines.
     """
-    extras: list[CommonName]
+    extras: list[str]
     """
     Theme-specific expressions, e.g. `cackle`.
     """
@@ -178,11 +174,33 @@ class Hello(Envelope):
     """
 
 
-class QItem(RootModel[float]):
-    root: float = Field(..., ge=-1.0, le=1.0)
+class LogFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    time_ms: int | None = Field(None, ge=0)
+    """
+    When the line was logged.
+    """
+    level: Literal["debug", "info", "notice", "warning", "error", "fault"] | None = (
+        Field(None, title="CommonLogLevel")
+    )
+    subsystem: str | None = Field(None, pattern="^[a-z][a-z0-9_.]*$")
+    """
+    e.g. `link`, `face`, `display`, `sensors`.
+    """
+    message: str | None = Field(None, max_length=4096)
+    seq_ref: int | None = Field(None, ge=0)
+    """
+    `seq` of the received message this line is about.
+    """
 
 
-class LogPayload(BaseModel):
+class LogPayload(LogFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
     model_config = ConfigDict(
         extra="ignore",
     )
@@ -198,10 +216,6 @@ class LogPayload(BaseModel):
     e.g. `link`, `face`, `display`, `sensors`.
     """
     message: str = Field(..., max_length=4096)
-    seq_ref: int | None = Field(None, ge=0)
-    """
-    `seq` of the received message this line is about.
-    """
 
 
 class ModeGetResult(BaseModel):
@@ -255,7 +269,7 @@ class PairRequired(Envelope):
     attempts_left: int = Field(..., ge=0)
 
 
-class StatusPayload(BaseModel):
+class StatusFields(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
@@ -263,6 +277,51 @@ class StatusPayload(BaseModel):
     """
     Omitted when unknown (e.g. simulator).
     """
+    charging: bool | None = None
+    thermal_state: Literal["nominal", "fair", "serious", "critical"] | None = Field(
+        None, title="CommonThermalState"
+    )
+    view: Literal["face", "image", "web"] | None = Field(None, title="CommonView")
+    """
+    What fills the screen.
+    """
+    overlay: Literal["none", "face-corner"] | None = None
+    theme: str | None = Field(
+        None, pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName"
+    )
+    """
+    Lower-case identifier used for themes and emotions.
+    """
+    emotion: str | None = Field(
+        None, pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName"
+    )
+    """
+    Lower-case identifier used for themes and emotions.
+    """
+    mode: Literal["idle", "sensing", "capture"] | None = Field(None, title="CommonMode")
+    """
+    Camera ownership mode. Only `idle` is supported in 0.1.
+    """
+    dev_mode: bool | None = None
+    clients: int | None = Field(None, ge=0)
+    """
+    Connected, authenticated clients.
+    """
+    rtt_ms: float | None = Field(None, ge=0.0)
+    """
+    Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
+    """
+    uptime_s: float | None = Field(None, ge=0.0)
+
+
+class StatusPayload(StatusFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
     charging: bool
     thermal_state: Literal["nominal", "fair", "serious", "critical"] = Field(
         ..., title="CommonThermalState"
@@ -288,10 +347,6 @@ class StatusPayload(BaseModel):
     clients: int = Field(..., ge=0)
     """
     Connected, authenticated clients.
-    """
-    rtt_ms: float | None = Field(None, ge=0.0)
-    """
-    Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
     """
     uptime_s: float = Field(..., ge=0.0)
 
@@ -485,10 +540,6 @@ class ThemeEnvelope(BaseModel):
     release_ms: int | None = Field(None, ge=0, le=1000)
 
 
-class ThemeRangeM(RootModel[int]):
-    root: int = Field(..., ge=0, le=60000)
-
-
 class ThemeShape1(BaseModel):
     """
     One of: a built-in preset, an SVG path in normalised coordinates ([-1, 1] box), or an image from `assets/`.
@@ -520,15 +571,11 @@ class ThemeShape3(BaseModel):
         extra="ignore",
     )
     image: str = Field(..., pattern="^assets/[A-Za-z0-9_./-]+\\.(png|svg)$")
-    anchor: list[CommonUnit] | None = Field(None, max_length=2, min_length=2)
+    anchor: list[float] | None = Field(None, max_length=2, min_length=2)
     """
     Point in the image placed at the feature centre. Default [0.5, 0.5].
     """
     scale: float | None = Field(None, gt=0.0, le=10.0)
-
-
-class Capability(RootModel[str]):
-    root: str = Field(..., pattern="^[a-z][a-z0-9_.-]*$")
 
 
 class WelcomeInsets(BaseModel):
@@ -789,11 +836,38 @@ class FaceSetTheme(Command):
     """
 
 
-class ImuPayload(BaseModel):
+class ImuFields(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    q: list[QItem] = Field(..., max_length=4, min_length=4)
+    q: list[float] | None = Field(None, max_length=4, min_length=4)
+    """
+    Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference frame.
+    """
+    gyro: list[float] | None = Field(None, max_length=3, min_length=3, title="ImuVec3")
+    """
+    Angular rate in rad/s.
+    """
+    accel: list[float] | None = Field(None, max_length=3, min_length=3, title="ImuVec3")
+    """
+    Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS CoreMotion reports the opposite sign.)
+    """
+    frame: Literal["device", "mount"] | None = None
+    sensor_time_s: float | None = Field(None, ge=0.0)
+    """
+    Sensor timestamp in seconds since device boot, for precise intervals between samples.
+    """
+
+
+class ImuPayload(ImuFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    q: list[float] = Field(..., max_length=4, min_length=4)
     """
     Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference frame.
     """
@@ -803,7 +877,7 @@ class ImuPayload(BaseModel):
     """
     accel: list[float] = Field(..., max_length=3, min_length=3, title="ImuVec3")
     """
-    Specific force (gravity + user acceleration) in m/s^2.
+    Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS CoreMotion reports the opposite sign.)
     """
     frame: Literal["device", "mount"]
     sensor_time_s: float = Field(..., ge=0.0)
@@ -812,9 +886,9 @@ class ImuPayload(BaseModel):
     """
 
 
-class Log(Envelope, LogPayload):
+class Log(Envelope, LogFields):
     """
-    One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`.
+    One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`. Every payload field is present unless the subscription named `fields`; then only those are.
     """
 
     model_config = ConfigDict(
@@ -858,9 +932,9 @@ class ModeSet(Command):
     """
 
 
-class Status(Envelope, StatusPayload):
+class Status(Envelope, StatusFields):
     """
-    Device status, up to 1 Hz. Also the result of `system.status`.
+    Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.
     """
 
     model_config = ConfigDict(
@@ -1074,14 +1148,14 @@ class ThemeIdle(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    blink_interval_ms: list[ThemeRangeM] = Field(
+    blink_interval_ms: list[int] = Field(
         ..., max_length=2, min_length=2, title="ThemeRangeMs"
     )
     """
     [min, max] in milliseconds; a value is drawn uniformly each time.
     """
     blink_duration_ms: int = Field(..., ge=30, le=2000)
-    saccade_interval_ms: list[ThemeRangeM] | None = Field(
+    saccade_interval_ms: list[int] | None = Field(
         None, max_length=2, min_length=2, title="ThemeRangeMs"
     )
     """
@@ -1167,9 +1241,9 @@ class WelcomeDevice(BaseModel):
     screen: WelcomeScreen
 
 
-class Imu(Envelope, ImuPayload):
+class Imu(Envelope, ImuFields):
     """
-    Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting.
+    Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting. Every payload field is present unless the subscription named `fields`; then only those are.
     """
 
     model_config = ConfigDict(
@@ -1201,9 +1275,9 @@ class Welcome(Envelope):
     Semantic version, MAJOR.MINOR.PATCH.
     """
     device: WelcomeDevice
-    capabilities: list[Capability]
+    capabilities: list[str]
     """
     Feature flags. Known in 0.1: `face`, `display.image`, `display.web`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values.
     """
-    themes: list[CommonName]
+    themes: list[str]
     dev_mode: bool

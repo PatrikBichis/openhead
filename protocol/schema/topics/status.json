@@ -1,19 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Status",
-  "description": "Device status, up to 1 Hz. Also the result of `system.status`.",
+  "description": "Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.",
   "type": "object",
   "allOf": [
-    { "$ref": "../envelope.json" },
-    { "$ref": "#/$defs/payload" }
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
   ],
   "properties": {
-    "type": { "const": "status" }
+    "type": {
+      "const": "status"
+    }
   },
-  "required": ["type"],
+  "required": [
+    "type"
+  ],
   "unevaluatedProperties": false,
   "$defs": {
-    "payload": {
+    "fields": {
       "type": "object",
       "properties": {
         "battery_level": {
@@ -22,25 +30,69 @@
           "maximum": 1,
           "description": "Omitted when unknown (e.g. simulator)."
         },
-        "charging": { "type": "boolean" },
-        "thermal_state": { "$ref": "../common.json#/$defs/thermal_state" },
-        "view": { "$ref": "../common.json#/$defs/view" },
-        "overlay": { "type": "string", "enum": ["none", "face-corner"] },
-        "theme": { "$ref": "../common.json#/$defs/name" },
-        "emotion": { "$ref": "../common.json#/$defs/name" },
-        "mode": { "$ref": "../common.json#/$defs/mode" },
-        "dev_mode": { "type": "boolean" },
-        "clients": { "type": "integer", "minimum": 0, "description": "Connected, authenticated clients." },
+        "charging": {
+          "type": "boolean"
+        },
+        "thermal_state": {
+          "$ref": "../common.json#/$defs/thermal_state"
+        },
+        "view": {
+          "$ref": "../common.json#/$defs/view"
+        },
+        "overlay": {
+          "type": "string",
+          "enum": [
+            "none",
+            "face-corner"
+          ]
+        },
+        "theme": {
+          "$ref": "../common.json#/$defs/name"
+        },
+        "emotion": {
+          "$ref": "../common.json#/$defs/name"
+        },
+        "mode": {
+          "$ref": "../common.json#/$defs/mode"
+        },
+        "dev_mode": {
+          "type": "boolean"
+        },
+        "clients": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Connected, authenticated clients."
+        },
         "rtt_ms": {
           "type": "number",
           "minimum": 0,
           "description": "Round-trip time to the receiving client, from WebSocket ping. Omitted until measured."
         },
-        "uptime_s": { "type": "number", "minimum": 0 }
-      },
+        "uptime_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
       "required": [
-        "charging", "thermal_state", "view", "overlay", "theme",
-        "emotion", "mode", "dev_mode", "clients", "uptime_s"
+        "charging",
+        "thermal_state",
+        "view",
+        "overlay",
+        "theme",
+        "emotion",
+        "mode",
+        "dev_mode",
+        "clients",
+        "uptime_s"
       ]
     }
   }

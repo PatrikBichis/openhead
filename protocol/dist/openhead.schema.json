@@ -684,14 +684,14 @@
     },
     "Imu": {
       "title": "Imu",
-      "description": "Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting.",
+      "description": "Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting. Every payload field is present unless the subscription named `fields`; then only those are.",
       "type": "object",
       "allOf": [
         {
           "$ref": "#/$defs/Envelope"
         },
         {
-          "$ref": "#/$defs/ImuPayload"
+          "$ref": "#/$defs/ImuFields"
         }
       ],
       "properties": {
@@ -704,8 +704,8 @@
       ],
       "unevaluatedProperties": false
     },
-    "ImuPayload": {
-      "title": "ImuPayload",
+    "ImuFields": {
+      "title": "ImuFields",
       "type": "object",
       "properties": {
         "q": {
@@ -725,7 +725,7 @@
         },
         "accel": {
           "$ref": "#/$defs/ImuVec3",
-          "description": "Specific force (gravity + user acceleration) in m/s^2."
+          "description": "Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS CoreMotion reports the opposite sign.)"
         },
         "frame": {
           "type": "string",
@@ -739,7 +739,17 @@
           "minimum": 0,
           "description": "Sensor timestamp in seconds since device boot, for precise intervals between samples."
         }
-      },
+      }
+    },
+    "ImuPayload": {
+      "title": "ImuPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ImuFields"
+        }
+      ],
       "required": [
         "q",
         "gyro",
@@ -759,14 +769,14 @@
     },
     "Log": {
       "title": "Log",
-      "description": "One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`.",
+      "description": "One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`. Every payload field is present unless the subscription named `fields`; then only those are.",
       "type": "object",
       "allOf": [
         {
           "$ref": "#/$defs/Envelope"
         },
         {
-          "$ref": "#/$defs/LogPayload"
+          "$ref": "#/$defs/LogFields"
         }
       ],
       "properties": {
@@ -779,8 +789,8 @@
       ],
       "unevaluatedProperties": false
     },
-    "LogPayload": {
-      "title": "LogPayload",
+    "LogFields": {
+      "title": "LogFields",
       "type": "object",
       "properties": {
         "time_ms": {
@@ -805,7 +815,17 @@
           "minimum": 0,
           "description": "`seq` of the received message this line is about."
         }
-      },
+      }
+    },
+    "LogPayload": {
+      "title": "LogPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/LogFields"
+        }
+      ],
       "required": [
         "time_ms",
         "level",
@@ -935,14 +955,14 @@
     },
     "Status": {
       "title": "Status",
-      "description": "Device status, up to 1 Hz. Also the result of `system.status`.",
+      "description": "Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.",
       "type": "object",
       "allOf": [
         {
           "$ref": "#/$defs/Envelope"
         },
         {
-          "$ref": "#/$defs/StatusPayload"
+          "$ref": "#/$defs/StatusFields"
         }
       ],
       "properties": {
@@ -955,8 +975,8 @@
       ],
       "unevaluatedProperties": false
     },
-    "StatusPayload": {
-      "title": "StatusPayload",
+    "StatusFields": {
+      "title": "StatusFields",
       "type": "object",
       "properties": {
         "battery_level": {
@@ -1007,7 +1027,17 @@
           "type": "number",
           "minimum": 0
         }
-      },
+      }
+    },
+    "StatusPayload": {
+      "title": "StatusPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/StatusFields"
+        }
+      ],
       "required": [
         "charging",
         "thermal_state",

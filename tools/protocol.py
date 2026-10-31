@@ -31,6 +31,7 @@ BUNDLE = PROTOCOL / "dist" / "openhead.schema.json"
 DOCS = PROTOCOL / "docs"
 MODELS = ROOT / "python" / "src" / "openhead" / "protocol" / "models.py"
 REGISTRY_PY = ROOT / "python" / "src" / "openhead" / "protocol" / "registry.py"
+PY_SCHEMA = ROOT / "python" / "src" / "openhead" / "protocol" / "schema.json"
 SWIFT_DIR = ROOT / "apps" / "ios" / "OpenHead" / "Protocol"
 QUICKTYPE = "quicktype@26.0.0"
 # Swift names that would shadow the standard library.
@@ -291,6 +292,32 @@ def bundle() -> dict:
 # --- generation -------------------------------------------------------------
 
 
+def python_schema(full: dict) -> dict:
+    """Bundle reshaped for datamodel-codegen, which turns constrained list items into
+    RootModel wrappers (`list[CommonName]`). Primitive items become plain types; the
+    constraints still apply where it matters, in `openhead.protocol.validate`."""
+    defs = full["$defs"]
+
+    def primitive(node: dict) -> dict | None:
+        if "$ref" in node:
+            node = defs[node["$ref"].rsplit("/", 1)[1]]
+        if node.get("type") in ("string", "number", "integer", "boolean"):
+            return {"type": node["type"], **({"enum": node["enum"]} if "enum" in node else {})}
+        return None
+
+    def walk(node):
+        if isinstance(node, dict):
+            node = {k: walk(v) for k, v in node.items()}
+            if isinstance(node.get("items"), dict) and (simple := primitive(node["items"])):
+                node["items"] = simple
+            return node
+        if isinstance(node, list):
+            return [walk(v) for v in node]
+        return node
+
+    return walk(full)
+
+
 def generate_models(bundle_path: Path, out: Path) -> str:
     subprocess.run(
         [
@@ -493,10 +520,13 @@ def generate(dry: bool) -> int:
     changed: list[str] = []
     with tempfile.TemporaryDirectory() as tmp:
         tmp_dir = Path(tmp)
-        bundle_text = json.dumps(bundle(), indent=2) + "\n"
+        full = bundle()
+        bundle_text = json.dumps(full, indent=2) + "\n"
         tmp_bundle = tmp_dir / "bundle.json"
-        tmp_bundle.write_text(bundle_text, encoding="utf-8")
+        tmp_bundle.write_text(json.dumps(python_schema(full)), encoding="utf-8")
         sync_file(BUNDLE, bundle_text, changed, dry)
+        # Shipped with the Python package so the simulator validates against the schema.
+        sync_file(PY_SCHEMA, bundle_text, changed, dry)
         sync_file(MODELS, generate_models(tmp_bundle, tmp_dir / "models.py"), changed, dry)
         sync_file(REGISTRY_PY, generate_registry(message_types()), changed, dry)
         for name, text in generate_swift(tmp_dir).items():

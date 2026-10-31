@@ -23,8 +23,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let faceSetTheme: FaceSetTheme?
     public let hello: Hello?
     public let imu: Imu?
+    public let imuFields: ImuFields?
     public let imuPayload: ImuPayload?
     public let log: Log?
+    public let logFields: LogFields?
     public let logPayload: LogPayload?
     public let modeGet: ModeGet?
     public let modeGetResult: ModeGetResult?
@@ -33,6 +35,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let pairRequired: PairRequired?
     public let protocolError: ProtocolError?
     public let status: Status?
+    public let statusFields: StatusFields?
     public let statusPayload: StatusPayload?
     public let subscribe: Subscribe?
     public let subscribeResult: SubscribeResult?
@@ -65,8 +68,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case faceSetTheme = "FaceSetTheme"
         case hello = "Hello"
         case imu = "Imu"
+        case imuFields = "ImuFields"
         case imuPayload = "ImuPayload"
         case log = "Log"
+        case logFields = "LogFields"
         case logPayload = "LogPayload"
         case modeGet = "ModeGet"
         case modeGetResult = "ModeGetResult"
@@ -75,6 +80,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case pairRequired = "PairRequired"
         case protocolError = "ProtocolError"
         case status = "Status"
+        case statusFields = "StatusFields"
         case statusPayload = "StatusPayload"
         case subscribe = "Subscribe"
         case subscribeResult = "SubscribeResult"
@@ -94,7 +100,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, hello: Hello?, imu: Imu?, imuPayload: ImuPayload?, log: Log?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, protocolError: ProtocolError?, status: Status?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayShow: DisplayShow?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, hello: Hello?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
         self.displayShow = displayShow
@@ -108,8 +114,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.faceSetTheme = faceSetTheme
         self.hello = hello
         self.imu = imu
+        self.imuFields = imuFields
         self.imuPayload = imuPayload
         self.log = log
+        self.logFields = logFields
         self.logPayload = logPayload
         self.modeGet = modeGet
         self.modeGetResult = modeGetResult
@@ -118,6 +126,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.pairRequired = pairRequired
         self.protocolError = protocolError
         self.status = status
+        self.statusFields = statusFields
         self.statusPayload = statusPayload
         self.subscribe = subscribe
         self.subscribeResult = subscribeResult
@@ -594,19 +603,22 @@ public enum HelloType: String, Codable, Equatable, Sendable {
 
 
 /// Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is
-/// up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting.
+/// up and +z points out of the screen (portrait). `mount` applies the `mount_offset`
+/// setting. Every payload field is present unless the subscription named `fields`; then only
+/// those are.
 // MARK: - Imu
 public struct Imu: Codable, Equatable, Sendable {
-    /// Specific force (gravity + user acceleration) in m/s^2.
-    public let accel: [Double]
-    public let frame: ImuFrame
+    /// Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS
+    /// CoreMotion reports the opposite sign.)
+    public let accel: [Double]?
+    public let frame: ImuFrame?
     /// Angular rate in rad/s.
-    public let gyro: [Double]
+    public let gyro: [Double]?
     /// Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference
     /// frame.
-    public let q: [Double]
+    public let q: [Double]?
     /// Sensor timestamp in seconds since device boot, for precise intervals between samples.
-    public let sensorTimeS: Double
+    public let sensorTimeS: Double?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
     /// Sender clock in milliseconds since the Unix epoch.
@@ -624,7 +636,7 @@ public struct Imu: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(accel: [Double], frame: ImuFrame, gyro: [Double], q: [Double], sensorTimeS: Double, seq: Int, ts: Int, type: ImuType) {
+    public init(accel: [Double]?, frame: ImuFrame?, gyro: [Double]?, q: [Double]?, sensorTimeS: Double?, seq: Int, ts: Int, type: ImuType) {
         self.accel = accel
         self.frame = frame
         self.gyro = gyro
@@ -646,9 +658,43 @@ public enum ImuType: String, Codable, Equatable, Sendable {
 }
 
 
+// MARK: - ImuFields
+public struct ImuFields: Codable, Equatable, Sendable {
+    /// Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS
+    /// CoreMotion reports the opposite sign.)
+    public let accel: [Double]?
+    public let frame: ImuFrame?
+    /// Angular rate in rad/s.
+    public let gyro: [Double]?
+    /// Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference
+    /// frame.
+    public let q: [Double]?
+    /// Sensor timestamp in seconds since device boot, for precise intervals between samples.
+    public let sensorTimeS: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case accel = "accel"
+        case frame = "frame"
+        case gyro = "gyro"
+        case q = "q"
+        case sensorTimeS = "sensor_time_s"
+    }
+
+    public init(accel: [Double]?, frame: ImuFrame?, gyro: [Double]?, q: [Double]?, sensorTimeS: Double?) {
+        self.accel = accel
+        self.frame = frame
+        self.gyro = gyro
+        self.q = q
+        self.sensorTimeS = sensorTimeS
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
 // MARK: - ImuPayload
 public struct ImuPayload: Codable, Equatable, Sendable {
-    /// Specific force (gravity + user acceleration) in m/s^2.
+    /// Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS
+    /// CoreMotion reports the opposite sign.)
     public let accel: [Double]
     public let frame: ImuFrame
     /// Angular rate in rad/s.
@@ -678,19 +724,20 @@ public struct ImuPayload: Codable, Equatable, Sendable {
 
 
 /// One structured log line, sent as it happens. Every received command is logged with its
-/// `seq` in `seq_ref`.
+/// `seq` in `seq_ref`. Every payload field is present unless the subscription named
+/// `fields`; then only those are.
 // MARK: - Log
 public struct Log: Codable, Equatable, Sendable {
-    public let level: CommonLogLevel
-    public let message: String
+    public let level: CommonLogLevel?
+    public let message: String?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
     /// `seq` of the received message this line is about.
     public let seqRef: Int?
     /// e.g. `link`, `face`, `display`, `sensors`.
-    public let subsystem: String
+    public let subsystem: String?
     /// When the line was logged.
-    public let timeMS: Int
+    public let timeMS: Int?
     /// Sender clock in milliseconds since the Unix epoch.
     public let ts: Int
     public let type: LogType
@@ -706,7 +753,7 @@ public struct Log: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(level: CommonLogLevel, message: String, seq: Int, seqRef: Int?, subsystem: String, timeMS: Int, ts: Int, type: LogType) {
+    public init(level: CommonLogLevel?, message: String?, seq: Int, seqRef: Int?, subsystem: String?, timeMS: Int?, ts: Int, type: LogType) {
         self.level = level
         self.message = message
         self.seq = seq
@@ -733,6 +780,36 @@ public enum LogType: String, Codable, Equatable, Sendable {
 }
 
 
+// MARK: - LogFields
+public struct LogFields: Codable, Equatable, Sendable {
+    public let level: CommonLogLevel?
+    public let message: String?
+    /// `seq` of the received message this line is about.
+    public let seqRef: Int?
+    /// e.g. `link`, `face`, `display`, `sensors`.
+    public let subsystem: String?
+    /// When the line was logged.
+    public let timeMS: Int?
+
+    public enum CodingKeys: String, CodingKey {
+        case level = "level"
+        case message = "message"
+        case seqRef = "seq_ref"
+        case subsystem = "subsystem"
+        case timeMS = "time_ms"
+    }
+
+    public init(level: CommonLogLevel?, message: String?, seqRef: Int?, subsystem: String?, timeMS: Int?) {
+        self.level = level
+        self.message = message
+        self.seqRef = seqRef
+        self.subsystem = subsystem
+        self.timeMS = timeMS
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
 // MARK: - LogPayload
 public struct LogPayload: Codable, Equatable, Sendable {
     public let level: CommonLogLevel
@@ -971,29 +1048,30 @@ public enum ProtocolErrorType: String, Codable, Equatable, Sendable {
 }
 
 
-/// Device status, up to 1 Hz. Also the result of `system.status`.
+/// Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is
+/// present unless the subscription named `fields`; then only those are.
 // MARK: - Status
 public struct Status: Codable, Equatable, Sendable {
     /// Omitted when unknown (e.g. simulator).
     public let batteryLevel: Double?
-    public let charging: Bool
+    public let charging: Bool?
     /// Connected, authenticated clients.
-    public let clients: Int
-    public let devMode: Bool
-    public let emotion: String
-    public let mode: CommonMode
-    public let overlay: Overlay
+    public let clients: Int?
+    public let devMode: Bool?
+    public let emotion: String?
+    public let mode: CommonMode?
+    public let overlay: Overlay?
     /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
     public let rttMS: Double?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
-    public let theme: String
-    public let thermalState: CommonThermalState
+    public let theme: String?
+    public let thermalState: CommonThermalState?
     /// Sender clock in milliseconds since the Unix epoch.
     public let ts: Int
     public let type: StatusType
-    public let uptimeS: Double
-    public let view: CommonView
+    public let uptimeS: Double?
+    public let view: CommonView?
 
     public enum CodingKeys: String, CodingKey {
         case batteryLevel = "battery_level"
@@ -1013,7 +1091,7 @@ public struct Status: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool, clients: Int, devMode: Bool, emotion: String, mode: CommonMode, overlay: Overlay, rttMS: Double?, seq: Int, theme: String, thermalState: CommonThermalState, ts: Int, type: StatusType, uptimeS: Double, view: CommonView) {
+    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
         self.charging = charging
         self.clients = clients
@@ -1044,6 +1122,57 @@ public enum StatusType: String, Codable, Equatable, Sendable {
 }
 
 
+// MARK: - StatusFields
+public struct StatusFields: Codable, Equatable, Sendable {
+    /// Omitted when unknown (e.g. simulator).
+    public let batteryLevel: Double?
+    public let charging: Bool?
+    /// Connected, authenticated clients.
+    public let clients: Int?
+    public let devMode: Bool?
+    public let emotion: String?
+    public let mode: CommonMode?
+    public let overlay: Overlay?
+    /// Round-trip time to the receiving client, from WebSocket ping. Omitted until measured.
+    public let rttMS: Double?
+    public let theme: String?
+    public let thermalState: CommonThermalState?
+    public let uptimeS: Double?
+    public let view: CommonView?
+
+    public enum CodingKeys: String, CodingKey {
+        case batteryLevel = "battery_level"
+        case charging = "charging"
+        case clients = "clients"
+        case devMode = "dev_mode"
+        case emotion = "emotion"
+        case mode = "mode"
+        case overlay = "overlay"
+        case rttMS = "rtt_ms"
+        case theme = "theme"
+        case thermalState = "thermal_state"
+        case uptimeS = "uptime_s"
+        case view = "view"
+    }
+
+    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
+        self.batteryLevel = batteryLevel
+        self.charging = charging
+        self.clients = clients
+        self.devMode = devMode
+        self.emotion = emotion
+        self.mode = mode
+        self.overlay = overlay
+        self.rttMS = rttMS
+        self.theme = theme
+        self.thermalState = thermalState
+        self.uptimeS = uptimeS
+        self.view = view
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
 // MARK: - StatusPayload
 public struct StatusPayload: Codable, Equatable, Sendable {
     /// Omitted when unknown (e.g. simulator).

@@ -8,7 +8,7 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-**Description:** Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting.
+**Description:** Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting. Every payload field is present unless the subscription named `fields`; then only those are.
 
 | Property         | Pattern | Type  | Deprecated | Definition | Title/Description |
 | ---------------- | ------- | ----- | ---------- | ---------- | ----------------- |
@@ -17,7 +17,7 @@
 | All of(Requirement)   |
 | --------------------- |
 | [Envelope](#allOf_i0) |
-| [payload](#allOf_i1)  |
+| [fields](#allOf_i1)   |
 
 ## <a name="allOf_i0"></a>1. Property `Imu > allOf > Envelope`
 
@@ -77,29 +77,29 @@
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-## <a name="allOf_i1"></a>2. Property `Imu > allOf > payload`
+## <a name="allOf_i1"></a>2. Property `Imu > allOf > fields`
 
 |                           |                  |
 | ------------------------- | ---------------- |
 | **Type**                  | `object`         |
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
-| **Defined in**            | #/$defs/payload  |
+| **Defined in**            | #/$defs/fields   |
 
-| Property                                    | Pattern | Type             | Deprecated | Definition                      | Title/Description                                                                           |
-| ------------------------------------------- | ------- | ---------------- | ---------- | ------------------------------- | ------------------------------------------------------------------------------------------- |
-| + [q](#allOf_i1_q )                         | No      | array of number  | No         | -                               | Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference frame. |
-| + [gyro](#allOf_i1_gyro )                   | No      | array of number  | No         | In #/$defs/vec3                 | Angular rate in rad/s.                                                                      |
-| + [accel](#allOf_i1_accel )                 | No      | array of number  | No         | Same as [gyro](#allOf_i1_gyro ) | Specific force (gravity + user acceleration) in m/s^2.                                      |
-| + [frame](#allOf_i1_frame )                 | No      | enum (of string) | No         | -                               | -                                                                                           |
-| + [sensor_time_s](#allOf_i1_sensor_time_s ) | No      | number           | No         | -                               | Sensor timestamp in seconds since device boot, for precise intervals between samples.       |
+| Property                                    | Pattern | Type             | Deprecated | Definition                      | Title/Description                                                                                                                |
+| ------------------------------------------- | ------- | ---------------- | ---------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| - [q](#allOf_i1_q )                         | No      | array of number  | No         | -                               | Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference frame.                                      |
+| - [gyro](#allOf_i1_gyro )                   | No      | array of number  | No         | In #/$defs/vec3                 | Angular rate in rad/s.                                                                                                           |
+| - [accel](#allOf_i1_accel )                 | No      | array of number  | No         | Same as [gyro](#allOf_i1_gyro ) | Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS CoreMotion reports the opposite sign.) |
+| - [frame](#allOf_i1_frame )                 | No      | enum (of string) | No         | -                               | -                                                                                                                                |
+| - [sensor_time_s](#allOf_i1_sensor_time_s ) | No      | number           | No         | -                               | Sensor timestamp in seconds since device boot, for precise intervals between samples.                                            |
 
 ### <a name="allOf_i1_q"></a>2.1. Property `Imu > allOf > item 1 > q`
 
 |              |                   |
 | ------------ | ----------------- |
 | **Type**     | `array of number` |
-| **Required** | Yes               |
+| **Required** | No                |
 
 **Description:** Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference frame.
 
@@ -132,7 +132,7 @@
 |                |                   |
 | -------------- | ----------------- |
 | **Type**       | `array of number` |
-| **Required**   | Yes               |
+| **Required**   | No                |
 | **Defined in** | #/$defs/vec3      |
 
 **Description:** Angular rate in rad/s.
@@ -161,17 +161,17 @@
 |                        |                        |
 | ---------------------- | ---------------------- |
 | **Type**               | `array of number`      |
-| **Required**           | Yes                    |
+| **Required**           | No                     |
 | **Same definition as** | [gyro](#allOf_i1_gyro) |
 
-**Description:** Specific force (gravity + user acceleration) in m/s^2.
+**Description:** Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS CoreMotion reports the opposite sign.)
 
 ### <a name="allOf_i1_frame"></a>2.4. Property `Imu > allOf > item 1 > frame`
 
 |              |                    |
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
-| **Required** | Yes                |
+| **Required** | No                 |
 
 Must be one of:
 * "device"
@@ -182,7 +182,7 @@ Must be one of:
 |              |          |
 | ------------ | -------- |
 | **Type**     | `number` |
-| **Required** | Yes      |
+| **Required** | No       |
 
 **Description:** Sensor timestamp in seconds since device boot, for precise intervals between samples.
 

@@ -8,7 +8,7 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-**Description:** One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`.
+**Description:** One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`. Every payload field is present unless the subscription named `fields`; then only those are.
 
 | Property         | Pattern | Type  | Deprecated | Definition | Title/Description |
 | ---------------- | ------- | ----- | ---------- | ---------- | ----------------- |
@@ -17,7 +17,7 @@
 | All of(Requirement)   |
 | --------------------- |
 | [Envelope](#allOf_i0) |
-| [payload](#allOf_i1)  |
+| [fields](#allOf_i1)   |
 
 ## <a name="allOf_i0"></a>1. Property `Log > allOf > Envelope`
 
@@ -77,21 +77,21 @@
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-## <a name="allOf_i1"></a>2. Property `Log > allOf > payload`
+## <a name="allOf_i1"></a>2. Property `Log > allOf > fields`
 
 |                           |                  |
 | ------------------------- | ---------------- |
 | **Type**                  | `object`         |
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
-| **Defined in**            | #/$defs/payload  |
+| **Defined in**            | #/$defs/fields   |
 
 | Property                            | Pattern | Type             | Deprecated | Definition                         | Title/Description                                   |
 | ----------------------------------- | ------- | ---------------- | ---------- | ---------------------------------- | --------------------------------------------------- |
-| + [time_ms](#allOf_i1_time_ms )     | No      | integer          | No         | -                                  | When the line was logged.                           |
-| + [level](#allOf_i1_level )         | No      | enum (of string) | No         | In ../common.json#/$defs/log_level | -                                                   |
-| + [subsystem](#allOf_i1_subsystem ) | No      | string           | No         | -                                  | e.g. \`link\`, \`face\`, \`display\`, \`sensors\`.  |
-| + [message](#allOf_i1_message )     | No      | string           | No         | -                                  | -                                                   |
+| - [time_ms](#allOf_i1_time_ms )     | No      | integer          | No         | -                                  | When the line was logged.                           |
+| - [level](#allOf_i1_level )         | No      | enum (of string) | No         | In ../common.json#/$defs/log_level | -                                                   |
+| - [subsystem](#allOf_i1_subsystem ) | No      | string           | No         | -                                  | e.g. \`link\`, \`face\`, \`display\`, \`sensors\`.  |
+| - [message](#allOf_i1_message )     | No      | string           | No         | -                                  | -                                                   |
 | - [seq_ref](#allOf_i1_seq_ref )     | No      | integer          | No         | -                                  | \`seq\` of the received message this line is about. |
 
 ### <a name="allOf_i1_time_ms"></a>2.1. Property `Log > allOf > item 1 > time_ms`
@@ -99,7 +99,7 @@
 |              |           |
 | ------------ | --------- |
 | **Type**     | `integer` |
-| **Required** | Yes       |
+| **Required** | No        |
 
 **Description:** When the line was logged.
 
@@ -112,7 +112,7 @@
 |                |                                 |
 | -------------- | ------------------------------- |
 | **Type**       | `enum (of string)`              |
-| **Required**   | Yes                             |
+| **Required**   | No                              |
 | **Defined in** | ../common.json#/$defs/log_level |
 
 Must be one of:
@@ -128,7 +128,7 @@ Must be one of:
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
-| **Required** | Yes      |
+| **Required** | No       |
 
 **Description:** e.g. `link`, `face`, `display`, `sensors`.
 
@@ -141,7 +141,7 @@ Must be one of:
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
-| **Required** | Yes      |
+| **Required** | No       |
 
 | Restrictions   |      |
 | -------------- | ---- |

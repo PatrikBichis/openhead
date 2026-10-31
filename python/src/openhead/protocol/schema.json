@@ -1,0 +1,1903 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenHeadProtocol",
+  "description": "All OpenHead protocol 0.1.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
+  "$defs": {
+    "Ack": {
+      "title": "Ack",
+      "description": "Successful reply to a command. Commands that return data put it in `result`; its shape is the command schema's `$defs/result`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "ack"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "result": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Command": {
+      "title": "Command",
+      "description": "Base for commands. Every command is answered with `ack` or `error` carrying the same `id`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Client-chosen id, echoed in the reply."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "CommonDurationMs": {
+      "title": "CommonDurationMs",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 600000
+    },
+    "CommonLogLevel": {
+      "title": "CommonLogLevel",
+      "type": "string",
+      "enum": [
+        "debug",
+        "info",
+        "notice",
+        "warning",
+        "error",
+        "fault"
+      ]
+    },
+    "CommonMode": {
+      "title": "CommonMode",
+      "type": "string",
+      "enum": [
+        "idle",
+        "sensing",
+        "capture"
+      ],
+      "description": "Camera ownership mode. Only `idle` is supported in 0.1."
+    },
+    "CommonName": {
+      "title": "CommonName",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,31}$",
+      "description": "Lower-case identifier used for themes and emotions."
+    },
+    "CommonSignedUnit": {
+      "title": "CommonSignedUnit",
+      "type": "number",
+      "minimum": -1,
+      "maximum": 1
+    },
+    "CommonThermalState": {
+      "title": "CommonThermalState",
+      "type": "string",
+      "enum": [
+        "nominal",
+        "fair",
+        "serious",
+        "critical"
+      ]
+    },
+    "CommonTopic": {
+      "title": "CommonTopic",
+      "type": "string",
+      "enum": [
+        "imu",
+        "status",
+        "log"
+      ],
+      "description": "Subscribable stream. `pose`, `faces`, `gps` and `env` arrive in 0.2."
+    },
+    "CommonUnit": {
+      "title": "CommonUnit",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "CommonVersion": {
+      "title": "CommonVersion",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version, MAJOR.MINOR.PATCH."
+    },
+    "CommonView": {
+      "title": "CommonView",
+      "type": "string",
+      "enum": [
+        "face",
+        "image",
+        "web"
+      ],
+      "description": "What fills the screen."
+    },
+    "DisplayClear": {
+      "title": "DisplayClear",
+      "description": "Remove any image or web page and show the face full screen.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "display.clear"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "DisplayShow": {
+      "title": "DisplayShow",
+      "description": "Change what fills the screen. `content` is named so to avoid clashing with the envelope's `type`. Images come as an http(s) URL the device fetches, or as a `data:image/...;base64,` URI under 1 MB. With `overlay: face-corner` the face keeps running in a corner.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        },
+        {
+          "if": {
+            "properties": {
+              "content": {
+                "enum": [
+                  "image",
+                  "web"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "source"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "display.show"
+        },
+        "content": {
+          "$ref": "#/$defs/CommonView"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 1400000,
+          "pattern": "^(https?://|data:image/(png|jpeg|gif|webp);base64,)",
+          "description": "Required for `image` and `web`. `web` accepts http(s) URLs only."
+        },
+        "overlay": {
+          "type": "string",
+          "enum": [
+            "none",
+            "face-corner"
+          ],
+          "description": "Default `none`."
+        },
+        "duration_ms": {
+          "$ref": "#/$defs/CommonDurationMs",
+          "description": "Return to the face after this time. Omit to hold."
+        }
+      },
+      "required": [
+        "type",
+        "content"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Envelope": {
+      "title": "Envelope",
+      "description": "Fields carried by every OpenHead message.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$",
+          "description": "Message type, e.g. `hello`, `face.set_emotion`, `imu`."
+        },
+        "ts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sender clock in milliseconds since the Unix epoch."
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Per-connection, per-direction counter, starting at 0."
+        }
+      },
+      "required": [
+        "type",
+        "ts",
+        "seq"
+      ]
+    },
+    "Error": {
+      "title": "Error",
+      "description": "Failed command (with `id`) or failed handshake (without).",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "unauthorized",
+            "unsupported",
+            "busy",
+            "invalid_params",
+            "dev_mode_required",
+            "rate_limited"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "details": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Expressions": {
+      "title": "Expressions",
+      "description": "A theme's `expressions.json`: a face parameter preset per shared emotion name, plus theme-specific ones under `extra`. Only `neutral` is required and must set every parameter; missing shared names fall back to it. Parameters a preset leaves out keep the neutral value.",
+      "type": "object",
+      "properties": {
+        "neutral": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "happy": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "curious": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "thinking": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "surprised": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "sad": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "angry": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "sleepy": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "scared": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "mischievous": {
+          "$ref": "#/$defs/ExpressionsParams"
+        },
+        "extra": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/CommonName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ExpressionsParams"
+          },
+          "description": "Theme-specific expressions, e.g. `cackle`."
+        }
+      },
+      "required": [
+        "neutral"
+      ],
+      "additionalProperties": false
+    },
+    "ExpressionsParams": {
+      "title": "ExpressionsParams",
+      "type": "object",
+      "description": "Face parameters. Eyes and mouth in [0, 1] or [-1, 1]; global values normalised.",
+      "properties": {
+        "open_l": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "open_r": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "tilt_l": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "tilt_r": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "pupil": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "gaze_x": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "gaze_y": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "squint": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "open": {
+          "$ref": "#/$defs/CommonUnit",
+          "description": "Mouth opening."
+        },
+        "width": {
+          "$ref": "#/$defs/CommonUnit",
+          "description": "Mouth width."
+        },
+        "curve": {
+          "$ref": "#/$defs/CommonSignedUnit",
+          "description": "Smile (+) or frown (-)."
+        },
+        "asym": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "teeth": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "head_tilt": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "breath_rate": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "blink_rate": {
+          "$ref": "#/$defs/CommonUnit"
+        },
+        "jitter": {
+          "$ref": "#/$defs/CommonUnit"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FaceBlink": {
+      "title": "FaceBlink",
+      "description": "Blink once now, in the theme's blink style.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "face.blink"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "FaceEnvelope": {
+      "title": "FaceEnvelope",
+      "description": "Mouth envelope from the host's speech audio, sent as a stream at 20-30 Hz while speaking. Not a command: no `id` and no reply. The face decays to closed if no update arrives for 200 ms.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "face.envelope"
+        },
+        "level": {
+          "$ref": "#/$defs/CommonUnit"
+        }
+      },
+      "required": [
+        "type",
+        "level"
+      ],
+      "unevaluatedProperties": false
+    },
+    "FaceList": {
+      "title": "FaceList",
+      "description": "List installed themes with their expressions.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "face.list"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "FaceListResult": {
+      "title": "FaceListResult",
+      "type": "object",
+      "properties": {
+        "active": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FaceListThemeInfo"
+          }
+        }
+      },
+      "required": [
+        "active",
+        "themes"
+      ],
+      "additionalProperties": false
+    },
+    "FaceListThemeInfo": {
+      "title": "FaceListThemeInfo",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "version": {
+          "$ref": "#/$defs/CommonVersion"
+        },
+        "title": {
+          "type": "string"
+        },
+        "expressions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommonName"
+          },
+          "description": "Shared emotion names the theme defines."
+        },
+        "extras": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommonName"
+          },
+          "description": "Theme-specific expressions, e.g. `cackle`."
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "expressions",
+        "extras"
+      ],
+      "additionalProperties": false
+    },
+    "FaceLookAt": {
+      "title": "FaceLookAt",
+      "description": "Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right, +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The world frame needs pose and arrives in 0.2.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        },
+        {
+          "if": {
+            "properties": {
+              "frame": {
+                "const": "screen"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "x",
+              "y"
+            ]
+          },
+          "else": {
+            "required": [
+              "yaw",
+              "pitch"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "face.look_at"
+        },
+        "frame": {
+          "type": "string",
+          "enum": [
+            "screen",
+            "head"
+          ]
+        },
+        "x": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "y": {
+          "$ref": "#/$defs/CommonSignedUnit"
+        },
+        "yaw": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "pitch": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "duration_ms": {
+          "$ref": "#/$defs/CommonDurationMs",
+          "description": "Hold the gaze, then return to idle motion. Omit to hold until the next `look_at`."
+        }
+      },
+      "required": [
+        "type",
+        "frame"
+      ],
+      "unevaluatedProperties": false
+    },
+    "FaceSetEmotion": {
+      "title": "FaceSetEmotion",
+      "description": "Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised, sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names the theme lacks fall back to `neutral` with a warning in the log.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "face.set_emotion"
+        },
+        "name": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "intensity": {
+          "$ref": "#/$defs/CommonUnit",
+          "description": "Weight of the emotion. Default 1."
+        },
+        "duration_ms": {
+          "$ref": "#/$defs/CommonDurationMs",
+          "description": "Return to the resting emotion after this time. Omit to hold."
+        },
+        "blend": {
+          "type": "string",
+          "enum": [
+            "replace",
+            "add"
+          ],
+          "description": "`replace` fades out other emotions; `add` layers on top. Default `replace`."
+        }
+      },
+      "required": [
+        "type",
+        "name"
+      ],
+      "unevaluatedProperties": false
+    },
+    "FaceSetTheme": {
+      "title": "FaceSetTheme",
+      "description": "Switch the face to an installed theme. Unknown names give `invalid_params`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "face.set_theme"
+        },
+        "name": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "transition_ms": {
+          "$ref": "#/$defs/CommonDurationMs",
+          "description": "Cross-fade time. Default 300."
+        }
+      },
+      "required": [
+        "type",
+        "name"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Hello": {
+      "title": "Hello",
+      "description": "First message on a new connection. Without a valid token the device answers `pair_required`; with one it answers `welcome`. The major version must match the device's.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "hello"
+        },
+        "client": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Human-readable client name, shown on the pairing screen and in the client list."
+        },
+        "protocol_version": {
+          "$ref": "#/$defs/CommonVersion"
+        },
+        "token": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256,
+          "description": "Token from an earlier `welcome`."
+        }
+      },
+      "required": [
+        "type",
+        "client",
+        "protocol_version"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Imu": {
+      "title": "Imu",
+      "description": "Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting. Every payload field is present unless the subscription named `fields`; then only those are.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/ImuFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "imu"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "ImuFields": {
+      "title": "ImuFields",
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Orientation as unit quaternion [x, y, z, w], relative to a gravity-aligned reference frame."
+        },
+        "gyro": {
+          "$ref": "#/$defs/ImuVec3",
+          "description": "Angular rate in rad/s."
+        },
+        "accel": {
+          "$ref": "#/$defs/ImuVec3",
+          "description": "Specific force in m/s^2, as a ROS IMU reports it: at rest upright about +9.81 on +y. (iOS CoreMotion reports the opposite sign.)"
+        },
+        "frame": {
+          "type": "string",
+          "enum": [
+            "device",
+            "mount"
+          ]
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sensor timestamp in seconds since device boot, for precise intervals between samples."
+        }
+      }
+    },
+    "ImuPayload": {
+      "title": "ImuPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ImuFields"
+        }
+      ],
+      "required": [
+        "q",
+        "gyro",
+        "accel",
+        "frame",
+        "sensor_time_s"
+      ]
+    },
+    "ImuVec3": {
+      "title": "ImuVec3",
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "Log": {
+      "title": "Log",
+      "description": "One structured log line, sent as it happens. Every received command is logged with its `seq` in `seq_ref`. Every payload field is present unless the subscription named `fields`; then only those are.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/LogFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "log"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "LogFields": {
+      "title": "LogFields",
+      "type": "object",
+      "properties": {
+        "time_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "When the line was logged."
+        },
+        "level": {
+          "$ref": "#/$defs/CommonLogLevel"
+        },
+        "subsystem": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "description": "e.g. `link`, `face`, `display`, `sensors`."
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "seq_ref": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "`seq` of the received message this line is about."
+        }
+      }
+    },
+    "LogPayload": {
+      "title": "LogPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/LogFields"
+        }
+      ],
+      "required": [
+        "time_ms",
+        "level",
+        "subsystem",
+        "message"
+      ]
+    },
+    "ModeGet": {
+      "title": "ModeGet",
+      "description": "Current camera ownership mode.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "mode.get"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "ModeGetResult": {
+      "title": "ModeGetResult",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/CommonMode"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "ModeSet": {
+      "title": "ModeSet",
+      "description": "Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give `unsupported`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "mode.set"
+        },
+        "mode": {
+          "$ref": "#/$defs/CommonMode"
+        }
+      },
+      "required": [
+        "type",
+        "mode"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Pair": {
+      "title": "Pair",
+      "description": "Pairing attempt with the code shown on the device. Answered with `welcome`, or `error` with `unauthorized` (wrong code) or `rate_limited` (locked for five minutes after five failures).",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "pair"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[0-9]{4,8}$",
+          "description": "Devices show six digits; the simulator accepts `0000` in dev mode."
+        }
+      },
+      "required": [
+        "type",
+        "code"
+      ],
+      "unevaluatedProperties": false
+    },
+    "PairRequired": {
+      "title": "PairRequired",
+      "description": "Sent by the device when `hello` has no valid token. The device shows a pairing code on screen.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "pair_required"
+        },
+        "code_hint": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Where to find the code, e.g. \"6-digit code shown on head-01\"."
+        },
+        "code_length": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 8
+        },
+        "expires_in_ms": {
+          "$ref": "#/$defs/CommonDurationMs"
+        },
+        "attempts_left": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "type",
+        "code_hint",
+        "code_length",
+        "expires_in_ms",
+        "attempts_left"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Status": {
+      "title": "Status",
+      "description": "Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/StatusFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "status"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "StatusFields": {
+      "title": "StatusFields",
+      "type": "object",
+      "properties": {
+        "battery_level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Omitted when unknown (e.g. simulator)."
+        },
+        "charging": {
+          "type": "boolean"
+        },
+        "thermal_state": {
+          "$ref": "#/$defs/CommonThermalState"
+        },
+        "view": {
+          "$ref": "#/$defs/CommonView"
+        },
+        "overlay": {
+          "type": "string",
+          "enum": [
+            "none",
+            "face-corner"
+          ]
+        },
+        "theme": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "emotion": {
+          "$ref": "#/$defs/CommonName"
+        },
+        "mode": {
+          "$ref": "#/$defs/CommonMode"
+        },
+        "dev_mode": {
+          "type": "boolean"
+        },
+        "clients": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Connected, authenticated clients."
+        },
+        "rtt_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Round-trip time to the receiving client, from WebSocket ping. Omitted until measured."
+        },
+        "uptime_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "StatusPayload": {
+      "title": "StatusPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/StatusFields"
+        }
+      ],
+      "required": [
+        "charging",
+        "thermal_state",
+        "view",
+        "overlay",
+        "theme",
+        "emotion",
+        "mode",
+        "dev_mode",
+        "clients",
+        "uptime_s"
+      ]
+    },
+    "Subscribe": {
+      "title": "Subscribe",
+      "description": "Open a stream. The device clamps `rate_hz` to what it supports and returns the actual rate. Subscribing again to the same topic replaces the earlier subscription.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "subscribe"
+        },
+        "topic": {
+          "$ref": "#/$defs/CommonTopic"
+        },
+        "rate_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "description": "Requested rate. Ignored for event-driven topics such as `log`."
+        },
+        "fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "description": "Only send these payload fields. Omit for all."
+        }
+      },
+      "required": [
+        "type",
+        "topic"
+      ],
+      "unevaluatedProperties": false
+    },
+    "SubscribeResult": {
+      "title": "SubscribeResult",
+      "type": "object",
+      "properties": {
+        "topic": {
+          "$ref": "#/$defs/CommonTopic"
+        },
+        "rate_hz": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Actual rate; 0 for event-driven topics."
+        }
+      },
+      "required": [
+        "topic",
+        "rate_hz"
+      ],
+      "additionalProperties": false
+    },
+    "SystemDiagnostics": {
+      "title": "SystemDiagnostics",
+      "description": "Health snapshot for debugging. Dev mode only.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "system.diagnostics"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "SystemDiagnosticsPermission": {
+      "title": "SystemDiagnosticsPermission",
+      "type": "string",
+      "enum": [
+        "granted",
+        "denied",
+        "not_determined",
+        "not_required"
+      ]
+    },
+    "SystemDiagnosticsResult": {
+      "title": "SystemDiagnosticsResult",
+      "type": "object",
+      "properties": {
+        "uptime_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "thermal_state": {
+          "$ref": "#/$defs/CommonThermalState"
+        },
+        "memory_mb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Memory used by the app."
+        },
+        "frame_rate": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Face render rate over the last second."
+        },
+        "permissions": {
+          "title": "DiagnosticsPermissions",
+          "type": "object",
+          "properties": {
+            "local_network": {
+              "$ref": "#/$defs/SystemDiagnosticsPermission"
+            },
+            "motion": {
+              "$ref": "#/$defs/SystemDiagnosticsPermission"
+            },
+            "camera": {
+              "$ref": "#/$defs/SystemDiagnosticsPermission"
+            }
+          },
+          "required": [
+            "local_network",
+            "motion",
+            "camera"
+          ],
+          "additionalProperties": false
+        },
+        "arkit": {
+          "title": "DiagnosticsArkit",
+          "type": "object",
+          "properties": {
+            "world_tracking": {
+              "type": "boolean"
+            },
+            "face_tracking": {
+              "type": "boolean",
+              "description": "Front-camera face tracking concurrent with world tracking."
+            }
+          },
+          "required": [
+            "world_tracking",
+            "face_tracking"
+          ],
+          "additionalProperties": false
+        },
+        "last_crash": {
+          "title": "DiagnosticsLastCrash",
+          "type": "object",
+          "properties": {
+            "time_ms": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "time_ms",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "uptime_s",
+        "thermal_state",
+        "memory_mb",
+        "frame_rate",
+        "permissions",
+        "arkit"
+      ],
+      "additionalProperties": false
+    },
+    "SystemLogs": {
+      "title": "SystemLogs",
+      "description": "Most recent lines from the device's log ring buffer (2000 lines), oldest first. Dev mode only.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "system.logs"
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000,
+          "description": "Default 100."
+        },
+        "level": {
+          "$ref": "#/$defs/CommonLogLevel",
+          "description": "Minimum level. Default `debug`."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "SystemLogsResult": {
+      "title": "SystemLogsResult",
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LogPayload"
+          }
+        }
+      },
+      "required": [
+        "entries"
+      ],
+      "additionalProperties": false
+    },
+    "SystemScreenshot": {
+      "title": "SystemScreenshot",
+      "description": "PNG of what is on screen. Dev mode only. With `delivery: url` the image is served by the device's HTTP server (WebSocket port + 1) for 60 s and must be fetched with the token in an `Authorization: Bearer` header.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "system.screenshot"
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Fraction of native resolution. Default 1."
+        },
+        "delivery": {
+          "type": "string",
+          "enum": [
+            "url",
+            "inline"
+          ],
+          "description": "Default `url`."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "SystemScreenshotResult": {
+      "title": "SystemScreenshotResult",
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pixels."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pixels."
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https?://"
+        },
+        "expires_ms": {
+          "$ref": "#/$defs/CommonDurationMs"
+        },
+        "png_base64": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "contentMediaType": "image/png"
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "url",
+            "expires_ms"
+          ]
+        },
+        {
+          "required": [
+            "png_base64"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Read all settings, or set one. `set` needs dev mode. Known keys in 0.1: `name`, `port`, `mount_offset` ([x, y, z, w] quaternion), `offline_theme`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "set"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "key",
+              "value"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "system.settings"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "get",
+            "set"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "value": {
+          "description": "Any JSON value valid for the key."
+        }
+      },
+      "required": [
+        "type",
+        "action"
+      ],
+      "unevaluatedProperties": false
+    },
+    "SystemSettingsResult": {
+      "title": "SystemSettingsResult",
+      "type": "object",
+      "properties": {
+        "settings": {
+          "type": "object",
+          "description": "All settings after the command."
+        }
+      },
+      "required": [
+        "settings"
+      ],
+      "additionalProperties": false
+    },
+    "SystemStatus": {
+      "title": "SystemStatus",
+      "description": "Current status, same content as the `status` topic.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "system.status"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "SystemStatusResult": {
+      "title": "SystemStatusResult",
+      "$ref": "#/$defs/StatusPayload"
+    },
+    "Theme": {
+      "title": "Theme",
+      "description": "A theme's `theme.json`: look and idle behaviour of the face. Expressions live in `expressions.json` next to it; images in `assets/`. Lengths are fractions of the screen's shortest side.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CommonName",
+          "description": "Must equal the folder name."
+        },
+        "version": {
+          "$ref": "#/$defs/CommonVersion"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "palette": {
+          "title": "ThemePalette",
+          "type": "object",
+          "properties": {
+            "bg": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "sclera": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "iris": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "pupil": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "lid": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "mouth": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "teeth": {
+              "$ref": "#/$defs/ThemeColor"
+            },
+            "accent": {
+              "$ref": "#/$defs/ThemeColor"
+            }
+          },
+          "required": [
+            "bg",
+            "sclera",
+            "iris",
+            "pupil",
+            "lid",
+            "mouth",
+            "teeth",
+            "accent"
+          ],
+          "additionalProperties": false
+        },
+        "shapes": {
+          "title": "ThemeShapes",
+          "type": "object",
+          "properties": {
+            "eye": {
+              "$ref": "#/$defs/ThemeShape"
+            },
+            "mouth": {
+              "$ref": "#/$defs/ThemeShape"
+            }
+          },
+          "required": [
+            "eye",
+            "mouth"
+          ],
+          "additionalProperties": false
+        },
+        "layout": {
+          "title": "ThemeLayout",
+          "type": "object",
+          "description": "Placement relative to the screen centre. Defaults are the engine's.",
+          "properties": {
+            "eye_spacing": {
+              "$ref": "#/$defs/CommonUnit"
+            },
+            "eye_size": {
+              "$ref": "#/$defs/CommonUnit"
+            },
+            "eye_y": {
+              "$ref": "#/$defs/CommonSignedUnit"
+            },
+            "mouth_width": {
+              "$ref": "#/$defs/CommonUnit"
+            },
+            "mouth_y": {
+              "$ref": "#/$defs/CommonSignedUnit"
+            }
+          },
+          "additionalProperties": false
+        },
+        "render": {
+          "title": "ThemeRender",
+          "type": "object",
+          "properties": {
+            "stroke": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.1,
+              "description": "Outline width; 0 for none."
+            },
+            "glow": {
+              "$ref": "#/$defs/CommonUnit"
+            },
+            "scanlines": {
+              "type": "boolean"
+            },
+            "pixelate": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "Pixel block size in points; 0 for off."
+            }
+          },
+          "additionalProperties": false
+        },
+        "idle": {
+          "title": "ThemeIdle",
+          "type": "object",
+          "properties": {
+            "blink_interval_ms": {
+              "$ref": "#/$defs/ThemeRangeMs"
+            },
+            "blink_duration_ms": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 2000
+            },
+            "saccade_interval_ms": {
+              "$ref": "#/$defs/ThemeRangeMs"
+            },
+            "saccade_amplitude": {
+              "$ref": "#/$defs/CommonUnit"
+            },
+            "breath_period_ms": {
+              "type": "integer",
+              "minimum": 500,
+              "maximum": 20000
+            },
+            "breath_amplitude": {
+              "$ref": "#/$defs/CommonUnit"
+            }
+          },
+          "required": [
+            "blink_interval_ms",
+            "blink_duration_ms"
+          ],
+          "additionalProperties": false
+        },
+        "envelope": {
+          "title": "ThemeEnvelope",
+          "type": "object",
+          "description": "How the speech envelope drives mouth `open`: open = gain * level^gamma, smoothed with attack/release.",
+          "properties": {
+            "gain": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "gamma": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4
+            },
+            "attack_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "release_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            }
+          },
+          "additionalProperties": false
+        },
+        "resting_emotion": {
+          "$ref": "#/$defs/CommonName",
+          "description": "Emotion shown when nothing else is set. Default `neutral`."
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "palette",
+        "shapes",
+        "idle"
+      ],
+      "additionalProperties": false
+    },
+    "ThemeColor": {
+      "title": "ThemeColor",
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$",
+      "description": "#RRGGBB or #RRGGBBAA."
+    },
+    "ThemeRangeMs": {
+      "title": "ThemeRangeMs",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 60000
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[min, max] in milliseconds; a value is drawn uniformly each time."
+    },
+    "ThemeShape": {
+      "title": "ThemeShape",
+      "description": "One of: a built-in preset, an SVG path in normalised coordinates ([-1, 1] box), or an image from `assets/`.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "preset": {
+              "type": "string",
+              "enum": [
+                "round",
+                "almond",
+                "slit",
+                "pixel",
+                "line"
+              ]
+            }
+          },
+          "required": [
+            "preset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^assets/[A-Za-z0-9_./-]+\\.(png|svg)$"
+            },
+            "anchor": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CommonUnit"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Point in the image placed at the feature centre. Default [0.5, 0.5]."
+            },
+            "scale": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "image"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Unsubscribe": {
+      "title": "Unsubscribe",
+      "description": "Close a stream. Acknowledged even if the topic was not subscribed.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Command"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "unsubscribe"
+        },
+        "topic": {
+          "$ref": "#/$defs/CommonTopic"
+        }
+      },
+      "required": [
+        "type",
+        "topic"
+      ],
+      "unevaluatedProperties": false
+    },
+    "Welcome": {
+      "title": "Welcome",
+      "description": "Session accepted. Carries the client's token (new after pairing, unchanged on reconnect), the device description and what it supports.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "welcome"
+        },
+        "token": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256
+        },
+        "protocol_version": {
+          "$ref": "#/$defs/CommonVersion"
+        },
+        "device": {
+          "$ref": "#/$defs/WelcomeDevice"
+        },
+        "capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.-]*$"
+          },
+          "description": "Feature flags. Known in 0.1: `face`, `display.image`, `display.web`, `imu`, `status`, `log`, `screenshot`. Clients ignore unknown values."
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommonName"
+          }
+        },
+        "dev_mode": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "token",
+        "protocol_version",
+        "device",
+        "capabilities",
+        "themes",
+        "dev_mode"
+      ],
+      "unevaluatedProperties": false
+    },
+    "WelcomeDevice": {
+      "title": "WelcomeDevice",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "ios",
+            "ipados",
+            "android",
+            "sim"
+          ]
+        },
+        "model": {
+          "type": "string",
+          "description": "Hardware identifier, e.g. `iPhone13,2`."
+        },
+        "os_version": {
+          "type": "string"
+        },
+        "app_version": {
+          "type": "string"
+        },
+        "screen": {
+          "$ref": "#/$defs/WelcomeScreen"
+        }
+      },
+      "required": [
+        "name",
+        "platform",
+        "model",
+        "os_version",
+        "app_version",
+        "screen"
+      ],
+      "additionalProperties": false
+    },
+    "WelcomeInsets": {
+      "title": "WelcomeInsets",
+      "type": "object",
+      "description": "Safe-area insets in points.",
+      "properties": {
+        "top": {
+          "type": "number",
+          "minimum": 0
+        },
+        "left": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bottom": {
+          "type": "number",
+          "minimum": 0
+        },
+        "right": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "top",
+        "left",
+        "bottom",
+        "right"
+      ],
+      "additionalProperties": false
+    },
+    "WelcomeScreen": {
+      "title": "WelcomeScreen",
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Points."
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Points."
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "safe_area": {
+          "$ref": "#/$defs/WelcomeInsets"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "scale",
+        "safe_area"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

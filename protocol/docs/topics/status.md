@@ -8,7 +8,7 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-**Description:** Device status, up to 1 Hz. Also the result of `system.status`.
+**Description:** Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.
 
 | Property         | Pattern | Type  | Deprecated | Definition | Title/Description |
 | ---------------- | ------- | ----- | ---------- | ---------- | ----------------- |
@@ -17,7 +17,7 @@
 | All of(Requirement)   |
 | --------------------- |
 | [Envelope](#allOf_i0) |
-| [payload](#allOf_i1)  |
+| [fields](#allOf_i1)   |
 
 ## <a name="allOf_i0"></a>1. Property `Status > allOf > Envelope`
 
@@ -77,29 +77,29 @@
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-## <a name="allOf_i1"></a>2. Property `Status > allOf > payload`
+## <a name="allOf_i1"></a>2. Property `Status > allOf > fields`
 
 |                           |                  |
 | ------------------------- | ---------------- |
 | **Type**                  | `object`         |
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
-| **Defined in**            | #/$defs/payload  |
+| **Defined in**            | #/$defs/fields   |
 
 | Property                                    | Pattern | Type             | Deprecated | Definition                             | Title/Description                                                                     |
 | ------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------- | ------------------------------------------------------------------------------------- |
 | - [battery_level](#allOf_i1_battery_level ) | No      | number           | No         | -                                      | Omitted when unknown (e.g. simulator).                                                |
-| + [charging](#allOf_i1_charging )           | No      | boolean          | No         | -                                      | -                                                                                     |
-| + [thermal_state](#allOf_i1_thermal_state ) | No      | enum (of string) | No         | In ../common.json#/$defs/thermal_state | -                                                                                     |
-| + [view](#allOf_i1_view )                   | No      | enum (of string) | No         | In ../common.json#/$defs/view          | What fills the screen.                                                                |
-| + [overlay](#allOf_i1_overlay )             | No      | enum (of string) | No         | -                                      | -                                                                                     |
-| + [theme](#allOf_i1_theme )                 | No      | string           | No         | In ../common.json#/$defs/name          | Lower-case identifier used for themes and emotions.                                   |
-| + [emotion](#allOf_i1_emotion )             | No      | string           | No         | Same as [theme](#allOf_i1_theme )      | Lower-case identifier used for themes and emotions.                                   |
-| + [mode](#allOf_i1_mode )                   | No      | enum (of string) | No         | In ../common.json#/$defs/mode          | Camera ownership mode. Only \`idle\` is supported in 0.1.                             |
-| + [dev_mode](#allOf_i1_dev_mode )           | No      | boolean          | No         | -                                      | -                                                                                     |
-| + [clients](#allOf_i1_clients )             | No      | integer          | No         | -                                      | Connected, authenticated clients.                                                     |
+| - [charging](#allOf_i1_charging )           | No      | boolean          | No         | -                                      | -                                                                                     |
+| - [thermal_state](#allOf_i1_thermal_state ) | No      | enum (of string) | No         | In ../common.json#/$defs/thermal_state | -                                                                                     |
+| - [view](#allOf_i1_view )                   | No      | enum (of string) | No         | In ../common.json#/$defs/view          | What fills the screen.                                                                |
+| - [overlay](#allOf_i1_overlay )             | No      | enum (of string) | No         | -                                      | -                                                                                     |
+| - [theme](#allOf_i1_theme )                 | No      | string           | No         | In ../common.json#/$defs/name          | Lower-case identifier used for themes and emotions.                                   |
+| - [emotion](#allOf_i1_emotion )             | No      | string           | No         | Same as [theme](#allOf_i1_theme )      | Lower-case identifier used for themes and emotions.                                   |
+| - [mode](#allOf_i1_mode )                   | No      | enum (of string) | No         | In ../common.json#/$defs/mode          | Camera ownership mode. Only \`idle\` is supported in 0.1.                             |
+| - [dev_mode](#allOf_i1_dev_mode )           | No      | boolean          | No         | -                                      | -                                                                                     |
+| - [clients](#allOf_i1_clients )             | No      | integer          | No         | -                                      | Connected, authenticated clients.                                                     |
 | - [rtt_ms](#allOf_i1_rtt_ms )               | No      | number           | No         | -                                      | Round-trip time to the receiving client, from WebSocket ping. Omitted until measured. |
-| + [uptime_s](#allOf_i1_uptime_s )           | No      | number           | No         | -                                      | -                                                                                     |
+| - [uptime_s](#allOf_i1_uptime_s )           | No      | number           | No         | -                                      | -                                                                                     |
 
 ### <a name="allOf_i1_battery_level"></a>2.1. Property `Status > allOf > item 1 > battery_level`
 
@@ -120,14 +120,14 @@
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | Yes       |
+| **Required** | No        |
 
 ### <a name="allOf_i1_thermal_state"></a>2.3. Property `Status > allOf > item 1 > thermal_state`
 
 |                |                                     |
 | -------------- | ----------------------------------- |
 | **Type**       | `enum (of string)`                  |
-| **Required**   | Yes                                 |
+| **Required**   | No                                  |
 | **Defined in** | ../common.json#/$defs/thermal_state |
 
 Must be one of:
@@ -141,7 +141,7 @@ Must be one of:
 |                |                            |
 | -------------- | -------------------------- |
 | **Type**       | `enum (of string)`         |
-| **Required**   | Yes                        |
+| **Required**   | No                         |
 | **Defined in** | ../common.json#/$defs/view |
 
 **Description:** What fills the screen.
@@ -156,7 +156,7 @@ Must be one of:
 |              |                    |
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
-| **Required** | Yes                |
+| **Required** | No                 |
 
 Must be one of:
 * "none"
@@ -167,7 +167,7 @@ Must be one of:
 |                |                            |
 | -------------- | -------------------------- |
 | **Type**       | `string`                   |
-| **Required**   | Yes                        |
+| **Required**   | No                         |
 | **Defined in** | ../common.json#/$defs/name |
 
 **Description:** Lower-case identifier used for themes and emotions.
@@ -181,7 +181,7 @@ Must be one of:
 |                        |                          |
 | ---------------------- | ------------------------ |
 | **Type**               | `string`                 |
-| **Required**           | Yes                      |
+| **Required**           | No                       |
 | **Same definition as** | [theme](#allOf_i1_theme) |
 
 **Description:** Lower-case identifier used for themes and emotions.
@@ -191,7 +191,7 @@ Must be one of:
 |                |                            |
 | -------------- | -------------------------- |
 | **Type**       | `enum (of string)`         |
-| **Required**   | Yes                        |
+| **Required**   | No                         |
 | **Defined in** | ../common.json#/$defs/mode |
 
 **Description:** Camera ownership mode. Only `idle` is supported in 0.1.
@@ -206,14 +206,14 @@ Must be one of:
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | Yes       |
+| **Required** | No        |
 
 ### <a name="allOf_i1_clients"></a>2.10. Property `Status > allOf > item 1 > clients`
 
 |              |           |
 | ------------ | --------- |
 | **Type**     | `integer` |
-| **Required** | Yes       |
+| **Required** | No        |
 
 **Description:** Connected, authenticated clients.
 
@@ -239,7 +239,7 @@ Must be one of:
 |              |          |
 | ------------ | -------- |
 | **Type**     | `number` |
-| **Required** | Yes      |
+| **Required** | No       |
 
 | Restrictions |        |
 | ------------ | ------ |

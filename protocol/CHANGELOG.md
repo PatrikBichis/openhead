@@ -17,10 +17,11 @@ All changes to `protocol/schema` are recorded here, in the same commit as the ch
 
 - `expressions.json`: shared emotion presets sit at the top level next to `extra`, as in the plan (was nested under `expressions`).
 - `status`: `battery_level` and `rtt_ms` are omitted when unknown instead of sent as `null`, so generated Swift models (which omit nil) stay valid.
+- `imu.accel` sign convention spelled out: specific force, +9.81 on +y at rest upright (ROS convention); the example now follows it.
+- Topics `imu`, `status`, `log`: a subscription with `fields` gets only those fields, so topic messages no longer require every payload field; `$defs/payload` (used by `system.status` and `system.logs`) still does.
 
 ### Notes
 
 - Swift models are generated from the bundle with quicktype into `apps/ios/OpenHead/Protocol/`; `error` is `ProtocolError` and `ack` is `ACK` in Swift.
-
 - `display.show` names its view parameter `content` (not `type`) so it does not clash with the envelope's `type`.
 - `protocol_version` is carried in `hello` and `welcome` only, not in every message.
