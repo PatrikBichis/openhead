@@ -190,11 +190,13 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 --line "TASK {task}" --lin
 openhead mode sensing && openhead watch pose -n 3
 ```
 
-On a real phone (iPhone 18 Pro, dim room):
+On a real phone (iPhone 18 Pro):
 
 | Hunter | Flight |
 | --- | --- |
-| ![Hunter HUD on an iPhone: locked face, compass, battery](docs/media/device-hud-hunter.jpg) | ![Flight HUD on an iPhone: compass, horizon, battery, tilt](docs/media/device-hud-flight.jpg) |
+| ![Hunter HUD on an iPhone: box locked on a face, MATCH, compass, battery](docs/media/device-hud-hunter.jpg) | ![Flight HUD on an iPhone: crosshair on a face, compass, horizon, tilt](docs/media/device-hud-flight.jpg) |
+| **Camcorder, with the robot's own lines** | **Boot** |
+| ![Camcorder HUD on an iPhone: crosshair on a face, TASK and SPEED lines, face in the corner](docs/media/device-hud-camcorder.jpg) | ![Boot HUD on an iPhone: boot text, corners locked on a face, LOCK](docs/media/device-hud-boot.jpg) |
 
 Sensor data recorded from the phone (tilt, acceleration, rotation, face bearing, ARKit position and path), with CSV files, is on the [website](https://patrikbichis.github.io/openhead/#sensors); `tools/sensor_plots.py` records any head (`--from-csv` redraws).
 
