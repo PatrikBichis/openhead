@@ -37,6 +37,7 @@ OUT = Path.home() / ".appstoreconnect" / "openhead"
 API = "https://api.appstoreconnect.apple.com/v1"
 APP_NAME = "OpenHead Robot Face"
 PROFILE_NAME = "OpenHead App Store"
+BETA_GROUP = "Internal"
 GH = r"C:\Program Files\GitHub CLI\gh.exe" if sys.platform == "win32" else "gh"
 
 
@@ -174,6 +175,41 @@ def find_app(asc: Asc, identifier: str) -> str | None:
     return apps[0]["id"] if apps else None
 
 
+def ensure_testflight(asc: Asc, app_id: str) -> None:
+    """Internal TestFlight group with access to every build, holding the team's admins."""
+    groups = asc.request("GET", f"/apps/{app_id}/betaGroups")["data"]
+    group = next((g for g in groups if g["attributes"]["name"] == BETA_GROUP), None)
+    if group:
+        print(f"testflight group '{BETA_GROUP}': exists ({group['id']})")
+    else:
+        group = asc.request("POST", "/betaGroups", json={"data": {
+            "type": "betaGroups",
+            "attributes": {"name": BETA_GROUP, "isInternalGroup": True,
+                           "hasAccessToAllBuilds": True},
+            "relationships": {"app": {"data": {"type": "apps", "id": app_id}}},
+        }})["data"]
+        print(f"testflight group '{BETA_GROUP}': created ({group['id']})")
+
+    members = asc.request("GET", f"/betaGroups/{group['id']}/betaTesters",
+                          params={"limit": 200})["data"]
+    present = {m["attributes"].get("email", "").lower() for m in members}
+    users = asc.request("GET", "/users", params={"limit": 200})["data"]
+    for user in users:
+        a = user["attributes"]
+        email = a["username"]
+        if not {"ACCOUNT_HOLDER", "ADMIN"} & set(a.get("roles", [])):
+            continue
+        if email.lower() in present:
+            print(f"testflight tester {a['firstName']} {a['lastName']}: already in group")
+            continue
+        asc.request("POST", "/betaTesters", json={"data": {
+            "type": "betaTesters",
+            "attributes": {"email": email, "firstName": a["firstName"], "lastName": a["lastName"]},
+            "relationships": {"betaGroups": {"data": [{"type": "betaGroups", "id": group["id"]}]}},
+        }})
+        print(f"testflight tester {a['firstName']} {a['lastName']}: added")
+
+
 # --- GitHub -----------------------------------------------------------------
 
 
@@ -197,7 +233,7 @@ def set_github(env: dict[str, str]) -> None:
     for name, value in secret_values.items():
         gh("secret", "set", name, stdin=value)
         print(f"github secret {name}: set")
-    for name in ("APPLE_TEAM_ID", "IOS_BUNDLE_ID", "IOS_SCHEME"):
+    for name in ("APPLE_TEAM_ID", "IOS_BUNDLE_ID", "IOS_SCHEME", "ASC_APP_ID"):
         gh("variable", "set", name, "--body", env[name])
         print(f"github variable {name}: {env[name]}")
 
@@ -225,6 +261,9 @@ def main() -> int:
     app_id = find_app(asc, env["IOS_BUNDLE_ID"])
     if app_id:
         print(f"app record: exists ({app_id})")
+        if read_env().get("ASC_APP_ID") != app_id:
+            set_env("ASC_APP_ID", app_id)
+        ensure_testflight(asc, app_id)
     else:
         print(f"app record: missing - create it in App Store Connect (My Apps > + > New App) "
               f"with name '{APP_NAME}' and bundle ID {env['IOS_BUNDLE_ID']}")

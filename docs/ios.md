@@ -8,7 +8,8 @@ The iOS app is built and signed only by `ios-testflight.yml` in GitHub Actions, 
 | --- | --- |
 | Team ID | `GJX3M68CH3` (individual account) |
 | Bundle ID | `se.bichis.openhead` |
-| App name in App Store Connect | OpenHead Robot Face |
+| App name in App Store Connect | OpenHead Robot Face (app id `6829240049`) |
+| TestFlight | internal group "Internal", access to all builds; team admins added as testers |
 | Distribution certificate | Apple Distribution, created by `tools/apple_setup.py`, expires 2027-10-31 |
 | Provisioning profile | "OpenHead App Store" (`IOS_APP_STORE`), expires 2027-10-31 |
 
@@ -24,7 +25,7 @@ Steps:
 
    It finds or creates the bundle ID, an Apple Distribution certificate (private key generated locally) and the App Store profile; writes them to `~/.appstoreconnect/openhead/`; fills `.env` (paths, generated passwords); and sets the GitHub secrets and variables. It is idempotent: re-run it when the profile or certificate nears expiry.
 4. Create the app record in App Store Connect (My Apps → + → New App: iOS, name "OpenHead Robot Face", bundle ID `se.bichis.openhead`, SKU `openhead`). The public API cannot create app records.
-5. TestFlight → Internal Testing: create a group and add the testers; turn on automatic updates on the desk devices.
+5. Run `tools/apple_setup.py` again: it records `ASC_APP_ID`, creates the internal TestFlight group "Internal" (access to all builds) and adds the team's Account Holder and Admins as testers. On each test device install TestFlight, sign in with that Apple ID and turn on automatic updates for OpenHead.
 
 GitHub secrets: `APPLE_DIST_CERT_P12_B64`, `APPLE_DIST_CERT_PASSWORD`, `APPLE_PROVISIONING_PROFILE_B64`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY`, `KEYCHAIN_PASSWORD`. Variables: `APPLE_TEAM_ID`, `IOS_BUNDLE_ID`, `IOS_SCHEME`.
 
