@@ -320,6 +320,6 @@ Agenten kör på antagandena ovan tills Patrik säger annat. Dessa påverkar äg
 - [x] Apple-konto: privat (beslutat 2026-10-31). Omvänd domän för Bundle ID återstår.
 - [x] Apache 2.0, publikt repo (beslutat 2026-10-31).
 - [ ] Ska Python-paketet publiceras på PyPI vid 0.1.0, eller installeras från Git-tagg?
-- [ ] Ska robotrepots ROS 2-bridge få ett exempel i `examples/` här, eller hållas helt separat?
+- [x] ROS 2: inget ROS-specifikt i det här repot. En brygga byggs separat senare vid behov (beslutat 2026-10-31).
 - [x] Nivå 2-testenheter: iPhone 12 (baslinje, tekniknivån låses hit) och iPhone 18 Pro (verifiering). iPad i mån av tillgång. Android/ARCore kan komma senare; protokoll och motor hålls plattformsneutrala.
 - [x] Halloween-temats bilder tas fram av agenten programmatiskt (beslutat 2026-10-31).

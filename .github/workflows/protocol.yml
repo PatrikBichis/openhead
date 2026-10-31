@@ -1,0 +1,75 @@
+name: protocol
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "protocol/**"
+      - "face/themes/**"
+      - "tools/protocol.py"
+      - "python/pyproject.toml"
+      - "python/uv.lock"
+      - "python/src/openhead/protocol/**"
+      - ".github/workflows/protocol.yml"
+  pull_request:
+    paths:
+      - "protocol/**"
+      - "face/themes/**"
+      - "tools/protocol.py"
+      - "python/pyproject.toml"
+      - "python/uv.lock"
+      - "python/src/openhead/protocol/**"
+      - ".github/workflows/protocol.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: protocol-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: python/uv.lock
+
+      - name: Install tools
+        run: uv sync --project python --locked
+
+      - name: Validate schemas, examples and themes
+        run: uv run --project python python tools/protocol.py check
+
+      - name: Generated bundle, models and docs are committed
+        run: uv run --project python python tools/protocol.py generate --check
+
+      - name: Every schema change has a CHANGELOG entry in the same commit
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then base="$PR_BASE"; else base="$PUSH_BEFORE"; fi
+          if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "No usable base commit ($EVENT); checking every commit on the branch."
+            range="HEAD"
+          else
+            range="$base..HEAD"
+          fi
+          failed=0
+          for c in $(git rev-list --no-merges "$range"); do
+            files=$(git diff-tree --no-commit-id --name-only -r "$c")
+            if echo "$files" | grep -q '^protocol/schema/' && ! echo "$files" | grep -qx 'protocol/CHANGELOG.md'; then
+              echo "::error::$(git log -1 --format='%h %s' "$c") changes protocol/schema without protocol/CHANGELOG.md"
+              failed=1
+            fi
+          done
+          exit $failed

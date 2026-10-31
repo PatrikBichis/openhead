@@ -238,7 +238,8 @@ openhead/
 │   └── OpenHeadUITests/    # XCUITest with screenshots
 ├── python/                 # one package: openhead (extras: [mcp], [sim])
 │   └── src/openhead/
-│       ├── client/         # asyncio client, models generated from schema
+│       ├── protocol/       # pydantic models generated from schema
+│       ├── client/         # asyncio client
 │       ├── sim/            # simulator: server + window running face/dist
 │       ├── mcp/            # MCP server
 │       └── cli/            # openhead discover|pair|screenshot|logs|emotion|theme|show|run|sim|mcp

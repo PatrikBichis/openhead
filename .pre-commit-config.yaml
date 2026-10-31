@@ -1,0 +1,22 @@
+# Install once: uv run --project python pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: protocol-check
+        name: validate protocol schemas, examples and themes
+        entry: uv run --project python python tools/protocol.py check
+        language: system
+        pass_filenames: false
+        files: ^(protocol/(schema|examples)/|face/themes/|tools/protocol\.py)
+      - id: protocol-generated
+        name: generated models and docs are up to date
+        entry: uv run --project python python tools/protocol.py generate --check
+        language: system
+        pass_filenames: false
+        files: ^(protocol/|tools/protocol\.py|python/src/openhead/protocol/)
+      - id: ruff
+        name: ruff
+        entry: uv run --project python ruff check --config python/pyproject.toml
+        language: system
+        types: [python]
+        exclude: ^(\.claude/|python/src/openhead/protocol/(models|registry)\.py)

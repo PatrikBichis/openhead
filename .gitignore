@@ -19,8 +19,8 @@ __pycache__/
 .mypy_cache/
 .coverage
 htmlcov/
-dist/
-build/
+python/dist/
+python/build/
 
 # Node / face engine
 node_modules/
@@ -54,3 +54,6 @@ Thumbs.db
 
 # Agent local state
 .claude/settings.local.json
+
+# Local signing material (keep outside git even if renamed)
+apps/ios/keys/

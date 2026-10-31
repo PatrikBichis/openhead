@@ -1,0 +1,46 @@
+name: python
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "python/**"
+      - "protocol/**"
+      - "scenarios/**"
+      - ".github/workflows/python.yml"
+  pull_request:
+    paths:
+      - "python/**"
+      - "protocol/**"
+      - "scenarios/**"
+      - ".github/workflows/python.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: python/uv.lock
+
+      - run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check
+
+      - name: Tests
+        run: uv run pytest -q
