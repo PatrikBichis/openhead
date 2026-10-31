@@ -523,15 +523,29 @@ def generate(dry: bool) -> int:
     return 0
 
 
+def check_changelog() -> int:
+    """A staged schema change must stage protocol/CHANGELOG.md in the same commit."""
+    staged = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=ROOT,
+                            capture_output=True, text=True, check=True).stdout.split()
+    if any(f.startswith("protocol/schema/") for f in staged) and \
+            "protocol/CHANGELOG.md" not in staged:
+        print("protocol/schema changed without a protocol/CHANGELOG.md entry in this commit")
+        return 1
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("check", help="validate schemas, examples and themes")
+    sub.add_parser("changelog", help="fail if staged schema changes lack a CHANGELOG entry")
     gen = sub.add_parser("generate", help="write bundle, Python models and docs")
     gen.add_argument("--check", action="store_true", help="only report stale files")
     args = parser.parse_args()
     if args.cmd == "check":
         return check()
+    if args.cmd == "changelog":
+        return check_changelog()
     return generate(dry=args.check)
 
 

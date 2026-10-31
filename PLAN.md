@@ -22,10 +22,11 @@ Planen utgår från följande val. De är Patriks att ändra; agenten ska inte a
 | Språk | Kod, README och protokolldokumentation på engelska. Den här planen på svenska. |
 | Namn | **OpenHead** (beslutat 2026-10-31). Repo `openhead`, Python-paket och CLI `openhead`, Swift-mål `OpenHead`, mDNS `_openhead._tcp`, MCP-resurser `openhead://`, Bundle ID `<omvänd domän>.openhead`. Kontrollera GitHub, PyPI och npm före första push; vid krock på PyPI publiceras paketet som `openhead-head` med oförändrat importnamn. Kontrollerat 2026-10-31: `openhead` ledigt på PyPI och npm, repot skapat som `PatrikBichis/openhead`. |
 | Licens | Apache 2.0 från första commit. |
+| CI och testning | All testning sker lokalt (`tools/check.py`, körs som pre-push-hook). GitHub Actions används bara för signerat iOS-bygge och uppladdning till TestFlight, startat manuellt, med så få macOS-minuter som möjligt (beslutat 2026-10-31). |
 
 ## Omfattning för v0.1
 
-v0.1 är klar när en agent på en PC kan parkoppla med en iPhone, byta tema, sätta känsla, visa en bild, ta en skärmdump och läsa loggen via MCP, och när samma scenario går grönt mot simulatorn i CI.
+v0.1 är klar när en agent på en PC kan parkoppla med en iPhone, byta tema, sätta känsla, visa en bild, ta en skärmdump och läsa loggen via MCP, och när samma scenario går grönt mot simulatorn lokalt.
 
 Ingår:
 
@@ -33,7 +34,8 @@ Ingår:
 - Ansiktsmotor med tre teman: `cartoon`, `minimal`, `halloween`. Tio gemensamma uttryck. Envelope-driven mun.
 - iOS-app: ansikte, parkopplingsvy, inställningar, statusrad, IMU-ström, skärmdump, logg. Universell layout.
 - Python: klientbibliotek, simulator med fönster, MCP-server (stdio), exempel-skript, scenariokörare.
-- CI: schemavalidering, Python-tester, Playwright-tester av motorn, iOS-bygge på simulator, TestFlight-leverans.
+- Lokal verifiering: schemavalidering, Python-tester, Playwright-tester av motorn, Swift-modellkontroll (`tools/check.py`).
+- GitHub Actions: endast signerat iOS-bygge och TestFlight-leverans.
 
 Väntar till v0.2 och senare:
 
@@ -60,7 +62,7 @@ openhead/
 │   ├── src/
 │   ├── themes/                 # cartoon/ minimal/ halloween/
 │   ├── tests/                  # Playwright: golden-bilder per tema × uttryck
-│   └── dist/                   # byggd bundle; checkas INTE in, byggs i CI och lokalt
+│   └── dist/                   # byggd bundle; checkas INTE in, byggs lokalt och i iOS-workflowen
 ├── apps/ios/                   # SwiftUI-skal; project.yml för XcodeGen
 │   ├── OpenHead/
 │   │   ├── App/  Link/  Sensors/  Display/  Face/ (WKWebView-värd)  Settings/  Logging/
@@ -78,22 +80,19 @@ openhead/
 ├── scenarios/                  # YAML-scenarier, körs mot sim och enhet
 ├── examples/
 ├── docs/                       # ios.md (TestFlight), dev-loop.md, themes.md
+├── tools/                      # protocol.py (validering, generering), check.py (alla lokala tester), apple_setup.py
 ├── .github/workflows/
-│   ├── protocol.yml            # schemavalidering, generera docs och modeller, diff-kontroll
-│   ├── face.yml                # bygg + Playwright
-│   ├── python.yml              # pytest, scenarier mot sim
-│   ├── ios-check.yml           # simulatorbygge + XCUITest, skärmdumpar som artefakt
-│   └── ios-testflight.yml      # signerat bygge → TestFlight
+│   └── ios-testflight.yml      # signerat bygge → TestFlight, startas manuellt
 ├── LICENSE                     # Apache 2.0
 └── README.md
 ```
 
 Regler:
 
-- Python-modeller (pydantic) och Swift-modeller genereras från schema i CI; handskrivna kopior är inte tillåtna. Generatorer: `datamodel-code-generator` för Python, en liten egen generator eller `quicktype` för Swift.
-- `face/dist` byggs av `face.yml` och av iOS-workflowen före `xcodegen`; appen får aldrig en inaktuell motor.
-- Teman valideras mot `theme.schema.json` i `protocol.yml`.
-- `CHANGELOG.md` uppdateras i samma commit som en schemaändring; `protocol.yml` misslyckas annars.
+- Python-modeller (pydantic) och Swift-modeller genereras från schema med `tools/protocol.py` och checkas in; pre-commit kontrollerar att de är aktuella. Handskrivna kopior är inte tillåtna. Generatorer: `datamodel-code-generator` för Python, en liten egen generator eller `quicktype` för Swift.
+- `face/dist` byggs lokalt och av iOS-workflowen före `xcodegen`; appen får aldrig en inaktuell motor.
+- Teman valideras mot `theme.schema.json` av `tools/protocol.py check` (pre-commit).
+- `CHANGELOG.md` uppdateras i samma commit som en schemaändring; pre-commit-hooken stoppar committen annars.
 
 ## Protokollet
 
@@ -198,7 +197,7 @@ Ett paket `openhead` (Python 3.11+, asyncio, pydantic v2, websockets). Extras `[
 
 **Klient** (`openhead.client`): `Head.discover()`, `Head.connect(host, token=None)`, `await head.pair(code)`, `head.subscribe("imu", 100)` som async-iterator, `await head.face.set_emotion(...)`, `await head.system.screenshot()` som returnerar bytes. Modeller genererade från schema; en handskriven tunn fasad ovanpå. Automatisk återanslutning med backoff. Det här biblioteket är det enda robotrepot ska bero på.
 
-**Simulator** (`openhead.sim`): samma server-API som iOS-appen, implementerat i Python. Kör `face/dist` i ett fönster via `pywebview`; headless-läge renderar via Playwright för CI. Syntetisk IMU (konfigurerbar rörelse eller inspelad fil), syntetisk status. Stöder parkoppling med fast kod `0000` i dev-läge. Allt ett protokolltest behöver utan hårdvara.
+**Simulator** (`openhead.sim`): samma server-API som iOS-appen, implementerat i Python. Kör `face/dist` i ett fönster via `pywebview`; headless-läge renderar via Playwright för automatiska tester. Syntetisk IMU (konfigurerbar rörelse eller inspelad fil), syntetisk status. Stöder parkoppling med fast kod `0000` i dev-läge. Allt ett protokolltest behöver utan hårdvara.
 
 **MCP-server** (`openhead.mcp`): byggd på det officiella Python-SDK:t för MCP, stdio i v0.1. Håller en klientanslutning mot vald enhet och exponerar:
 
@@ -231,9 +230,9 @@ Målet är att kodningsagenten kan verifiera en ändring själv, i tre nivåer m
 
 **Nivå 1: motor och protokoll på PC, sekunder.** Playwright kör `face/dist` headless: för varje tema × uttryck tas en bild och jämförs mot golden-bilder i `face/tests/golden/` med tolerans. Pytest kör protokollscenarier mot `openhead sim --headless`. Inga enheter, inga minuter på macOS.
 
-**Nivå 2: enhet på skrivbordet, minuter.** En iPhone eller iPad står laddad med senaste TestFlight-bygget, appen i förgrunden, dev-läge på, parkopplad med agentens maskin. TestFlight ställs på automatisk uppdatering så att CI-byggen når enheten utan handpåläggning. Agenten kör `openhead run scenarios/x.yaml --device head-01.local` eller använder MCP-verktygen direkt: `take_screenshot` för att se, `tail_logs` för att förstå, `get_diagnostics` när något är fel. Det här är enda sättet att verifiera ARKit, kameror, prestanda och termik utan en Mac.
+**Nivå 2: enhet på skrivbordet, minuter.** En iPhone eller iPad står laddad med senaste TestFlight-bygget, appen i förgrunden, dev-läge på, parkopplad med agentens maskin. TestFlight ställs på automatisk uppdatering så att nya byggen når enheten utan handpåläggning. Agenten kör `openhead run scenarios/x.yaml --device head-01.local` eller använder MCP-verktygen direkt: `take_screenshot` för att se, `tail_logs` för att förstå, `get_diagnostics` när något är fel. Det här är enda sättet att verifiera ARKit, kameror, prestanda och termik utan en Mac.
 
-**Nivå 3: CI, kvartar.** `ios-check.yml` kör XCUITest på simulatorn och sparar skärmdumpar som artefakter; `ios-testflight.yml` väntar in App Store Connect tills bygget är Ready to Test och skriver version, byggnummer och tid i jobbsummeringen. Agenten läser artefakter och summering via GitHub.
+**Nivå 3: TestFlight-bygge, kvartar.** `ios-testflight.yml` startas manuellt (`gh workflow run ios-testflight.yml`), bygger signerat och laddar upp. Jobbet väntar inte på Apples processning, för att spara macOS-minuter; agenten följer status till Ready to Test lokalt via App Store Connect API. Inga tester körs i GitHub Actions; iOS-skalet verifieras på enheten (nivå 2).
 
 **Scenariospråk** (`scenarios/*.yaml`):
 
@@ -248,9 +247,9 @@ steps:
   - expect_status: { theme: halloween, emotion: scared }
 ```
 
-Köraren rapporterar pass/fail per steg, sparar skärmdumpar och loggutdrag i en katalog och, mot simulatorn, jämför skärmdumpar mot golden. Samma fil körs i `python.yml`, i nivå 2 och via MCP-verktyget `run_scenario`.
+Köraren rapporterar pass/fail per steg, sparar skärmdumpar och loggutdrag i en katalog och, mot simulatorn, jämför skärmdumpar mot golden. Samma fil körs lokalt mot simulatorn, i nivå 2 och via MCP-verktyget `run_scenario`.
 
-**Vad agenten ska göra vid varje ändring**: bygg motorn, kör Playwright och pytest lokalt (nivå 1); vid ändringar i iOS-skalet pusha och vänta in `ios-check.yml`; vid ändringar som rör sensorer eller prestanda kör scenariot mot enheten (nivå 2) och bifoga skärmdump och loggutdrag i PR-beskrivningen. Dokumenteras i `docs/dev-loop.md` och i repots `AGENTS.md`.
+**Vad agenten ska göra vid varje ändring**: kör `tools/check.py` lokalt (nivå 1: motor, Playwright, pytest, scenarier, Swift-modeller); vid ändringar i iOS-skalet starta `ios-testflight.yml` och verifiera på enheten (nivå 2); vid ändringar som rör sensorer eller prestanda kör scenariot mot enheten (nivå 2) och bifoga skärmdump och loggutdrag i PR-beskrivningen. Dokumenteras i `docs/dev-loop.md` och i repots `AGENTS.md`.
 
 ## Säkerhet
 
@@ -269,15 +268,13 @@ MCP-servern ärver detta: den är en klient som alla andra och behöver sin egen
 
 ## CI/CD
 
-Fem workflows, pathfiltrerade så att Linux-jobb aldrig startar macOS-runners i onödan.
+Ett enda workflow. All testning sker lokalt (`tools/check.py`, pre-push-hook); GitHub Actions används bara för det som kräver macOS: signerat bygge och uppladdning.
 
 | Workflow | Runner | Trigger | Gör |
 | --- | --- | --- | --- |
-| `protocol.yml` | ubuntu | `protocol/**` | Validerar schema och teman, genererar Python/Swift-modeller och docs, misslyckas om genererat inte är incheckat eller CHANGELOG saknar post |
-| `face.yml` | ubuntu | `face/**` | `npm ci`, bygg, Playwright golden-tester, laddar upp diff-bilder vid fel |
-| `python.yml` | ubuntu | `python/**`, `scenarios/**`, `protocol/**` | pytest, scenarier mot headless-sim, `openhead mcp --selftest` |
-| `ios-check.yml` | macos-15 | `apps/ios/**`, `face/**`, PR | bygg motor, `xcodegen`, simulatorbygge utan signering, XCUITest med skärmdumpar som artefakt |
-| `ios-testflight.yml` | macos-15 | push `main` med ovan paths, `workflow_dispatch`, kvartalsvis `schedule` | signerat arkiv, export, `fastlane pilot upload`, väntar in Ready to Test, skriver summering |
+| `ios-testflight.yml` | macos-15 | endast `workflow_dispatch` (manuellt, `gh workflow run`) | bygg motor, `xcodegen`, signerat arkiv, export, uppladdning till TestFlight; väntar inte på processning, skriver version och byggnummer i summeringen |
+
+Ingen körning vid push och inget schema. TestFlight-byggen går ut efter 90 dagar; ett nytt bygge startas manuellt vid behov.
 
 Apple-uppsättning, görs av Patrik en gång (detaljer i `docs/ios.md`):
 
@@ -286,25 +283,25 @@ Apple-uppsättning, görs av Patrik en gång (detaljer i `docs/ios.md`):
 3. Apple Distribution-certifikat (CSR via OpenSSL på Linux), exporterat till `.p12`.
 4. App Store Connect-distributionsprofil för App ID:t.
 5. App i App Store Connect med Bundle ID; intern TestFlight-grupp med Patrik och testenheterna.
-6. App Store Connect API-nyckel (App Manager); Key ID, Issuer ID, `.p8`.
+6. App Store Connect API-nyckel (Admin, krävs för att skapa certifikat och profiler); Key ID, Issuer ID, `.p8`. Steg 2–4 och secrets görs av `tools/apple_setup.py --github`.
 
 Secrets i GitHub: `APPLE_DIST_CERT_P12_B64`, `APPLE_DIST_CERT_PASSWORD`, `APPLE_PROVISIONING_PROFILE_B64`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY`, `KEYCHAIN_PASSWORD`. Variables: `APPLE_TEAM_ID`, `IOS_BUNDLE_ID`, `IOS_SCHEME`.
 
 Signeringsflöde: manuell signering med importerad `.p12` och profil i tillfällig nyckelring; `CURRENT_PROJECT_VERSION = github.run_number`; `MARKETING_VERSION` följer protokollets `VERSION`-fil så att app och protokoll alltid har samma versionsnummer. `ITSAppUsesNonExemptEncryption = NO` och alla usage-strängar sätts i `project.yml`.
 
-Budget: macOS-minuter räknas 10×; ett TestFlight-bygge kostar 12–15 minuter. Pathfilter och `concurrency` håller det till några byggen per dag.
+Budget: macOS-minuter räknas 10×. Målet är under 10 minuter per bygge: cache för npm och SwiftPM, ingen väntan på Apples processning, inga tester i jobbet, och bara manuellt startade byggen.
 
 ## Arbetsordning
 
 Varje steg har ett acceptanskriterium som agenten verifierar innan nästa påbörjas. Steg 1–5 kräver ingen Apple-uppsättning och inga macOS-minuter.
 
-1. **Repo-skelett.** Mappstruktur, LICENSE, README (från utkastet), `AGENTS.md` med arbetsreglerna i den här planen, `.editorconfig`, `pre-commit` med schemavalidering. *Klart när `protocol.yml` är grön på ett tomt schema.*
+1. **Repo-skelett.** Mappstruktur, LICENSE, README (från utkastet), `AGENTS.md` med arbetsreglerna i den här planen, `.editorconfig`, `pre-commit` med schemavalidering. *Klart när schemavalideringen (`tools/protocol.py check`) är grön lokalt.*
 2. **Protokoll v0.1.** Alla schema för v0.1, exempelmeddelanden per typ, genererade Python-modeller, genererad referens. *Klart när exempelmeddelandena validerar och docs byggs.*
-3. **Ansiktsmotor.** Parametermodell, blandare, renderer, temat `cartoon`, sedan `minimal` och `halloween`. Playwright-tester med golden-bilder. *Klart när alla 3 × 10 kombinationer har golden-bilder och `face.yml` är grön.*
-4. **Simulator och klient.** Server-implementation, parkoppling, prenumerationer, kommandon; klientbibliotek; CLI. *Klart när `scenarios/smoke.yaml` går grönt mot headless-sim i `python.yml`.*
+3. **Ansiktsmotor.** Parametermodell, blandare, renderer, temat `cartoon`, sedan `minimal` och `halloween`. Playwright-tester med golden-bilder. *Klart när alla 3 × 10 kombinationer har golden-bilder och Playwright är grön lokalt.*
+4. **Simulator och klient.** Server-implementation, parkoppling, prenumerationer, kommandon; klientbibliotek; CLI. *Klart när `scenarios/smoke.yaml` går grönt mot headless-sim lokalt (`tools/check.py`).*
 5. **MCP-server.** Verktyg och resurser enligt tabellen; `--selftest` som kör mot sim. *Klart när Claude Code kan köra `set_theme`, `take_screenshot` och `tail_logs` mot simulatorn via stdio.*
-6. **Apple-uppsättning.** Patrik gör stegen i CI/CD-avsnittet och lägger in secrets. Agenten förbereder `project.yml`, `ExportOptions.plist` och workflows under tiden.
-7. **iOS-skal, del 1.** Länk, parkoppling, WKWebView med motorn, statusrad, inställningar, logg, skärmdump. `ios-check.yml` grön. *Klart när första TestFlight-bygget är Ready to Test och Patrik ser cartoon-ansiktet på iPhone, iPad mini och iPad.*
+6. **Apple-uppsättning.** Patrik gör stegen i CI/CD-avsnittet och lägger in secrets. Agenten förbereder `project.yml`, `ExportOptions.plist` och `ios-testflight.yml` under tiden.
+7. **iOS-skal, del 1.** Länk, parkoppling, WKWebView med motorn, statusrad, inställningar, logg, skärmdump. *Klart när första TestFlight-bygget är Ready to Test och Patrik ser cartoon-ansiktet på iPhone, iPad mini och iPad.*
 8. **Enhet i slingan.** Parkoppla skrivbordsenheten med agentens maskin; kör `smoke.yaml` mot enheten; verifiera skärmdump och logg via MCP. *Klart när samma scenario är grönt mot sim och enhet.*
 9. **IMU och envelope.** `imu`-topic med monteringsoffset; envelope-driven mun; latensmätning skärmdump-till-skärmdump. *Klart när envelope på 25 Hz ger synlig munrörelse utan hack på iPhone 12.*
 10. **Tagga 0.1.0.** CHANGELOG, release-notes, robotrepot byter från `main` till taggen.

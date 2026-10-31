@@ -1,34 +1,49 @@
 # Developer loop
 
-The head is built to be validated by an agent, not only by a person holding the phone. Every change is checked at the cheapest level that can prove it; the same scenario file runs at all three levels.
+The head is built to be validated by an agent, not only by a person holding the phone. **All testing runs locally**; GitHub Actions only builds the iOS app and uploads it to TestFlight, started by hand, to keep Actions minutes to a minimum.
 
 | Level | Where | Time | Proves | Status |
 | --- | --- | --- | --- | --- |
-| 1 | PC (Windows, WSL or CI Linux) | seconds | protocol, models, face rendering, simulator behaviour | protocol + face: available; simulator: step 4 |
+| 1 | PC (Windows, WSL) | seconds–minutes | protocol, Python/Swift models, face rendering, simulator behaviour | available; simulator from step 4 |
 | 2 | Device on the desk | minutes | WKWebView, sensors, ARKit, performance, thermals | step 8 |
-| 3 | GitHub Actions | ~15 min | iOS build, XCUITest screenshots, TestFlight delivery | step 7 |
+| 3 | TestFlight build (GitHub Actions, manual) | ~10 min | the app builds, signs and uploads | step 7 |
 
 ## Level 1: PC
 
 ```bash
-uv run --project python python tools/protocol.py check             # schemas, examples, themes
-uv run --project python python tools/protocol.py generate --check  # generated Python/Swift/docs up to date
-cd python && uv run pytest -q                                      # contract tests (and, from step 4, protocol tests against the simulator)
-cd face && npm run build && npm test                               # golden images per theme × emotion, engine API
-cd face && npm run gallery                                         # test-results/gallery.png to review by eye
+uv run --project python python tools/check.py          # everything (also runs as the pre-push hook)
+uv run --project python python tools/check.py --fast   # protocol + Python only
+cd face && npm run gallery                             # test-results/gallery.png to review by eye
 ```
 
-Golden images live in `face/tests/golden/` and are compared with a tolerance (`maxDiffPixelRatio 0.01`), so the same files pass on Windows and on CI Linux. After an intentional visual change: review the gallery, `npm run test:update`, commit the new goldens.
+`tools/check.py` runs: protocol validation, generated-file check, ruff, pytest (contract tests; from step 4 also scenarios against `openhead sim --headless`), face build with type check, Playwright golden images and API tests, and the Swift contract test when Swift is available.
 
-From step 4: `openhead sim --headless` serves the same protocol as the app; `openhead run scenarios/x.yaml` runs a scenario against it and `python.yml` does the same in CI.
+Install the git hooks once:
+
+```bash
+uv run --project python pre-commit install
+```
+
+Pre-commit runs the quick checks (schema validation, CHANGELOG rule, generated files, ruff); pre-push runs the full `tools/check.py`.
+
+Golden images live in `face/tests/golden/` and are compared with a tolerance (`maxDiffPixelRatio 0.01`). After an intentional visual change: review the gallery, `npm run test:update`, commit the new goldens.
+
+### Swift on Windows (via WSL)
+
+There is no Swift for the iOS SDK on Windows, but the generated models only use Foundation, so a Linux Swift toolchain in WSL compiles and tests them. Once Swift is installed in WSL (`swiftly`, https://www.swift.org/install/linux/), `tools/check.py` picks it up automatically; without it, the Swift check is reported as skipped and the models are first compiled by the TestFlight build.
 
 ## Level 2: device on the desk (step 8)
 
-An iPhone 12 (baseline) or the iPhone 18 Pro stands charged with the latest TestFlight build, app in the foreground, dev mode on, paired with the agent's machine. TestFlight automatic updates bring CI builds to it without hands. The agent runs `openhead run scenarios/x.yaml --device head-01.local` or uses the MCP tools: `take_screenshot` to see, `tail_logs` to understand, `get_diagnostics` when something is wrong. This is the only way to verify ARKit, cameras, performance and thermals without a Mac.
+An iPhone 12 (baseline) or the iPhone 18 Pro stands charged with the latest TestFlight build, app in the foreground, dev mode on, paired with the agent's machine. TestFlight automatic updates bring new builds to it without hands. The agent runs `openhead run scenarios/x.yaml --device head-01.local` or uses the MCP tools: `take_screenshot` to see, `tail_logs` to understand, `get_diagnostics` when something is wrong. This is the only way to verify the iOS shell, ARKit, cameras, performance and thermals without a Mac.
 
-## Level 3: CI (step 7)
+## Level 3: TestFlight build (step 7)
 
-`ios-check.yml` runs XCUITest on the simulator and uploads screenshots; `ios-testflight.yml` waits for App Store Connect to report Ready to Test and writes version, build number and time to the job summary. Read them with `gh run view` / `gh run download`.
+```bash
+gh workflow run ios-testflight.yml      # only when a change is ready to try on the device
+gh run watch
+```
+
+The job builds the face bundle, generates the Xcode project, archives, signs and uploads. It does not wait for Apple's processing (that would burn macOS minutes); the agent follows the build to Ready to Test locally through the App Store Connect API.
 
 ## Scenarios
 
@@ -43,10 +58,10 @@ steps:
   - expect_status: { theme: halloween, emotion: scared }
 ```
 
-The runner reports pass/fail per step, saves screenshots and log excerpts, and against the simulator compares screenshots with goldens. The same file runs in `python.yml`, at level 2 and through the MCP tool `run_scenario`.
+The runner reports pass/fail per step, saves screenshots and log excerpts, and against the simulator compares screenshots with goldens. The same file runs locally against the simulator, at level 2 and through the MCP tool `run_scenario`.
 
 ## What the agent does on each change
 
-- Always: level 1.
-- iOS shell changed: push and wait for `ios-check.yml`.
+- Always: level 1 (`tools/check.py`).
+- iOS shell changed: when ready, start a TestFlight build and verify on the device.
 - Sensors or performance changed: run the scenario on the device and attach screenshot and log excerpt to the PR.

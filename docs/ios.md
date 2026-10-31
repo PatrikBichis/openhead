@@ -1,6 +1,6 @@
 # iOS: Apple setup, TestFlight and device
 
-The iOS app is built and signed only in GitHub Actions; no Mac is needed. Baseline device is iPhone 12 (iOS 17).
+The iOS app is built and signed only by `ios-testflight.yml` in GitHub Actions, started manually; no Mac is needed and no tests run there. Baseline device is iPhone 12 (iOS 17).
 
 ## Apple setup (done once)
 

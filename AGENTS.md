@@ -12,30 +12,27 @@ Working rules for coding agents in this repository. `PLAN.md` (Swedish) is the s
 ## Development machine
 
 - Windows 11 with an AMD GPU (no CUDA). WSL (Ubuntu 24.04) is available when a Linux tool is needed.
-- No Mac and no local Swift: iOS is built and signed only in GitHub Actions (`macos-15`); generated Swift models are compiled on Linux in `protocol.yml`. Keep macOS jobs path-filtered.
+- No Mac: iOS is built and signed only by `ios-testflight.yml` in GitHub Actions (`macos-15`), started manually. **No testing runs in GitHub Actions**; keep Actions minutes to a minimum. All tests run locally with `tools/check.py` (also the pre-push hook). Generated Swift models are compiled locally with Swift in WSL when installed.
 - Python: always via **uv** (`uv sync`, `uv run ...`); the venv lives in `python/.venv`. Never `pip install` into the system Python.
 - Node 22+ for the face engine (`npm ci` in `face/`) and for quicktype (`npx`).
 - GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe` (may not be on PATH in agent shells).
 
 ## Rules from the plan
 
-- Python models (pydantic) and Swift models are generated from `protocol/schema` by `tools/protocol.py generate`; hand-written copies are not allowed. Commit the generated files; CI fails if they are stale.
-- A schema change updates `protocol/CHANGELOG.md` in the same commit; `protocol.yml` fails otherwise.
+- Python models (pydantic) and Swift models are generated from `protocol/schema` by `tools/protocol.py generate`; hand-written copies are not allowed. Commit the generated files; the pre-commit hook fails if they are stale.
+- A schema change updates `protocol/CHANGELOG.md` in the same commit; the pre-commit hook fails otherwise.
 - Themes are validated against `theme.schema.json` / `expressions.schema.json` by `tools/protocol.py check`.
-- `face/dist` is never committed; it is built by `face.yml` and by the iOS workflows before `xcodegen`, so the app never ships a stale engine.
+- `face/dist` is never committed; it is built locally and by `ios-testflight.yml` before `xcodegen`, so the app never ships a stale engine.
 - No face logic in Swift: the iOS app hosts `face/dist` in a WKWebView.
 
 ## What to do on every change
 
-1. **Level 1 (PC, seconds).** Build the engine and run its tests; run the protocol checks and pytest:
+1. **Level 1 (PC).** Run every local check (protocol, generated files, ruff, pytest, face build + Playwright, Swift models):
    ```bash
-   uv run --project python python tools/protocol.py check
-   uv run --project python python tools/protocol.py generate --check
-   cd python && uv run pytest -q
-   cd face && npm run build && npm test
+   uv run --project python python tools/check.py
    ```
-   From step 4: run the scenarios against `openhead sim --headless`.
-2. **iOS shell changed:** push and wait for `ios-check.yml` (`gh run watch`), read its screenshots artifact.
+   Install the hooks once with `uv run --project python pre-commit install`; the full check then runs before every push. From step 4 it also runs the scenarios against `openhead sim --headless`.
+2. **iOS shell changed:** start a TestFlight build only when the change is ready to try on the device (`gh workflow run ios-testflight.yml`), then verify on the device (level 2). Never add test jobs to GitHub Actions.
 3. **Sensors or performance changed:** run the scenario against the desk device (level 2) and put the screenshot and log excerpt in the PR description.
 4. Before claiming something works, run the command that proves it and read the output (`.claude/skills/verification-before-completion`).
 

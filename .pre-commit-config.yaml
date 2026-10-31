@@ -1,4 +1,6 @@
+# All testing is local (GitHub Actions only builds for TestFlight).
 # Install once: uv run --project python pre-commit install
+default_install_hook_types: [pre-commit, pre-push]
 repos:
   - repo: local
     hooks:
@@ -8,6 +10,12 @@ repos:
         language: system
         pass_filenames: false
         files: ^(protocol/(schema|examples)/|face/themes/|tools/protocol\.py)
+      - id: protocol-changelog
+        name: schema changes come with a CHANGELOG entry
+        entry: uv run --project python python tools/protocol.py changelog
+        language: system
+        pass_filenames: false
+        files: ^protocol/schema/
       - id: protocol-generated
         name: generated models and docs are up to date
         entry: uv run --project python python tools/protocol.py generate --check
@@ -20,3 +28,10 @@ repos:
         language: system
         types: [python]
         exclude: ^(\.claude/|python/src/openhead/protocol/(models|registry)\.py)
+      - id: full-check
+        name: all local checks (tools/check.py) before push
+        entry: uv run --project python python tools/check.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

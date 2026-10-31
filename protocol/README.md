@@ -9,7 +9,7 @@ The OpenHead protocol is the product; every client and tool depends on what is h
 | `dist/openhead.schema.json` | All schemas bundled into one document (`$defs` named by title). Generated; use it for code generators in other languages. |
 | `docs/` | Generated reference. Start at [docs/README.md](docs/README.md). |
 | `VERSION` | Protocol version; also the iOS app's `MARKETING_VERSION`. |
-| `CHANGELOG.md` | Updated in the same commit as any schema change (CI enforces it). |
+| `CHANGELOG.md` | Updated in the same commit as any schema change (the pre-commit hook enforces it). |
 
 ## Conventions
 
@@ -24,7 +24,7 @@ The OpenHead protocol is the product; every client and tool depends on what is h
 ```bash
 uv run --project python python tools/protocol.py check             # validate everything
 uv run --project python python tools/protocol.py generate          # bundle, Python models, docs
-uv run --project python python tools/protocol.py generate --check  # what CI runs
+uv run --project python python tools/protocol.py generate --check  # what the pre-commit hook runs
 ```
 
-Python models are written to `python/src/openhead/protocol/`; Swift models (quicktype, Codable + Sendable) to `apps/ios/OpenHead/Protocol/`. CI compiles the Swift models on Linux and round-trips every example through both (`tools/swift_contract/`, `python/tests/test_contract.py`). Generating Swift needs Node (`npx`).
+Python models are written to `python/src/openhead/protocol/`; Swift models (quicktype, Codable + Sendable) to `apps/ios/OpenHead/Protocol/`. `tools/check.py` round-trips every example through both (`python/tests/test_contract.py`, and `tools/swift_contract/` when Swift is installed in WSL). Generating Swift needs Node (`npx`).

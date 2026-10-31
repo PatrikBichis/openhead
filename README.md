@@ -182,7 +182,7 @@ The head is built to be validated by an agent, not only by a person holding the 
 flowchart LR
     A["Coding agent"] -->|MCP / CLI| S["Level 1<br/>openhead sim --headless<br/>Playwright golden images"]
     A -->|MCP / CLI| D["Level 2<br/>Device on the desk<br/>TestFlight build · dev mode"]
-    A -->|GitHub| CI["Level 3<br/>CI: XCUITest screenshots<br/>TestFlight status"]
+    A -->|GitHub| CI["Level 3<br/>TestFlight build<br/>(manual, no tests)"]
     S --> R["Screenshots · logs · scenario report"]
     D --> R
     CI --> R
@@ -246,10 +246,11 @@ openhead/
 ├── scenarios/              # YAML scenarios, run against simulator and device
 ├── examples/
 ├── docs/                   # ios.md · dev-loop.md · themes.md
-└── .github/workflows/      # protocol · face · python · ios-check · ios-testflight
+├── tools/                  # protocol.py · check.py (all local tests) · apple_setup.py
+└── .github/workflows/      # ios-testflight (manual; the only workflow)
 ```
 
-Python and Swift models are generated from the schemas in CI; hand-written copies are not allowed. The face bundle is built in CI and copied into the iOS app before each build.
+Python and Swift models are generated from the schemas by `tools/protocol.py` and committed; hand-written copies are not allowed. All testing runs locally (`tools/check.py`, also as the pre-push hook); GitHub Actions only builds the iOS app and uploads it to TestFlight. The face bundle is built in that workflow and copied into the app before each build.
 
 ---
 
@@ -290,7 +291,7 @@ openhead mcp --device localhost               # expose it to an agent
 
 Early development. The protocol is unstable until `0.1.0` is tagged; robot integrations should track `main` until then and pin a tag afterwards.
 
-- [x] 1. Repo skeleton, CI for schema validation
+- [x] 1. Repo skeleton, local schema validation
 - [x] 2. Protocol schemas 0.1 with generated models and docs
 - [x] 3. Face engine with three themes and golden-image tests
 - [ ] 4. Simulator, Python client, CLI, smoke scenario
