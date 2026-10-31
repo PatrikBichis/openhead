@@ -31,6 +31,15 @@ uv run openhead --help
 
 `--device` defaults to `$OPENHEAD_DEVICE`, else mDNS discovery. Tokens live in `~/.openhead/tokens.json` (`$OPENHEAD_TOKENS`).
 
+## MCP server
+
+```bash
+uv run openhead mcp --device localhost    # stdio; register it with any MCP client
+uv run openhead mcp --selftest            # every tool and resource against a headless simulator
+```
+
+Tools: `pair`, `list_themes`, `set_theme`, `set_emotion`, `look_at`, `show_image` (URL or local file), `show_web`, `show_face`, `take_screenshot` (returns an image), `tail_logs`, `get_status`, `get_diagnostics`, `wait_for`, `run_scenario`. Resources: `openhead://status`, `openhead://themes`, `openhead://logs`. It is a client like any other and needs its own token; IMU and envelope streams are not exposed. This repo's `.mcp.json` registers it for Claude Code against `localhost`.
+
 ## Library
 
 ```python

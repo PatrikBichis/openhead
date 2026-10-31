@@ -10,7 +10,7 @@ import os
 import sys
 from pathlib import Path
 
-from ..client import Head, HeadError, discover, parse_address
+from ..client import Head, HeadError, discover, resolve_device
 from ..protocol import DEFAULT_PORT
 
 EPILOG = """examples:
@@ -88,7 +88,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--idle", action=argparse.BooleanOptionalAction, default=None,
                    help="idle motion (default: on with a window, off headless)")
 
-    sub.add_parser("mcp", help="MCP server for agents (step 5 of the plan)")
+    p = sub.add_parser("mcp", help="MCP server (stdio) exposing the head to agents")
+    p.add_argument("--selftest", action="store_true",
+                   help="run every tool against a headless simulator and exit")
 
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO if args.verbose or args.cmd == "sim" else logging.WARNING,
@@ -116,10 +118,18 @@ async def _dispatch(args: argparse.Namespace) -> int:
             print("no heads found", file=sys.stderr)
         return 0 if devices else 1
     if args.cmd == "mcp":
-        print("the MCP server arrives in step 5", file=sys.stderr)
-        return 2
+        try:
+            from ..mcp.selftest import selftest
+            from ..mcp.server import serve_stdio
+        except ImportError as exc:
+            print(f"the MCP server needs the [mcp] extra: {exc}", file=sys.stderr)
+            return 1
+        if args.selftest:
+            return await selftest()
+        await serve_stdio(args.device, args.client.replace("openhead-cli", "openhead-mcp"))
+        return 0
 
-    host, port = await _resolve(args.device)
+    host, port = await resolve_device(args.device)
     head = await Head.connect(host, port, client=args.client, auto_reconnect=False)
     async with head:
         if args.cmd == "pair":
@@ -186,18 +196,6 @@ async def _command(head: Head, args: argparse.Namespace) -> int:
                 failed += not report.passed
             return 1 if failed else 0
     return 0
-
-
-async def _resolve(device: str) -> tuple[str, int]:
-    if device != "auto":
-        return parse_address(device)
-    devices = await discover(2.0)
-    if len(devices) == 1:
-        return devices[0].host, devices[0].port
-    if not devices:
-        raise ConnectionError("no head found over mDNS; pass --device host[:port]")
-    names = ", ".join(f"{d.name} ({d.address})" for d in devices)
-    raise ConnectionError(f"several heads found: {names}; pass --device")
 
 
 async def _sim(args: argparse.Namespace) -> int:

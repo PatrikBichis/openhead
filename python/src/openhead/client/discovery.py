@@ -45,3 +45,18 @@ async def discover(timeout: float = 2.0) -> list[DeviceInfo]:
     finally:
         await browser.async_cancel()
         await azc.async_close()
+
+
+async def resolve_device(device: str) -> tuple[str, int]:
+    """`host[:port]` as given, or `auto`: the single head found over mDNS."""
+    from .head import parse_address
+
+    if device != "auto":
+        return parse_address(device)
+    devices = await discover(2.0)
+    if len(devices) == 1:
+        return devices[0].host, devices[0].port
+    if not devices:
+        raise ConnectionError("no head found over mDNS; pass --device host[:port]")
+    names = ", ".join(f"{d.name} ({d.address})" for d in devices)
+    raise ConnectionError(f"several heads found: {names}; pass --device")

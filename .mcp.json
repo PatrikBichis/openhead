@@ -3,6 +3,19 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "openhead": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "python",
+        "openhead",
+        "mcp"
+      ],
+      "env": {
+        "OPENHEAD_DEVICE": "localhost"
+      }
     }
   }
 }

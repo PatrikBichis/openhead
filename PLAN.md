@@ -204,6 +204,7 @@ Ett paket `openhead` (Python 3.11+, asyncio, pydantic v2, websockets). Extras `[
 
 | MCP | Underliggande |
 | --- | --- |
+| Tool `pair(code)` | `pair`; tillagt 2026-10-31 så att en agent kan parkoppla med koden användaren läser av |
 | Tool `list_themes` | `face.list` |
 | Tool `set_theme(name)` | `face.set_theme` |
 | Tool `set_emotion(name, intensity, duration_ms)` | `face.set_emotion` |

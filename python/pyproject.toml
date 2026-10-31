@@ -19,14 +19,16 @@ sim = [
     "jsonschema>=4.23",
     "pillow>=10",
 ]
-mcp = []
+mcp = [
+    "mcp>=2.3",
+]
 
 [project.scripts]
 openhead = "openhead.cli.main:main"
 
 [dependency-groups]
 dev = [
-    "openhead[sim]",
+    "openhead[sim,mcp]",
     "pytest>=8",
     "pytest-asyncio>=0.24",
     "jsonschema>=4.23",

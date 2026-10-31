@@ -161,6 +161,7 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 
 | MCP | Maps to |
 | --- | --- |
+| Tool `pair(code)` | `pair` with the code the user reads off the device |
 | Tools `list_themes`, `set_theme`, `set_emotion`, `look_at`, `show_image`, `show_web`, `show_face` | `face.*`, `display.*` |
 | Tools `get_status`, `take_screenshot` (returns image), `tail_logs`, `get_diagnostics` | `system.*` (dev mode required for the last three) |
 | Tool `wait_for(topic, predicate, timeout_s)` | A subscription that returns on first match (`status`, `log`; `faces` in 0.2) |
@@ -171,6 +172,7 @@ High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use th
 
 ```bash
 openhead mcp --device auto        # stdio, for Claude Code / Claude Desktop / local agents
+openhead mcp --selftest           # every tool against a headless simulator
 ```
 
 ---
@@ -298,7 +300,7 @@ Early development. The protocol is unstable until `0.1.0` is tagged; robot integ
 - [x] 2. Protocol schemas 0.1 with generated models and docs
 - [x] 3. Face engine with three themes and golden-image tests
 - [x] 4. Simulator, Python client, CLI, smoke scenario
-- [ ] 5. MCP server (stdio)
+- [x] 5. MCP server (stdio)
 - [ ] 6. Apple Developer setup and secrets
 - [ ] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
 - [ ] 8. Device in the loop: smoke scenario green on simulator and device

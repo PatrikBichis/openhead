@@ -1,1 +1,1 @@
-"""MCP server exposing an OpenHead device to agents (step 5)."""
+"""MCP server exposing an OpenHead device to agents (needs the `[mcp]` extra)."""

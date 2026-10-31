@@ -50,5 +50,5 @@ See `docs/dev-loop.md` for the three levels in detail.
 ## Agent resources in this repo
 
 - Skills: `.claude/skills/` (installed with `npx skills add ... -a claude-code --copy`, pinned in `skills-lock.json`). Update with `npx skills update`.
-- MCP: `.mcp.json` registers DeepWiki (`https://mcp.deepwiki.com/mcp`) for questions about upstream repos, e.g. `modelcontextprotocol/python-sdk`, `yonaskolb/XcodeGen`, `fastlane/fastlane`, `r0x0r/pywebview`, `microsoft/playwright`, `glideapps/quicktype`.
+- MCP: `.mcp.json` registers `openhead` (this repo's MCP server, `OPENHEAD_DEVICE=localhost`: start `uv run --project python openhead sim` first and pair once with `openhead pair 0000 --device localhost`) and DeepWiki (`https://mcp.deepwiki.com/mcp`) for questions about upstream repos, e.g. `modelcontextprotocol/python-sdk`, `yonaskolb/XcodeGen`, `fastlane/fastlane`, `r0x0r/pywebview`, `microsoft/playwright`, `glideapps/quicktype`.
 - See `docs/agents.md` for why each skill is here.
