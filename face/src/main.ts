@@ -1,4 +1,6 @@
+import "@fontsource-variable/inter/wght.css";
 import { FaceEngine, type LogLevel } from "./engine";
+import { Screen, type ScreenEvent, type ScreenState, type ShowOptions, type SubtitleOptions, type View } from "./screen";
 
 /**
  * Entry point of the face page. Query parameters:
@@ -8,9 +10,17 @@ import { FaceEngine, type LogLevel } from "./engine";
  *   idle=0            animate, but without idle motion (headless simulator)
  *   seed=<n>          idle randomness seed
  */
+/** The page's API: the face engine plus what else is on screen (`screen.ts`). */
+export interface OpenHead extends FaceEngine {
+  show(content: View, source?: string, opts?: ShowOptions): Promise<void>;
+  clear(): void;
+  subtitle(text?: string, opts?: SubtitleOptions): void;
+  screen(): ScreenState;
+}
+
 declare global {
   interface Window {
-    openhead: FaceEngine;
+    openhead: OpenHead;
     webkit?: { messageHandlers?: { openhead?: { postMessage(message: unknown): void } } };
   }
 }
@@ -27,7 +37,21 @@ function onLog(level: LogLevel, message: string) {
 
 const idle = !test && query.get("idle") !== "0";
 const engine = new FaceEngine(canvas, { idle, seed: Number(query.get("seed") ?? 1), onLog });
-window.openhead = engine;
+
+function emit(event: ScreenEvent) {
+  // iOS gets events like logs; the simulator reads them from the console.
+  window.webkit?.messageHandlers?.openhead?.postMessage({ type: "event", event });
+  console.info(`[face-event] ${JSON.stringify(event)}`);
+}
+
+const screen = new Screen(engine, onLog, emit);
+engine.onTick = (dt) => screen.tick(dt);
+window.openhead = Object.assign(engine, {
+  show: (content: View, source?: string, opts?: ShowOptions) => screen.show(content, source, opts),
+  clear: () => screen.clear(),
+  subtitle: (text?: string, opts?: SubtitleOptions) => screen.subtitle(text, opts),
+  screen: () => screen.state(),
+});
 
 await engine.setTheme(query.get("theme") ?? "cartoon", 0);
 const emotion = query.get("emotion");

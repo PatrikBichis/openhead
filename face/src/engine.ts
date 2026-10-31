@@ -36,6 +36,7 @@ export class FaceEngine {
   private envTarget = 0;
   private envLevel = 0;
   private envAge = Infinity;
+  private hostEnvAge = Infinity;
   private manualBlink = false;
   private fade?: { image: HTMLCanvasElement; alpha: number; ms: number };
   private raf = 0;
@@ -90,11 +91,19 @@ export class FaceEngine {
     this.gazeTarget = { x: clamp(x, -1, 1), y: clamp(y, -1, 1) };
   }
 
-  /** Speech envelope, 0-1. Decays to closed if not refreshed within 200 ms. */
-  setEnvelope(level: number) {
+  /**
+   * Speech envelope, 0-1. Decays to closed if not refreshed within 200 ms. `text` is the
+   * subtitle-driven mouth, which gives way while the host streams a real envelope.
+   */
+  setEnvelope(level: number, source: "host" | "text" = "host") {
+    if (source === "host") this.hostEnvAge = 0;
+    else if (this.hostEnvAge < 300) return;
     this.envTarget = clamp(level, 0, 1);
     this.envAge = 0;
   }
+
+  /** Called at the end of every tick with the same `dt` (the screen layer's clock). */
+  onTick?: (dt: number) => void;
 
   blink() {
     this.idle.triggerBlink();
@@ -118,6 +127,7 @@ export class FaceEngine {
     this.gaze.y += (this.gazeTarget.y - this.gaze.y) * kg;
 
     this.envAge += dt;
+    this.hostEnvAge += dt;
     if (this.envAge > 200) this.envTarget = 0;
     const env = pack.theme.envelope ?? {};
     const tau = this.envTarget > this.envLevel ? (env.attack_ms ?? 30) : (env.release_ms ?? 90);
@@ -127,6 +137,7 @@ export class FaceEngine {
       this.fade.alpha -= dt / this.fade.ms;
       if (this.fade.alpha <= 0) this.fade = undefined;
     }
+    this.onTick?.(dt);
   }
 
   /** Current face parameters after blending, idle motion, gaze and envelope. */
