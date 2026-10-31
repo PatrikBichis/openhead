@@ -276,7 +276,7 @@ uv run openhead mcp --device localhost        # expose it to an agent (step 5)
 
 1. Install the app from TestFlight (see [`docs/ios.md`](docs/ios.md)) and put the device on the same Wi-Fi as the host.
 2. Open the app; it shows a pairing code when the first client connects.
-3. `openhead discover` then `openhead pair <code> --device head-01.local`.
+3. `openhead discover`, then `openhead pair --device head-01.local`: connecting makes the head show a code for 60 s; type it at the prompt.
 4. `openhead run scenarios/smoke.yaml --device head-01.local`.
 
 ---

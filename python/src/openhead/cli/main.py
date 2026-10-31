@@ -16,6 +16,7 @@ from ..protocol import DEFAULT_PORT
 EPILOG = """examples:
   openhead sim                                   simulated head with a window (pairing code 0000)
   openhead pair 0000 --device localhost
+  openhead pair --device 192.168.1.20            connects (the head shows a code), then asks for it
   openhead emotion curious --device localhost
   openhead screenshot -o face.png --device localhost
   openhead run scenarios/smoke.yaml --device localhost
@@ -31,49 +32,56 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--client", default=f"openhead-cli@{_hostname()}",
                         help="client name shown on the device")
     parser.add_argument("-v", "--verbose", action="store_true")
+    # The same options are accepted after the command too (`openhead pair --device ...`).
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--device", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+    common.add_argument("--client", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+    common.add_argument("-v", "--verbose", action="store_true", default=argparse.SUPPRESS,
+                        help=argparse.SUPPRESS)
     sub = parser.add_subparsers(dest="cmd", required=True, metavar="command")
 
-    p = sub.add_parser("discover", help="list heads on the network")
+    p = sub.add_parser("discover", parents=[common], help="list heads on the network")
     p.add_argument("--timeout", type=float, default=2.0)
 
-    p = sub.add_parser("pair", help="pair with the code shown on the head")
-    p.add_argument("code")
+    p = sub.add_parser("pair", parents=[common], help="pair with the code shown on the head")
+    p.add_argument("code", nargs="?",
+                   help="the code on the head; omit to connect first (shows the code) and type it")
 
-    sub.add_parser("status", help="show device status")
+    sub.add_parser("status", parents=[common], help="show device status")
 
-    p = sub.add_parser("screenshot", help="save what is on screen (dev mode)")
+    p = sub.add_parser("screenshot", parents=[common], help="save what is on screen (dev mode)")
     p.add_argument("-o", "--output", default="screenshot.png")
     p.add_argument("--scale", type=float)
 
-    p = sub.add_parser("logs", help="show the device log (dev mode)")
+    p = sub.add_parser("logs", parents=[common], help="show the device log (dev mode)")
     p.add_argument("-n", type=int, default=50)
     p.add_argument("--level")
     p.add_argument("-f", "--follow", action="store_true", help="keep streaming new lines")
 
-    p = sub.add_parser("emotion", help="set an emotion")
+    p = sub.add_parser("emotion", parents=[common], help="set an emotion")
     p.add_argument("name")
     p.add_argument("--intensity", type=float, default=1.0)
     p.add_argument("--duration-ms", type=int)
 
-    p = sub.add_parser("theme", help="set the face theme")
+    p = sub.add_parser("theme", parents=[common], help="set the face theme")
     p.add_argument("name")
 
-    sub.add_parser("themes", help="list themes and their expressions")
+    sub.add_parser("themes", parents=[common], help="list themes and their expressions")
 
-    p = sub.add_parser("show", help="show an image (URL or file), a web page, or 'face'")
+    p = sub.add_parser("show", parents=[common], help="show an image (URL or file), a web page, or 'face'")
     p.add_argument("source")
     p.add_argument("--web", action="store_true", help="treat source as a web page URL")
     p.add_argument("--overlay", choices=["none", "face-corner"], default="none")
     p.add_argument("--duration-ms", type=int)
 
-    p = sub.add_parser("run", help="run YAML scenarios")
+    p = sub.add_parser("run", parents=[common], help="run YAML scenarios")
     p.add_argument("scenarios", nargs="+", type=Path)
     p.add_argument("--out", type=Path, help="report directory (default scenario-reports/...)")
     p.add_argument("--compare", action="store_true",
                    help="compare screenshots with scenarios/golden/<name>/ (simulator)")
     p.add_argument("--update-golden", action="store_true")
 
-    p = sub.add_parser("sim", help="start the desktop simulator")
+    p = sub.add_parser("sim", parents=[common], help="start the desktop simulator")
     p.add_argument("--headless", action="store_true")
     p.add_argument("--port", type=int, default=DEFAULT_PORT)
     p.add_argument("--host", default="0.0.0.0")
@@ -88,7 +96,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--idle", action=argparse.BooleanOptionalAction, default=None,
                    help="idle motion (default: on with a window, off headless)")
 
-    p = sub.add_parser("mcp", help="MCP server (stdio) exposing the head to agents")
+    p = sub.add_parser("mcp", parents=[common], help="MCP server (stdio) exposing the head to agents")
     p.add_argument("--selftest", action="store_true",
                    help="run every tool against a headless simulator and exit")
 
@@ -136,12 +144,18 @@ async def _dispatch(args: argparse.Namespace) -> int:
             if head.paired:
                 print(f"already paired with {head.welcome.device.name} ({head.key})")
                 return 0
-            welcome = await head.pair(args.code)
+            code = args.code
+            if not code:
+                # Our hello has made the head show a code; read it on the same connection.
+                seconds = head.pairing.expires_in_ms // 1000 if head.pairing else 60
+                prompt = f"code shown on {head.key} (valid {seconds} s): "
+                code = (await asyncio.to_thread(input, prompt)).strip()
+            welcome = await head.pair(code)
             print(f"paired with {welcome.device.name} ({head.key}); token saved")
             return 0
         if not head.paired:
             hint = head.pairing.code_hint if head.pairing else ""
-            print(f"not paired with {head.key}: run `openhead pair <code> --device {args.device}`"
+            print(f"not paired with {head.key}: run `openhead pair --device {args.device}`"
                   f" ({hint})", file=sys.stderr)
             return 1
         return await _command(head, args)
