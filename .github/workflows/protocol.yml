@@ -10,6 +10,8 @@ on:
       - "python/pyproject.toml"
       - "python/uv.lock"
       - "python/src/openhead/protocol/**"
+      - "apps/ios/OpenHead/Protocol/**"
+      - "tools/swift_contract/**"
       - ".github/workflows/protocol.yml"
   pull_request:
     paths:
@@ -19,6 +21,8 @@ on:
       - "python/pyproject.toml"
       - "python/uv.lock"
       - "python/src/openhead/protocol/**"
+      - "apps/ios/OpenHead/Protocol/**"
+      - "tools/swift_contract/**"
       - ".github/workflows/protocol.yml"
   workflow_dispatch:
 
@@ -42,14 +46,28 @@ jobs:
           enable-cache: true
           cache-dependency-glob: python/uv.lock
 
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
       - name: Install tools
         run: uv sync --project python --locked
 
       - name: Validate schemas, examples and themes
         run: uv run --project python python tools/protocol.py check
 
-      - name: Generated bundle, models and docs are committed
+      - name: Generated bundle, Python and Swift models and docs are committed
         run: uv run --project python python tools/protocol.py generate --check
+
+      - name: Python models round-trip the examples
+        working-directory: python
+        run: uv run pytest -q tests/test_contract.py
+
+      - name: Swift models compile and round-trip the examples
+        run: |
+          swift --version
+          swiftc -o "$RUNNER_TEMP/contract" apps/ios/OpenHead/Protocol/*.swift tools/swift_contract/main.swift
+          "$RUNNER_TEMP/contract" protocol/examples
 
       - name: Every schema change has a CHANGELOG entry in the same commit
         env:

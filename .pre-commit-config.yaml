@@ -13,7 +13,7 @@ repos:
         entry: uv run --project python python tools/protocol.py generate --check
         language: system
         pass_filenames: false
-        files: ^(protocol/|tools/protocol\.py|python/src/openhead/protocol/)
+        files: ^(protocol/|tools/protocol\.py|python/src/openhead/protocol/|apps/ios/OpenHead/Protocol/)
       - id: ruff
         name: ruff
         entry: uv run --project python ruff check --config python/pyproject.toml

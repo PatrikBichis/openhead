@@ -31,6 +31,12 @@ BUNDLE = PROTOCOL / "dist" / "openhead.schema.json"
 DOCS = PROTOCOL / "docs"
 MODELS = ROOT / "python" / "src" / "openhead" / "protocol" / "models.py"
 REGISTRY_PY = ROOT / "python" / "src" / "openhead" / "protocol" / "registry.py"
+SWIFT_DIR = ROOT / "apps" / "ios" / "OpenHead" / "Protocol"
+QUICKTYPE = "quicktype@26.0.0"
+# Swift names that would shadow the standard library.
+SWIFT_RENAMES = {"Error": "ProtocolError"}
+# Names quicktype changes on its own (it treats "Ack" as an acronym).
+QUICKTYPE_NAMES = {"Ack": "ACK"}
 THEME_SCHEMA = SCHEMA_DIR / "theme.schema.json"
 EXPRESSIONS_SCHEMA = SCHEMA_DIR / "expressions.schema.json"
 DIALECT = "https://json-schema.org/draft/2020-12/schema"
@@ -335,6 +341,92 @@ def generate_docs(out_dir: Path) -> None:
     (out_dir / "README.md").write_text("\n".join(index), encoding="utf-8", newline="\n")
 
 
+def swift_schema(full: dict) -> dict:
+    """Bundle reshaped for quicktype, which ignores `allOf` refs: inherited fields are
+    copied into each type, conditionals dropped and theme/shared-only defs left out."""
+    defs = full["$defs"]
+    skip = ("Theme", "Expressions", "Common", "Envelope", "Command", "OpenHeadProtocol")
+
+    def flat(name: str) -> dict:
+        node = copy.deepcopy(defs[name])
+        props: dict = {}
+        required: list[str] = []
+        for part in node.pop("allOf", []):
+            src = flat(part["$ref"].rsplit("/", 1)[1]) if "$ref" in part else part
+            props.update(src.get("properties", {}))
+            required += src.get("required", [])
+        props.update(node.get("properties", {}))
+        required += node.get("required", [])
+        for key in ("if", "then", "else", "oneOf", "unevaluatedProperties"):
+            node.pop(key, None)
+        if props:
+            node["properties"] = props
+            node["required"] = sorted(set(required), key=required.index)
+        return node
+
+    out = {name: flat(name) for name in defs}
+    for old, new in SWIFT_RENAMES.items():
+        out[new] = {**out.pop(old), "title": new}
+    text = json.dumps(out)
+    for old, new in SWIFT_RENAMES.items():
+        text = text.replace(f'"#/$defs/{old}"', f'"#/$defs/{new}"')
+    out = json.loads(text)
+    roots = sorted(n for n, d in out.items() if not n.startswith(skip) and "properties" in d)
+    return {
+        "$schema": DIALECT,
+        "title": "OpenHeadProtocol",
+        "type": "object",
+        "properties": {n: {"$ref": f"#/$defs/{n}"} for n in roots},
+        "$defs": out,
+    }, roots
+
+
+def generate_swift(tmp_dir: Path) -> dict[str, str]:
+    schema, roots = swift_schema(bundle())
+    src = tmp_dir / "swift.schema.json"
+    src.write_text(json.dumps(schema, indent=1), encoding="utf-8")
+    out = tmp_dir / "Models.swift"
+    subprocess.run(
+        [
+            "npx", "--yes", QUICKTYPE,
+            "--src-lang", "schema", "--lang", "swift",
+            "--top-level", "OpenHeadProtocol",
+            "--struct-or-class", "struct",
+            "--access-level", "public",
+            "--protocol", "equatable",
+            "--acronym-style", "pascal",
+            "--sendable",
+            "--support-linux",
+            "--no-initializers",
+            "-o", str(out), str(src),
+        ],
+        check=True,
+        shell=sys.platform == "win32",
+    )
+    header = "// Generated from protocol/schema by tools/protocol.py (quicktype). Do not edit.\n\n"
+    models = header + out.read_text(encoding="utf-8")
+    for name in roots:
+        name = QUICKTYPE_NAMES.get(name, name)
+        if not re.search(rf"^public struct {name}\b", models, re.MULTILINE):
+            raise SystemExit(f"quicktype did not emit a Swift struct named {name}")
+
+    types = message_types()
+    lines = [
+        header.rstrip(),
+        "",
+        f'public let protocolVersion = "{protocol_version()}"',
+        "",
+        "/// Message `type` to its generated model.",
+        "public let messageTypes: [String: any Codable.Type] = [",
+    ]
+    for type_, path in sorted(types.items()):
+        title = load(path)["title"]
+        name = QUICKTYPE_NAMES.get(title, SWIFT_RENAMES.get(title, title))
+        lines.append(f'    "{type_}": {name}.self,')
+    lines.append("]")
+    return {"Models.swift": models, "MessageTypes.swift": "\n".join(lines) + "\n"}
+
+
 def normalise(text: str) -> str:
     return text.replace("\r\n", "\n")
 
@@ -359,6 +451,8 @@ def generate(dry: bool) -> int:
         sync_file(BUNDLE, bundle_text, changed, dry)
         sync_file(MODELS, generate_models(tmp_bundle, tmp_dir / "models.py"), changed, dry)
         sync_file(REGISTRY_PY, generate_registry(message_types()), changed, dry)
+        for name, text in generate_swift(tmp_dir).items():
+            sync_file(SWIFT_DIR / name, text, changed, dry)
 
         docs_tmp = tmp_dir / "docs"
         generate_docs(docs_tmp)

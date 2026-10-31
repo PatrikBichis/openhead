@@ -27,4 +27,4 @@ uv run --project python python tools/protocol.py generate          # bundle, Pyt
 uv run --project python python tools/protocol.py generate --check  # what CI runs
 ```
 
-Python models are written to `python/src/openhead/protocol/`. Swift models will be generated from `dist/openhead.schema.json` in step 7.
+Python models are written to `python/src/openhead/protocol/`; Swift models (quicktype, Codable + Sendable) to `apps/ios/OpenHead/Protocol/`. CI compiles the Swift models on Linux and round-trips every example through both (`tools/swift_contract/`, `python/tests/test_contract.py`). Generating Swift needs Node (`npx`).
