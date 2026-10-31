@@ -1,0 +1,10 @@
+OpenHead turns the phone into the face of a robot. The app is driven over the local Wi-Fi by a robot's computer, a script or an AI agent; on its own it shows an animated face.
+
+How to review it without a robot:
+1. Open the app: an animated cartoon face appears (it blinks and looks around).
+2. Long-press the face for 1.5 seconds to open Settings (name, port, theme when offline, dev mode, paired controllers).
+3. To drive it, install the free open-source tools on a Mac on the same Wi-Fi (Python, uv): uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.2.0#subdirectory=python", then run "openhead discover" and "openhead pair --device <address shown in Settings>". The app shows a 6-digit code; type it. Then try "openhead emotion happy", "openhead subtitle Hello --mouth", "openhead camera hunter --follow".
+
+Camera: used only when a paired controller asks for the camera view or face tracking; iOS asks for permission first. Images are processed on the device and are never stored or sent. Local Network permission is needed for controllers to connect. No account, no login, no data collection.
+
+Support: https://patrikbichis.github.io/openhead/support.html

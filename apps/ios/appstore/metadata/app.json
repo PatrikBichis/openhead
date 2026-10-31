@@ -1,0 +1,7 @@
+{
+  "version": "from protocol/VERSION",
+  "build": "newest VALID build of that version",
+  "release_type": "MANUAL",
+  "primary_category": "DEVELOPER_TOOLS",
+  "secondary_category": "UTILITIES"
+}

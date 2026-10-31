@@ -7,6 +7,9 @@ metadata/en-US/        App Store page: description, subtitle, promotional_text, 
                        prepared and the app info; not submitted)
 metadata/testflight/   beta_description (TestFlight app description) and whats_new
                        ("What to Test" for the newest build, or --build N)
+metadata/app.json      release type and categories; with copyright.txt, age_rating.json and
+                       review_notes.txt also the version number (protocol/VERSION) and its
+                       newest valid build on the version being prepared
 
 Only fields with a file are touched; nothing is submitted for review. Uses the API key in .env.
 """
@@ -14,6 +17,7 @@ Only fields with a file are touched; nothing is submitted for review. Uses the A
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -62,6 +66,67 @@ class Sync:
             if not self.dry_run:
                 self.asc.request("POST", f"/{kind}", json={"data": {
                     "type": kind, "attributes": attrs, **create}})
+
+
+def prepare_version(asc: Asc, app: str, sync: Sync, locale: str) -> None:
+    """Version number, build, copyright, release type, categories, age rating, review notes."""
+    settings = json.loads((META / "app.json").read_text(encoding="utf-8"))
+    version_string = (ROOT / "protocol" / "VERSION").read_text(encoding="utf-8").strip()
+    versions = [v for v in asc.request("GET", f"/apps/{app}/appStoreVersions")["data"]
+                if v["attributes"]["appStoreState"] in ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED",
+                                                        "REJECTED", "METADATA_REJECTED")]
+    if not versions:
+        print("version: none in preparation")
+        return
+    version = versions[0]
+    attrs = {"versionString": version_string, "releaseType": settings["release_type"]}
+    copyright_ = text(META / locale / "copyright.txt")
+    if copyright_:
+        attrs["copyright"] = copyright_
+    sync.upsert("appStoreVersions", version, attrs, {}, "version")
+    builds = asc.request("GET", "/builds", params={
+        "filter[app]": app, "filter[preReleaseVersion.version]": version_string,
+        "filter[processingState]": "VALID", "sort": "-uploadedDate", "limit": 1,
+        "fields[builds]": "version"})["data"]
+    current = asc.request("GET", f"/appStoreVersions/{version['id']}/relationships/build")["data"]
+    if builds and (not current or current["id"] != builds[0]["id"]):
+        print(f"version: select build {builds[0]['attributes']['version']}")
+        if not sync.dry_run:
+            try:
+                asc.request("PATCH", f"/appStoreVersions/{version['id']}/relationships/build",
+                            json={"data": {"type": "builds", "id": builds[0]["id"]}})
+            except SystemExit as exc:  # e.g. the build is not ready for the App Store yet
+                print(f"version: could not select the build: {exc}")
+    elif builds:
+        print(f"version: build {builds[0]['attributes']['version']} selected")
+
+    info = next(i for i in asc.request("GET", f"/apps/{app}/appInfos")["data"]
+            if i["attributes"].get("appStoreState") != "READY_FOR_SALE")
+    rel = asc.request("GET", f"/appInfos/{info['id']}", params={"include": "primaryCategory,secondaryCategory"})
+    have = {k: (rel["data"]["relationships"].get(k, {}).get("data") or {}).get("id")
+            for k in ("primaryCategory", "secondaryCategory")}
+    want = {"primaryCategory": settings["primary_category"], "secondaryCategory": settings["secondary_category"]}
+    if have != want:
+        print(f"categories: {want['primaryCategory']}, {want['secondaryCategory']}")
+        if not sync.dry_run:
+            asc.request("PATCH", f"/appInfos/{info['id']}", json={"data": {
+                "type": "appInfos", "id": info["id"], "relationships": {
+                    k: {"data": {"type": "appCategories", "id": v}} for k, v in want.items()}}})
+    else:
+        print("categories: up to date")
+
+    answers = {k: v for k, v in json.loads((META / "age_rating.json").read_text(encoding="utf-8")).items()
+               if not k.startswith("_")}
+    age = asc.request("GET", f"/appInfos/{info['id']}/ageRatingDeclaration")["data"]
+    sync.upsert("ageRatingDeclarations", age, answers, {}, "age rating")
+
+    notes = text(META / "review_notes.txt")
+    if notes:
+        existing = asc.request("GET", f"/appStoreVersions/{version['id']}/appStoreReviewDetail").get("data")
+        sync.upsert("appStoreReviewDetails", existing, {"notes": notes, "demoAccountRequired": False},
+                    {"relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions",
+                                                                    "id": version["id"]}}}},
+                    "review notes")
 
 
 def main() -> int:
@@ -134,6 +199,7 @@ def main() -> int:
                         {"relationships": {"appStoreVersion": {"data": {
                             "type": "appStoreVersions", "id": v["id"]}}}},
                         f"App Store page, version {v['attributes']['versionString']}")
+    prepare_version(asc, app, sync, locale)
     if args.dry_run:
         print("dry run: nothing changed")
     return 0

@@ -23,7 +23,8 @@
 	<true/>
 	<key>manageAppVersionAndBuildNumber</key>
 	<false/>
+	<!-- false: builds can go to App Review too (internal TestFlight works either way) -->
 	<key>testFlightInternalTestingOnly</key>
-	<true/>
+	<false/>
 </dict>
 </plist>
