@@ -1,0 +1,56 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+*.certSigningRequest
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Node / face engine
+node_modules/
+face/dist/
+playwright-report/
+test-results/
+face/tests/**/*-diff.png
+face/tests/**/*-actual.png
+
+# iOS / Xcode
+apps/ios/*.xcodeproj/
+apps/ios/OpenHead/Resources/face/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.ipa
+*.dSYM.zip
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Scenario output
+scenario-reports/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Agent local state
+.claude/settings.local.json
