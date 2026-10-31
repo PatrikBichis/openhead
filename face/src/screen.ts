@@ -171,13 +171,23 @@ export class Screen {
   freezeVideo(on: boolean) {
     this.display.querySelector("canvas.frame")?.remove();
     const video = this.display.querySelector("video");
-    if (!on || !video || !video.videoWidth) return;
+    if (!on || !video) return;
+    if (!video.videoWidth) {
+      this.log("warning", `no video frame to freeze (readyState ${video.readyState})`);
+      return;
+    }
     const frame = document.createElement("canvas");
     frame.className = "frame";
     frame.width = video.videoWidth;
     frame.height = video.videoHeight;
-    frame.getContext("2d")!.drawImage(video, 0, 0);
+    try {
+      frame.getContext("2d")!.drawImage(video, 0, 0);
+    } catch (e) {
+      this.log("warning", `could not draw the video frame: ${e}`);
+      return;
+    }
     this.display.append(frame);
+    this.log("debug", `froze video frame ${frame.width}x${frame.height} at ${video.currentTime.toFixed(2)} s`);
   }
 
   state(): ScreenState {

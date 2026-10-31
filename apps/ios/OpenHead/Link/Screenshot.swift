@@ -39,7 +39,11 @@ enum Screenshot {
         let webView = model.face.webView
         // Snapshots leave video black; the page shows the current frame as a still meanwhile.
         let video = model.display == .video
-        if video { try? await model.face.call("window.openhead.freezeVideo(true); return true") }
+        if video {
+            do { try await model.face.call("window.openhead.freezeVideo(true); return true") } catch {
+                model.logs.log("warning", "link", "could not freeze the video frame: \(error)")
+            }
+        }
         let faceImage = try? await webView.takeSnapshot(configuration: nil)
         if video { try? await model.face.call("window.openhead.freezeVideo(false); return true") }
         let faceFrame = webView.convert(webView.bounds, to: window)
