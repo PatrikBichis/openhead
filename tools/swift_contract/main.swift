@@ -1,7 +1,7 @@
 // Contract test for the generated Swift models: every example message in
 // protocol/examples must decode into its model and encode back to the same JSON.
 //
-//   swiftc -o contract apps/ios/OpenHead/Protocol/*.swift tools/swift_contract/main.swift
+//   swiftc -swift-version 6 -o contract apps/ios/OpenHead/Protocol/*.swift tools/swift_contract/main.swift
 //   ./contract protocol/examples
 import Foundation
 

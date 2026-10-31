@@ -5,11 +5,6 @@
 //
 //   let openHeadProtocol = try? JSONDecoder().decode(OpenHeadProtocol.self, from: jsonData)
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 import Foundation
 
@@ -143,18 +138,13 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Successful reply to a command. Commands that return data put it in `result`; its shape is
 /// the command schema's `$defs/result`.
 // MARK: - ACK
 public struct ACK: Codable, Equatable, Sendable {
     public let id: String
-    public let result: [String: JSONAny]?
+    public let result: [String: JSONValue]?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
     /// Sender clock in milliseconds since the Unix epoch.
@@ -169,7 +159,7 @@ public struct ACK: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(id: String, result: [String: JSONAny]?, seq: Int, ts: Int, type: ACKType) {
+    public init(id: String, result: [String: JSONValue]?, seq: Int, ts: Int, type: ACKType) {
         self.id = id
         self.result = result
         self.seq = seq
@@ -182,11 +172,6 @@ public enum ACKType: String, Codable, Equatable, Sendable {
     case ack = "ack"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Remove any image or web page and show the face full screen.
 // MARK: - DisplayClear
@@ -218,11 +203,6 @@ public enum DisplayClearType: String, Codable, Equatable, Sendable {
     case displayClear = "display.clear"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Change what fills the screen. `content` is named so to avoid clashing with the envelope's
 /// `type`. Images come as an http(s) URL the device fetches, or as a
@@ -285,11 +265,6 @@ public enum DisplayShowType: String, Codable, Equatable, Sendable {
     case displayShow = "display.show"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Blink once now, in the theme's blink style.
 // MARK: - FaceBlink
@@ -321,11 +296,6 @@ public enum FaceBlinkType: String, Codable, Equatable, Sendable {
     case faceBlink = "face.blink"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Mouth envelope from the host's speech audio, sent as a stream at 20-30 Hz while speaking.
 /// Not a command: no `id` and no reply. The face decays to closed if no update arrives for
@@ -358,11 +328,6 @@ public enum FaceEnvelopeType: String, Codable, Equatable, Sendable {
     case faceEnvelope = "face.envelope"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// List installed themes with their expressions.
 // MARK: - FaceList
@@ -394,11 +359,6 @@ public enum FaceListType: String, Codable, Equatable, Sendable {
     case faceList = "face.list"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - FaceListResult
 public struct FaceListResult: Codable, Equatable, Sendable {
@@ -416,11 +376,6 @@ public struct FaceListResult: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - FaceListThemeInfo
 public struct FaceListThemeInfo: Codable, Equatable, Sendable {
@@ -449,11 +404,6 @@ public struct FaceListThemeInfo: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Point the gaze. `screen`: `x`, `y` in [-1, 1] with origin at the screen centre, +x right,
 /// +y up. `head`: `yaw`, `pitch` in degrees in the head frame, +yaw left, +pitch up. The
@@ -511,11 +461,6 @@ public enum FaceLookAtType: String, Codable, Equatable, Sendable {
     case faceLookAt = "face.look_at"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Blend towards an emotion. Shared names: neutral, happy, curious, thinking, surprised,
 /// sad, angry, sleepy, scared, mischievous; themes may add extras (see `face.list`). Names
@@ -570,11 +515,6 @@ public enum FaceSetEmotionType: String, Codable, Equatable, Sendable {
     case faceSetEmotion = "face.set_emotion"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Switch the face to an installed theme. Unknown names give `invalid_params`.
 // MARK: - FaceSetTheme
@@ -613,11 +553,6 @@ public enum FaceSetThemeType: String, Codable, Equatable, Sendable {
     case faceSetTheme = "face.set_theme"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// First message on a new connection. Without a valid token the device answers
 /// `pair_required`; with one it answers `welcome`. The major version must match the device's.
@@ -657,11 +592,6 @@ public enum HelloType: String, Codable, Equatable, Sendable {
     case hello = "hello"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Inertial sample, up to 100 Hz. Right-handed frame: in `device` frame +x is right, +y is
 /// up and +z points out of the screen (portrait). `mount` applies the `mount_offset` setting.
@@ -715,11 +645,6 @@ public enum ImuType: String, Codable, Equatable, Sendable {
     case imu = "imu"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - ImuPayload
 public struct ImuPayload: Codable, Equatable, Sendable {
@@ -751,11 +676,6 @@ public struct ImuPayload: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// One structured log line, sent as it happens. Every received command is logged with its
 /// `seq` in `seq_ref`.
@@ -812,11 +732,6 @@ public enum LogType: String, Codable, Equatable, Sendable {
     case log = "log"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - LogPayload
 public struct LogPayload: Codable, Equatable, Sendable {
@@ -846,11 +761,6 @@ public struct LogPayload: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Current camera ownership mode.
 // MARK: - ModeGet
@@ -882,11 +792,6 @@ public enum ModeGetType: String, Codable, Equatable, Sendable {
     case modeGet = "mode.get"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - ModeGetResult
 public struct ModeGetResult: Codable, Equatable, Sendable {
@@ -908,11 +813,6 @@ public enum CommonMode: String, Codable, Equatable, Sendable {
     case sensing = "sensing"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Choose who owns the cameras. In 0.1 only `idle` is accepted; other modes give
 /// `unsupported`.
@@ -948,11 +848,6 @@ public enum ModeSetType: String, Codable, Equatable, Sendable {
     case modeSet = "mode.set"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Pairing attempt with the code shown on the device. Answered with `welcome`, or `error`
 /// with `unauthorized` (wrong code) or `rate_limited` (locked for five minutes after five
@@ -986,11 +881,6 @@ public enum PairType: String, Codable, Equatable, Sendable {
     case pair = "pair"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Sent by the device when `hello` has no valid token. The device shows a pairing code on
 /// screen.
@@ -1032,17 +922,12 @@ public enum PairRequiredType: String, Codable, Equatable, Sendable {
     case pairRequired = "pair_required"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Failed command (with `id`) or failed handshake (without).
 // MARK: - ProtocolError
 public struct ProtocolError: Codable, Equatable, Sendable {
     public let code: Code
-    public let details: [String: JSONAny]?
+    public let details: [String: JSONValue]?
     public let id: String?
     public let message: String
     /// Per-connection, per-direction counter, starting at 0.
@@ -1061,7 +946,7 @@ public struct ProtocolError: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(code: Code, details: [String: JSONAny]?, id: String?, message: String, seq: Int, ts: Int, type: ProtocolErrorType) {
+    public init(code: Code, details: [String: JSONValue]?, id: String?, message: String, seq: Int, ts: Int, type: ProtocolErrorType) {
         self.code = code
         self.details = details
         self.id = id
@@ -1085,11 +970,6 @@ public enum ProtocolErrorType: String, Codable, Equatable, Sendable {
     case error = "error"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Device status, up to 1 Hz. Also the result of `system.status`.
 // MARK: - Status
@@ -1163,11 +1043,6 @@ public enum StatusType: String, Codable, Equatable, Sendable {
     case status = "status"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - StatusPayload
 public struct StatusPayload: Codable, Equatable, Sendable {
@@ -1218,11 +1093,6 @@ public struct StatusPayload: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Open a stream. The device clamps `rate_hz` to what it supports and returns the actual
 /// rate. Subscribing again to the same topic replaces the earlier subscription.
@@ -1273,11 +1143,6 @@ public enum SubscribeType: String, Codable, Equatable, Sendable {
     case subscribe = "subscribe"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - SubscribeResult
 public struct SubscribeResult: Codable, Equatable, Sendable {
@@ -1296,11 +1161,6 @@ public struct SubscribeResult: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Health snapshot for debugging. Dev mode only.
 // MARK: - SystemDiagnostics
@@ -1332,11 +1192,6 @@ public enum SystemDiagnosticsType: String, Codable, Equatable, Sendable {
     case systemDiagnostics = "system.diagnostics"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - SystemDiagnosticsResult
 public struct SystemDiagnosticsResult: Codable, Equatable, Sendable {
@@ -1371,11 +1226,6 @@ public struct SystemDiagnosticsResult: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - DiagnosticsArkit
 public struct DiagnosticsArkit: Codable, Equatable, Sendable {
@@ -1394,11 +1244,6 @@ public struct DiagnosticsArkit: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - DiagnosticsLastCrash
 public struct DiagnosticsLastCrash: Codable, Equatable, Sendable {
@@ -1416,11 +1261,6 @@ public struct DiagnosticsLastCrash: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - DiagnosticsPermissions
 public struct DiagnosticsPermissions: Codable, Equatable, Sendable {
@@ -1448,11 +1288,6 @@ public enum SystemDiagnosticsPermission: String, Codable, Equatable, Sendable {
     case notRequired = "not_required"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Most recent lines from the device's log ring buffer (2000 lines), oldest first. Dev mode
 /// only.
@@ -1493,11 +1328,6 @@ public enum SystemLogsType: String, Codable, Equatable, Sendable {
     case systemLogs = "system.logs"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - SystemLogsResult
 public struct SystemLogsResult: Codable, Equatable, Sendable {
@@ -1512,11 +1342,6 @@ public struct SystemLogsResult: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// PNG of what is on screen. Dev mode only. With `delivery: url` the image is served by the
 /// device's HTTP server (WebSocket port + 1) for 60 s and must be fetched with the token in
@@ -1564,11 +1389,6 @@ public enum SystemScreenshotType: String, Codable, Equatable, Sendable {
     case systemScreenshot = "system.screenshot"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - SystemScreenshotResult
 public struct SystemScreenshotResult: Codable, Equatable, Sendable {
@@ -1597,11 +1417,6 @@ public struct SystemScreenshotResult: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Read all settings, or set one. `set` needs dev mode. Known keys in 0.1: `name`, `port`,
 /// `mount_offset` ([x, y, z, w] quaternion), `offline_theme`.
@@ -1617,7 +1432,7 @@ public struct SystemSettings: Codable, Equatable, Sendable {
     public let ts: Int
     public let type: SystemSettingsType
     /// Any JSON value valid for the key.
-    public let value: JSONAny?
+    public let value: JSONValue?
 
     public enum CodingKeys: String, CodingKey {
         case action = "action"
@@ -1629,7 +1444,7 @@ public struct SystemSettings: Codable, Equatable, Sendable {
         case value = "value"
     }
 
-    public init(action: Action, id: String, key: String?, seq: Int, ts: Int, type: SystemSettingsType, value: JSONAny?) {
+    public init(action: Action, id: String, key: String?, seq: Int, ts: Int, type: SystemSettingsType, value: JSONValue?) {
         self.action = action
         self.id = id
         self.key = key
@@ -1649,31 +1464,21 @@ public enum SystemSettingsType: String, Codable, Equatable, Sendable {
     case systemSettings = "system.settings"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - SystemSettingsResult
 public struct SystemSettingsResult: Codable, Equatable, Sendable {
     /// All settings after the command.
-    public let settings: [String: JSONAny]
+    public let settings: [String: JSONValue]
 
     public enum CodingKeys: String, CodingKey {
         case settings = "settings"
     }
 
-    public init(settings: [String: JSONAny]) {
+    public init(settings: [String: JSONValue]) {
         self.settings = settings
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Current status, same content as the `status` topic.
 // MARK: - SystemStatus
@@ -1705,11 +1510,6 @@ public enum SystemStatusType: String, Codable, Equatable, Sendable {
     case systemStatus = "system.status"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Close a stream. Acknowledged even if the topic was not subscribed.
 // MARK: - Unsubscribe
@@ -1744,11 +1544,6 @@ public enum UnsubscribeType: String, Codable, Equatable, Sendable {
     case unsubscribe = "unsubscribe"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Session accepted. Carries the client's token (new after pairing, unchanged on reconnect),
 /// the device description and what it supports.
@@ -1793,11 +1588,6 @@ public struct Welcome: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - WelcomeDevice
 public struct WelcomeDevice: Codable, Equatable, Sendable {
@@ -1835,11 +1625,6 @@ public enum Platform: String, Codable, Equatable, Sendable {
     case sim = "sim"
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 // MARK: - WelcomeScreen
 public struct WelcomeScreen: Codable, Equatable, Sendable {
@@ -1865,11 +1650,6 @@ public struct WelcomeScreen: Codable, Equatable, Sendable {
     }
 }
 
-//
-// Hashable or Equatable:
-// The compiler will not be able to synthesize the implementation of Hashable or Equatable
-// for types that require the use of JSONAny, nor will the implementation of Hashable be
-// synthesized for types that have collections (such as arrays or dictionaries).
 
 /// Safe-area insets in points.
 // MARK: - WelcomeInsets
@@ -1898,248 +1678,43 @@ public enum WelcomeType: String, Codable, Equatable, Sendable {
     case welcome = "welcome"
 }
 
-// MARK: - Encode/decode helpers
+// MARK: - JSONValue
 
-public class JSONNull: Codable, Hashable {
+/// Any JSON value, for schema fields without a fixed type (e.g. `ack.result`, settings).
+public enum JSONValue: Codable, Hashable, Sendable {
+    case null
+    case bool(Bool)
+    case number(Double)
+    case string(String)
+    case array([JSONValue])
+    case object([String: JSONValue])
 
-    public static func == (lhs: JSONNull, rhs: JSONNull) -> Bool {
-        return true
-    }
-
-    public var hashValue: Int {
-        return 0
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        // No-op
-    }
-
-    public init() {}
-
-    public required init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if !container.decodeNil() {
-            throw DecodingError.typeMismatch(JSONNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for JSONNull"))
+        if container.decodeNil() {
+            self = .null
+        } else if let value = try? container.decode(Bool.self) {
+            self = .bool(value)
+        } else if let value = try? container.decode(Double.self) {
+            self = .number(value)
+        } else if let value = try? container.decode(String.self) {
+            self = .string(value)
+        } else if let value = try? container.decode([JSONValue].self) {
+            self = .array(value)
+        } else {
+            self = .object(try container.decode([String: JSONValue].self))
         }
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encodeNil()
-    }
-}
-
-class JSONCodingKey: CodingKey {
-    let key: String
-
-    required init?(intValue: Int) {
-        return nil
-    }
-
-    required init?(stringValue: String) {
-        key = stringValue
-    }
-
-    var intValue: Int? {
-        return nil
-    }
-
-    var stringValue: String {
-        return key
-    }
-}
-
-public class JSONAny: Codable {
-
-    public let value: Any
-
-    static func decodingError(forCodingPath codingPath: [CodingKey]) -> DecodingError {
-        let context = DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode JSONAny")
-        return DecodingError.typeMismatch(JSONAny.self, context)
-    }
-
-    static func encodingError(forValue value: Any, codingPath: [CodingKey]) -> EncodingError {
-        let context = EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode JSONAny")
-        return EncodingError.invalidValue(value, context)
-    }
-
-    static func decode(from container: SingleValueDecodingContainer) throws -> Any {
-        if let value = try? container.decode(Bool.self) {
-            return value
-        }
-        if let value = try? container.decode(Int64.self) {
-            return value
-        }
-        if let value = try? container.decode(Double.self) {
-            return value
-        }
-        if let value = try? container.decode(String.self) {
-            return value
-        }
-        if container.decodeNil() {
-            return JSONNull()
-        }
-        throw decodingError(forCodingPath: container.codingPath)
-    }
-
-    static func decode(from container: inout UnkeyedDecodingContainer) throws -> Any {
-        if let value = try? container.decode(Bool.self) {
-            return value
-        }
-        if let value = try? container.decode(Int64.self) {
-            return value
-        }
-        if let value = try? container.decode(Double.self) {
-            return value
-        }
-        if let value = try? container.decode(String.self) {
-            return value
-        }
-        if let value = try? container.decodeNil() {
-            if value {
-                return JSONNull()
-            }
-        }
-        if var container = try? container.nestedUnkeyedContainer() {
-            return try decodeArray(from: &container)
-        }
-        if var container = try? container.nestedContainer(keyedBy: JSONCodingKey.self) {
-            return try decodeDictionary(from: &container)
-        }
-        throw decodingError(forCodingPath: container.codingPath)
-    }
-
-    static func decode(from container: inout KeyedDecodingContainer<JSONCodingKey>, forKey key: JSONCodingKey) throws -> Any {
-        if let value = try? container.decode(Bool.self, forKey: key) {
-            return value
-        }
-        if let value = try? container.decode(Int64.self, forKey: key) {
-            return value
-        }
-        if let value = try? container.decode(Double.self, forKey: key) {
-            return value
-        }
-        if let value = try? container.decode(String.self, forKey: key) {
-            return value
-        }
-        if let value = try? container.decodeNil(forKey: key) {
-            if value {
-                return JSONNull()
-            }
-        }
-        if var container = try? container.nestedUnkeyedContainer(forKey: key) {
-            return try decodeArray(from: &container)
-        }
-        if var container = try? container.nestedContainer(keyedBy: JSONCodingKey.self, forKey: key) {
-            return try decodeDictionary(from: &container)
-        }
-        throw decodingError(forCodingPath: container.codingPath)
-    }
-
-    static func decodeArray(from container: inout UnkeyedDecodingContainer) throws -> [Any] {
-        var arr: [Any] = []
-        while !container.isAtEnd {
-            let value = try decode(from: &container)
-            arr.append(value)
-        }
-        return arr
-    }
-
-    static func decodeDictionary(from container: inout KeyedDecodingContainer<JSONCodingKey>) throws -> [String: Any] {
-        var dict = [String: Any]()
-        for key in container.allKeys {
-            let value = try decode(from: &container, forKey: key)
-            dict[key.stringValue] = value
-        }
-        return dict
-    }
-
-    static func encode(to container: inout UnkeyedEncodingContainer, array: [Any]) throws {
-        for value in array {
-            if let value = value as? Bool {
-                try container.encode(value)
-            } else if let value = value as? Int64 {
-                try container.encode(value)
-            } else if let value = value as? Double {
-                try container.encode(value)
-            } else if let value = value as? String {
-                try container.encode(value)
-            } else if value is JSONNull {
-                try container.encodeNil()
-            } else if let value = value as? [Any] {
-                var container = container.nestedUnkeyedContainer()
-                try encode(to: &container, array: value)
-            } else if let value = value as? [String: Any] {
-                var container = container.nestedContainer(keyedBy: JSONCodingKey.self)
-                try encode(to: &container, dictionary: value)
-            } else {
-                throw encodingError(forValue: value, codingPath: container.codingPath)
-            }
-        }
-    }
-
-    static func encode(to container: inout KeyedEncodingContainer<JSONCodingKey>, dictionary: [String: Any]) throws {
-        for (key, value) in dictionary {
-            let key = JSONCodingKey(stringValue: key)!
-            if let value = value as? Bool {
-                try container.encode(value, forKey: key)
-            } else if let value = value as? Int64 {
-                try container.encode(value, forKey: key)
-            } else if let value = value as? Double {
-                try container.encode(value, forKey: key)
-            } else if let value = value as? String {
-                try container.encode(value, forKey: key)
-            } else if value is JSONNull {
-                try container.encodeNil(forKey: key)
-            } else if let value = value as? [Any] {
-                var container = container.nestedUnkeyedContainer(forKey: key)
-                try encode(to: &container, array: value)
-            } else if let value = value as? [String: Any] {
-                var container = container.nestedContainer(keyedBy: JSONCodingKey.self, forKey: key)
-                try encode(to: &container, dictionary: value)
-            } else {
-                throw encodingError(forValue: value, codingPath: container.codingPath)
-            }
-        }
-    }
-
-    static func encode(to container: inout SingleValueEncodingContainer, value: Any) throws {
-        if let value = value as? Bool {
-            try container.encode(value)
-        } else if let value = value as? Int64 {
-            try container.encode(value)
-        } else if let value = value as? Double {
-            try container.encode(value)
-        } else if let value = value as? String {
-            try container.encode(value)
-        } else if value is JSONNull {
-            try container.encodeNil()
-        } else {
-            throw encodingError(forValue: value, codingPath: container.codingPath)
-        }
-    }
-
-    public required init(from decoder: Decoder) throws {
-        if var arrayContainer = try? decoder.unkeyedContainer() {
-            self.value = try JSONAny.decodeArray(from: &arrayContainer)
-        } else if var container = try? decoder.container(keyedBy: JSONCodingKey.self) {
-            self.value = try JSONAny.decodeDictionary(from: &container)
-        } else {
-            let container = try decoder.singleValueContainer()
-            self.value = try JSONAny.decode(from: container)
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        if let arr = self.value as? [Any] {
-            var container = encoder.unkeyedContainer()
-            try JSONAny.encode(to: &container, array: arr)
-        } else if let dict = self.value as? [String: Any] {
-            var container = encoder.container(keyedBy: JSONCodingKey.self)
-            try JSONAny.encode(to: &container, dictionary: dict)
-        } else {
-            var container = encoder.singleValueContainer()
-            try JSONAny.encode(to: &container, value: self.value)
+        switch self {
+        case .null: try container.encodeNil()
+        case .bool(let value): try container.encode(value)
+        case .number(let value): try container.encode(value)
+        case .string(let value): try container.encode(value)
+        case .array(let value): try container.encode(value)
+        case .object(let value): try container.encode(value)
         }
     }
 }

@@ -66,7 +66,7 @@ jobs:
       - name: Swift models compile and round-trip the examples
         run: |
           swift --version
-          swiftc -o "$RUNNER_TEMP/contract" apps/ios/OpenHead/Protocol/*.swift tools/swift_contract/main.swift
+          swiftc -swift-version 6 -o "$RUNNER_TEMP/contract" apps/ios/OpenHead/Protocol/*.swift tools/swift_contract/main.swift
           "$RUNNER_TEMP/contract" protocol/examples
 
       - name: Every schema change has a CHANGELOG entry in the same commit

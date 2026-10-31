@@ -37,6 +37,48 @@ QUICKTYPE = "quicktype@26.0.0"
 SWIFT_RENAMES = {"Error": "ProtocolError"}
 # Names quicktype changes on its own (it treats "Ack" as an acronym).
 QUICKTYPE_NAMES = {"Ack": "ACK"}
+SWIFT_JSON_VALUE = """\
+// MARK: - JSONValue
+
+/// Any JSON value, for schema fields without a fixed type (e.g. `ack.result`, settings).
+public enum JSONValue: Codable, Hashable, Sendable {
+    case null
+    case bool(Bool)
+    case number(Double)
+    case string(String)
+    case array([JSONValue])
+    case object([String: JSONValue])
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            self = .null
+        } else if let value = try? container.decode(Bool.self) {
+            self = .bool(value)
+        } else if let value = try? container.decode(Double.self) {
+            self = .number(value)
+        } else if let value = try? container.decode(String.self) {
+            self = .string(value)
+        } else if let value = try? container.decode([JSONValue].self) {
+            self = .array(value)
+        } else {
+            self = .object(try container.decode([String: JSONValue].self))
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .null: try container.encodeNil()
+        case .bool(let value): try container.encode(value)
+        case .number(let value): try container.encode(value)
+        case .string(let value): try container.encode(value)
+        case .array(let value): try container.encode(value)
+        case .object(let value): try container.encode(value)
+        }
+    }
+}
+"""
 THEME_SCHEMA = SCHEMA_DIR / "theme.schema.json"
 EXPRESSIONS_SCHEMA = SCHEMA_DIR / "expressions.schema.json"
 DIALECT = "https://json-schema.org/draft/2020-12/schema"
@@ -404,7 +446,13 @@ def generate_swift(tmp_dir: Path) -> dict[str, str]:
         shell=sys.platform == "win32",
     )
     header = "// Generated from protocol/schema by tools/protocol.py (quicktype). Do not edit.\n\n"
-    models = header + out.read_text(encoding="utf-8")
+    models = out.read_text(encoding="utf-8")
+    # quicktype's JSONAny is a non-Sendable, non-Equatable class; swap in JSONValue.
+    models = models.split("// MARK: - Encode/decode helpers")[0]
+    models = re.sub(r"\n//\n// Hashable or Equatable:\n(//.*\n){3}", "\n", models)
+    if "JSONNull" in models:
+        raise SystemExit("quicktype emitted JSONNull; extend SWIFT_JSON_VALUE")
+    models = header + models.replace("JSONAny", "JSONValue").rstrip() + "\n\n" + SWIFT_JSON_VALUE
     for name in roots:
         name = QUICKTYPE_NAMES.get(name, name)
         if not re.search(rf"^public struct {name}\b", models, re.MULTILINE):
