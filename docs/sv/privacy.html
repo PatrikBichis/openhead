@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Integritetspolicy · OpenHead</title>
+  <meta name="description" content="Integritetspolicy för appen OpenHead Robot Face: ingen data samlas in; allt stannar i ditt lokala nätverk.">
+  <link rel="alternate" hreflang="en" href="https://patrikbichis.github.io/openhead/privacy.html">
+  <link rel="alternate" hreflang="sv" href="https://patrikbichis.github.io/openhead/sv/privacy.html">
+  <link rel="alternate" hreflang="x-default" href="https://patrikbichis.github.io/openhead/privacy.html">
+  <link rel="icon" href="../media/favicon.png">
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="../media/icon.png" alt="">OpenHead</a>
+      <nav aria-label="Huvudmeny">
+        <a href="./">Start</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+      <a class="lang" href="../privacy.html" hreflang="en" lang="en">English</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <h1>Integritetspolicy</h1>
+      <p class="updated">OpenHead Robot Face för iOS och iPadOS · Gäller från 1 november 2026 (plats och barometer tillagda)</p>
+
+      <div class="box">
+        <p><strong>Kort sagt:</strong> appen samlar inte in några personuppgifter. Den har inga konton, ingen analys, ingen reklam och ingen spårning, och den skickar ingenting till oss eller till någon tredje part. Den pratar bara med enheter i ditt eget lokala nätverk som du har parat med den.</p>
+        <p>Det här är en översättning. Vid skillnader gäller den <a href="../privacy.html">engelska versionen</a>.</p>
+      </div>
+
+      <h2>Vilka vi är</h2>
+      <p>OpenHead är ett projekt med öppen källkod som publiceras på GitHub på <a href="https://github.com/PatrikBichis/openhead">github.com/PatrikBichis/openhead</a>. "Vi" i den här policyn betyder utvecklaren av appen OpenHead Robot Face. Frågor om policyn kan ställas via <a href="support.html">supportsidan</a>.</p>
+
+      <h2>Data vi samlar in</h2>
+      <p>Ingen. Appen samlar inte in, sparar inte för vår räkning, säljer inte och delar inte personuppgifter, och den innehåller inga tredjeparts-SDK:er för analys, kraschrapportering eller reklam.</p>
+
+      <h2>Vad appen gör på din enhet och i ditt nätverk</h2>
+      <ul>
+        <li><strong>Lokalt nätverk.</strong> Appen kör en liten server på ditt wifi så att en robotstyrenhet kan ansluta, och annonserar sig med Bonjour (mDNS) så att den kan hittas. iOS frågar om tillåtelse att använda det lokala nätverket. Anslutningar kommer bara från enheter i samma nätverk.</li>
+        <li><strong>Parning.</strong> En styrenhet måste skriva in en sexsiffrig kod som visas på skärmen. Varje parad styrenhet får en slumpmässig token som sparas med dess namn och senaste anslutning i enhetens nyckelring. Inget av det lämnar enheten. Du kan återkalla vilken styrenhet som helst i appens inställningar.</li>
+        <li><strong>Rörelsesensorer.</strong> Om en parad styrenhet prenumererar skickar appen enhetens orientering, rotation och acceleration till den styrenheten, bara i ditt lokala nätverk. Det kräver ingen behörighet och sparas inte.</li>
+        <li><strong>Bilder, video och webbsidor.</strong> När en parad styrenhet ber appen visa en bild, en video eller en webbsida hämtar appen den från adressen som styrenheten anger. Den servern ser förfrågan som från vilken webbläsare som helst. Appen behåller inte innehållet när det inte längre visas.</li>
+        <li><strong>Loggar och skärmdumpar.</strong> Appen håller en kort logg över sin egen aktivitet i minnet (rensas när appen avslutas) för felsökning. Med utvecklarläget påslaget i inställningarna kan en parad styrenhet läsa loggen och ta skärmdumpar av det som visas. Utvecklarläget är av från början.</li>
+        <li><strong>Inställningar.</strong> Dina inställningar (namn, port, tema, montering, utvecklarläge) sparas bara på enheten.</li>
+        <li><strong>Kamera.</strong> Kameran används bara när en parad styrenhet slår på ett kameraläge, och iOS frågar om din tillåtelse första gången. I läget <em>capture</em> visar frontkameran det huvudet ser på sin egen skärm och hittar ansikten; i läget <em>sensing</em> använder ARKit kamerorna för att följa var huvudet är i rummet och för att följa ett ansikte. Kamerabilder behandlas på enheten och sparas eller skickas aldrig någonstans. Det parade styrenheter får är positioner och vinklar: var ansikten är (riktning, storlek, avstånd) och var huvudet är. Ansikten känns inte igen och identifieras inte, och ingen ansiktsdata sparas. Med utvecklarläget påslaget kan en parad styrenhet ta en skärmdump, som då innehåller kameravyn.</li>
+        <li><strong>Plats.</strong> Först när en parad styrenhet prenumererar på strömmen <code>gps</code> ber appen iOS om din plats ("När appen används"), och iOS frågar om din tillåtelse första gången. Platsen skickas bara till de parade styrenheter i ditt lokala nätverk som bad om den, medan de är anslutna. Den sparas inte, skickas inte till oss och används inte till något annat. När platsåtkomst är tillåten anger kompassen också geografisk nord.</li>
+        <li><strong>Kompass, magnetometer och barometer.</strong> Kompassriktningen i kameravyn kommer från kompassen. Om en parad styrenhet prenumererar på strömmen <code>env</code> skickar appen kompassriktningen, magnetfältet samt lufttrycket och höjdförändringen från barometern till den, bara i ditt lokala nätverk. Barometern kräver behörigheten Rörelse &amp; fitness, som iOS frågar om första gången. Inget av detta sparas.</li>
+        <li><strong>Mikrofon.</strong> Appen använder inte mikrofonen.</li>
+      </ul>
+
+      <h2>Barn</h2>
+      <p>Appen samlar inte in data från någon, inte heller från barn.</p>
+
+      <h2>Lagring och radering</h2>
+      <p>Allt appen sparar stannar på din enhet. Om du tar bort appen försvinner dess inställningar och parningstokens; om du återkallar en styrenhet i inställningarna tas dess token bort direkt.</p>
+
+      <h2>Säkerhet</h2>
+      <p>Bara parade styrenheter kan ändra vad appen visar; fem felaktiga parningskoder låser parningen i fem minuter. Trafiken i det lokala nätverket är inte krypterad i den här versionen, så använd appen i ett nätverk du litar på.</p>
+
+      <h2>Ändringar i policyn</h2>
+      <p>Om policyn ändras publiceras den nya versionen på den här sidan med ett nytt datum, och historiken finns kvar i projektets publika Git-förråd.</p>
+
+      <h2>Kontakt</h2>
+      <p>Skapa ett ärende på <a href="https://github.com/PatrikBichis/openhead/issues">GitHub</a> eller läs <a href="support.html">supportsidan</a>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>OpenHead · Apache 2.0</span>
+      <nav aria-label="Sidfot">
+        <a href="./">Start</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

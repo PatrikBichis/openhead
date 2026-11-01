@@ -53,7 +53,7 @@ flowchart LR
         Face["Face engine<br/>web-based · themes · expressions"]
         Display["Display<br/>image · video · web · subtitles · overlay"]
         Sensors["Sensors<br/>IMU · status · pose · faces · GPS · env"]
-        Cam["Cameras<br/>(v0.2)"]
+        Cam["Cameras<br/>camera view · HUD"]
         Link["Link<br/>WebSocket server · mDNS · pairing"]
         Face --- Link
         Display --- Link
@@ -92,7 +92,7 @@ The device is the server. Hosts discover it over mDNS (`_openhead._tcp`), pair o
 | Screenshot of what is on screen | host → head | command (dev mode) | 0.1 |
 | Pose: position + orientation in world frame (ARKit) | head → host | subscription, ≤ 60 Hz | 0.2 |
 | Faces: detected faces with bearing and size | head → host | subscription, ≤ 15 Hz | 0.2 |
-| Cameras: still / clip from front or back | host → head | command, result over HTTP | 0.2 |
+| Camera view: front camera with a HUD on the head's screen | host → head | command (`display.show`, `display.hud`) | 0.2 |
 | GPS: latitude, longitude, altitude, accuracy, speed, course | head → host | subscription, 1 Hz | 0.3 |
 | Environment: air pressure, altitude change, magnetic field, compass heading | head → host | subscription, ≤ 10 Hz | 0.3 |
 
@@ -129,7 +129,7 @@ sequenceDiagram
     loop while speaking (no ack)
         H->>D: face.envelope {level: 0.42}
     end
-    H->>D: display.show {type: "image", source, overlay: "face-corner"}
+    H->>D: display.show {content: "image", source, overlay: "face-corner"}
     D-->>H: ack {id}
 ```
 
@@ -139,10 +139,13 @@ sequenceDiagram
 | --- | --- | --- |
 | `face.*` | `set_theme`, `set_emotion`, `look_at` (screen / head frame), `blink`, `envelope`, `list` | 0.1 |
 | `display.*` | `show` (face, image, video, web), `clear`, `subtitle` | 0.1 |
+| `display.*` | `show` (camera with a HUD), `hud` | 0.2 |
 | `system.*` | `status`, `screenshot`, `logs`, `diagnostics`, `settings` | 0.1 |
 | `mode.*` | `set` (`idle`, `sensing`, `capture`), `get` | 0.1 (`idle` only), 0.2 |
-| `pose.*` | `reset`, `save_map`, `load_map` | 0.2 |
-| `camera.*` | `capture`, `stream` | 0.2 |
+| `pose.*` | `reset`, `save_map`, `load_map` | planned |
+| `camera.*` | `capture` (still or clip from front or back camera, fetched over HTTP), `stream` | planned |
+
+Streams: `imu`, `status`, `log` (0.1); `faces`, `pose` (0.2); `gps`, `env` (0.3).
 
 Error codes: `unauthorized`, `unsupported`, `busy`, `invalid_params`, `dev_mode_required`, `rate_limited`.
 
@@ -230,11 +233,11 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 | Tools `set_mode`, `get_faces`, `get_pose` | `mode.*`, `faces`, `pose` (0.2) |
 | Tools `get_location`, `get_environment` | `gps`, `env` (0.3) |
 | Tools `get_status`, `take_screenshot` (returns image), `tail_logs`, `get_diagnostics` | `system.*` (dev mode required for the last three) |
-| Tool `wait_for(topic, predicate, timeout_s)` | A subscription that returns on first match (`status`, `log`; `faces` in 0.2) |
+| Tool `wait_for(topic, predicate, timeout_s)` | A subscription that returns on first match (`status`, `log`) |
 | Tool `run_scenario(path)` | Runs a YAML scenario and returns the report with screenshots |
 | Resources `openhead://status`, `openhead://themes`, `openhead://logs` | Latest cached value |
 
-High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use the WebSocket API. Transport is stdio in v0.1; Streamable HTTP is planned for v0.2.
+High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use the WebSocket API. Transport is stdio; Streamable HTTP is planned.
 
 ```bash
 openhead mcp --device auto        # stdio, for Claude Code / Claude Desktop / local agents
@@ -281,9 +284,9 @@ See [`docs/dev-loop.md`](docs/dev-loop.md).
 
 - Pairing: the device shows a 6-digit code for 60 s when an unknown client connects. A correct code yields a per-client token (Keychain on the device, `~/.openhead/tokens.json` on the host). Five failed attempts lock pairing for five minutes.
 - All commands and subscriptions require a valid token. mDNS advertises name and port only.
-- Dev mode gates `system.screenshot`, `system.logs`, `system.diagnostics` and `settings.set`. Off by default; shown as an icon in the status bar.
-- Screenshot and photo URLs are served by the device over HTTP with the token in a header and expire after 60 s.
-- No TLS in v0.1; the network is assumed private. TLS is planned for v0.2 and advertised through `capabilities`.
+- Dev mode gates `system.screenshot`, `system.logs`, `system.diagnostics` and `settings.set`. Off by default; shown as a small icon in the corner of the screen.
+- Screenshot URLs are served by the device over HTTP with the token in a header and expire after 60 s.
+- No TLS yet; the network is assumed private. TLS is planned and will be advertised through `capabilities`.
 - Clients can be revoked in the app's settings. The MCP server is a client like any other.
 
 ---
@@ -294,28 +297,28 @@ See [`docs/dev-loop.md`](docs/dev-loop.md).
 openhead/
 ├── protocol/
 │   ├── schema/             # JSON Schema (2020-12): envelope, commands/, topics/, theme.schema.json
-│   ├── VERSION             # 0.1.0 – also drives the app's MARKETING_VERSION
+│   ├── VERSION             # 0.3.0 – also drives the app's MARKETING_VERSION
 │   ├── CHANGELOG.md
 │   └── docs/               # generated reference
 ├── face/                   # face engine (TypeScript + Canvas, Vite)
 │   ├── src/
 │   ├── themes/             # cartoon/ minimal/ halloween/
+│   ├── huds/               # hunter/ camcorder/ boot/ flight/
 │   └── tests/              # Playwright golden images: theme × emotion, images, video, subtitles, animation
 ├── apps/ios/               # SwiftUI shell; project.yml for XcodeGen
 │   ├── OpenHead/           # App/ Link/ Sensors/ Display/ Face/ Settings/ Logging/
-│   ├── OpenHeadTests/
-│   └── OpenHeadUITests/    # XCUITest with screenshots
+│   └── appstore/           # store texts, screenshots, preview, header and search art
 ├── python/                 # one package: openhead (extras: [mcp], [sim])
 │   └── src/openhead/
 │       ├── protocol/       # pydantic models generated from schema
 │       ├── client/         # asyncio client
 │       ├── sim/            # simulator: server + window running face/dist
 │       ├── mcp/            # MCP server
-│       └── cli/            # openhead discover|pair|screenshot|logs|emotion|theme|show|run|sim|mcp
+│       └── cli/            # openhead discover|pair|status|emotion|theme|show|subtitle|camera|hud|mode|watch|screenshot|logs|run|sim|mcp
 ├── scenarios/              # YAML scenarios, run against simulator and device
 ├── examples/
-├── docs/                   # ios.md · dev-loop.md · themes.md
-├── tools/                  # protocol.py · check.py (all local tests) · apple_setup.py
+├── docs/                   # website (GitHub Pages) · ios.md · dev-loop.md · themes.md · agents.md
+├── tools/                  # protocol.py · check.py (all local tests) · apple_setup.py · appstore_*.py · media.py
 └── .github/workflows/      # ios-testflight (manual; the only workflow)
 ```
 
@@ -382,7 +385,7 @@ Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 - [x] 6. Apple Developer setup and secrets
 - [x] 7. iOS shell: link, pairing, face, status, settings, logs, screenshot → first TestFlight build
 - [x] 8. Device in the loop: smoke scenario green on simulator and device
-- [ ] 9. IMU stream and envelope-driven mouth
+- [ ] 9. IMU stream and envelope-driven mouth (built; the iPhone 12 check is open)
 - [x] 10. Video, subtitles and a display test suite
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
 - [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
@@ -392,4 +395,4 @@ Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 
 ## License
 
-Apache 2.0 (proposed). See [`LICENSE`](LICENSE).
+Apache 2.0. See [`LICENSE`](LICENSE).

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support · OpenHead</title>
+  <meta name="description" content="Hjälp för appen OpenHead Robot Face: kom igång, parning, vanliga problem och hur du hör av dig.">
+  <link rel="alternate" hreflang="en" href="https://patrikbichis.github.io/openhead/support.html">
+  <link rel="alternate" hreflang="sv" href="https://patrikbichis.github.io/openhead/sv/support.html">
+  <link rel="alternate" hreflang="x-default" href="https://patrikbichis.github.io/openhead/support.html">
+  <link rel="icon" href="../media/favicon.png">
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="../media/icon.png" alt="">OpenHead</a>
+      <nav aria-label="Huvudmeny">
+        <a href="./">Start</a>
+        <a href="privacy.html">Integritet</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+      <a class="lang" href="../support.html" hreflang="en" lang="en">English</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <h1>Support</h1>
+      <p class="updated">OpenHead Robot Face för iOS och iPadOS</p>
+
+      <div class="box">
+        <p><strong>Behöver du hjälp eller har du hittat ett fel?</strong> Skapa ett ärende på <a href="https://github.com/PatrikBichis/openhead/issues">GitHub</a> (gärna på engelska). Ta med appens version (Settings → About), din enhetsmodell och vad du provade. Med utvecklarläget påslaget visar <code>openhead logs</code> vad appen gjorde.</p>
+      </div>
+
+      <h2>Kom igång</h2>
+      <ol>
+        <li>Öppna appen med telefonen liggande. Ansiktet visas.</li>
+        <li>Installera verktygen på en dator i samma wifi: <code>uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.2.0#subdirectory=python"</code></li>
+        <li>Kör <code>openhead discover</code> för att hitta huvudet och sedan <code>openhead pair --device &lt;adress&gt;</code>. En sexsiffrig kod visas på skärmen i 60 sekunder; skriv in den när du blir tillfrågad.</li>
+        <li>Prova <code>openhead emotion happy</code> eller <code>openhead subtitle "Hej" --mouth</code>.</li>
+      </ol>
+      <p><a href="https://github.com/PatrikBichis/openhead#readme">README</a> (på engelska) beskriver protokollet, Python-klienten, simulatorn och MCP-servern för AI-agenter.</p>
+
+      <h2>Vanliga problem</h2>
+      <details>
+        <summary>Datorn hittar inte eller når inte huvudet</summary>
+        <p>Båda måste vara i samma wifi-nätverk (gästnätverk hindrar ofta enheter från att se varandra). Se till att appen är öppen och ligger överst, och att "Lokalt nätverk" är tillåtet för OpenHead i iOS Inställningar → Integritet och säkerhet → Lokalt nätverk. Huvudets adress visas i appens inställningar.</p>
+      </details>
+      <details>
+        <summary>Ingen parningskod visas</summary>
+        <p>Koden visas när en oparad styrenhet ansluter, inte vid sökningen. Kör <code>openhead pair --device &lt;adress&gt;</code>; den ansluter först och frågar sedan efter koden. Efter fem felaktiga koder låses parningen i fem minuter.</p>
+      </details>
+      <details>
+        <summary>Skärmdumpar eller loggar säger att utvecklarläge krävs</summary>
+        <p>Håll fingret på ansiktet i 1,5 sekunder för att öppna inställningarna och slå på Dev mode. Slå av det igen när roboten används.</p>
+      </details>
+      <details>
+        <summary>En video eller bild visas inte</summary>
+        <p>Huvudet hämtar media själv, så adressen måste gå att nå från telefonen. Video ska vara H.264 MP4. <code>openhead show fil.mp4</code> serverar en lokal fil från din dator automatiskt.</p>
+      </details>
+      <details>
+        <summary>GPS eller barometern skickar inget</summary>
+        <p>Strömmarna <code>gps</code> och <code>env</code> kommer i version 0.3. Första gången frågar iOS om plats och Rörelse &amp; fitness; om du nekade, slå på dem i iOS Inställningar → OpenHead. Inomhus kan det dröja innan GPS får en position.</p>
+      </details>
+      <details>
+        <summary>Appen slutar svara när skärmen låses</summary>
+        <p>iOS pausar appar i bakgrunden. På en robot, använd Guidad åtkomst (Inställningar → Hjälpmedel → Guidad åtkomst) för att hålla OpenHead överst; appen håller själv skärmen vaken.</p>
+      </details>
+      <details>
+        <summary>Hur tar jag bort en styrenhet?</summary>
+        <p>Öppna inställningarna (håll fingret på ansiktet) och ta bort den under Paired clients. Den måste paras igen för att kunna ansluta.</p>
+      </details>
+
+      <h2>Integritet</h2>
+      <p>Appen samlar inte in någon data. Läs <a href="privacy.html">integritetspolicyn</a>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>OpenHead · Apache 2.0</span>
+      <nav aria-label="Sidfot">
+        <a href="./">Start</a>
+        <a href="privacy.html">Integritetspolicy</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

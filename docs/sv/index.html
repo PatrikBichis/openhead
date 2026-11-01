@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenHead Robot Face</title>
+  <meta name="description" content="OpenHead gör en iPhone eller iPad till ansiktet på en robot: 28 uttryck, en mun som pratar med robotens röst, undertexter, bilder och video, kameravy med HUD, ansiktsföljning, ARKit-position och telefonens sensorer. Öppen källkod.">
+  <meta property="og:title" content="OpenHead Robot Face">
+  <meta property="og:description" content="En telefon som robotens ansikte. Öppen källkod.">
+  <meta property="og:image" content="https://patrikbichis.github.io/openhead/media/cartoon-happy.png">
+  <link rel="alternate" hreflang="en" href="https://patrikbichis.github.io/openhead/">
+  <link rel="alternate" hreflang="sv" href="https://patrikbichis.github.io/openhead/sv/">
+  <link rel="alternate" hreflang="x-default" href="https://patrikbichis.github.io/openhead/">
+  <link rel="icon" href="../media/favicon.png">
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="../media/icon.png" alt="">OpenHead</a>
+      <nav aria-label="Huvudmeny">
+        <a href="#features">Funktioner</a>
+        <a href="#themes">Teman</a>
+        <a href="#camera">Kamera &amp; HUD</a>
+        <a href="#sensors">Sensorer</a>
+        <a href="#how">Så fungerar det</a>
+        <a href="#developers">Utvecklare</a>
+        <a href="support.html">Support</a>
+      </nav>
+      <a class="lang" href="../" hreflang="en" lang="en">English</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow">iPhone &amp; iPad · Öppen källkod</p>
+          <h1>En telefon som robotens ansikte.</h1>
+          <p class="lead">OpenHead gör en iPhone eller iPad till ett uttrycksfullt robothuvud. Din robot, ett Python-skript eller en AI-agent får det att le, se sig omkring, prata och visa saker, över ditt eget wifi.</p>
+          <div class="buttons">
+            <a class="btn primary" href="https://github.com/PatrikBichis/openhead">Se på GitHub</a>
+            <a class="btn ghost" href="#how">Så fungerar det</a>
+          </div>
+          <p class="note">iOS-appen <strong>OpenHead Robot Face</strong> finns i beta på TestFlight.</p>
+        </div>
+        <div class="phone">
+          <video src="../media/openhead-preview.mp4" poster="../media/cartoon-happy.png" autoplay muted loop playsinline
+                 aria-label="OpenHead pratar, byter uttryck och växlar tema"></video>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <h2>Allt ett robothuvud behöver</h2>
+        <p class="sub">En telefon har redan skärmen, sensorerna och radion. OpenHead gör dem åtkomliga för resten av roboten, som inte behöver veta något om iOS.</p>
+        <div class="grid">
+          <div class="card">
+            <div class="icon" aria-hidden="true">😊</div>
+            <h3>28 uttryck</h3>
+            <p>Glad, nyfiken, fundersam, förvånad, orolig, skrattande, självbelåten och fler. Blanda dem, håll dem en stund eller lägg en snabb reaktion ovanpå ett humör.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">👀</div>
+            <h3>Ögon som lever</h3>
+            <p>Titta på en punkt på skärmen eller i en riktning från huvudet. Blinkningar, andning och små ögonrörelser håller ansiktet levande mellan kommandona.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🗣️</div>
+            <h3>En mun som pratar</h3>
+            <p>Roboten skickar hur högt den talar 25 gånger i sekunden, och munnen följer med inom ungefär 70 ms. Känslorna är separata, så humöret kan skifta mitt i en mening.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">💬</div>
+            <h3>Undertexter</h3>
+            <p>Text ovanpå allt, för en robot utan högtalare eller ett AI-svar som strömmar in ord för ord. Munnen kan röra sig med texten.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🖼️</div>
+            <h3>Bilder, video, webb</h3>
+            <p>PNG, JPEG, animerad GIF, WebP och SVG; H.264-video; webbsidor. Ansiktet kan fortsätta i ett hörn medan de visas.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🎯</div>
+            <h3>Kameravy med HUD</h3>
+            <p>Se det huvudet ser, med en sci-fi-HUD: rutor runt ansikten, ett låst mål, kompass, horisont, batteri och dina egna rader.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🙂</div>
+            <h3>Hittar människor</h3>
+            <p>Flera ansikten samtidigt, med riktning och storlek, 15 gånger i sekunden. Ögonen kan följa personen framför roboten.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🧭</div>
+            <h3>Vet var det är</h3>
+            <p>ARKit följer huvudets position och riktning i rummet 60 gånger i sekunden, bredvid rörelsesensorerna på upp till 100 Hz. Från 0.3 berättar GPS, barometer, magnetometer och kompass var det är utomhus.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="themes" class="alt">
+      <div class="wrap">
+        <h2>Tre utseenden, samma uttryck</h2>
+        <p class="sub">Teman är data, inte kod: former, färger och bilder i en mapp. Alla teman har samma 28 uttryck, så roboten behöver aldrig bry sig om vilket som är på.</p>
+        <div class="themes">
+          <figure>
+            <img src="../media/cartoon-happy.png" alt="Temat Cartoon: runda ögon och ett brett leende" loading="lazy">
+            <figcaption>Cartoon <span>Runda ögon, varma färger, en tydlig mun.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="../media/minimal-surprised.png" alt="Temat Minimal: två lysande streck och en linje" loading="lazy">
+            <figcaption>Minimal <span>Två ljusstreck och en linje; få pixlar, låg ström.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="../media/halloween-cackle.png" alt="Temat Halloween: lysande grönt pumpansikte" loading="lazy">
+            <figcaption>Halloween <span>Ett lysande pumpaflin, med ett extra kackel.</span></figcaption>
+          </figure>
+        </div>
+        <details style="margin-top: 32px">
+          <summary>Se alla 28 uttryck i varje tema</summary>
+          <p><img src="../media/emotions-cartoon.png" alt="Alla uttryck i temat Cartoon" loading="lazy"></p>
+          <p><img src="../media/emotions-minimal.png" alt="Alla uttryck i temat Minimal" loading="lazy"></p>
+          <p><img src="../media/emotions-halloween.png" alt="Alla uttryck i temat Halloween" loading="lazy"></p>
+        </details>
+      </div>
+    </section>
+
+    <section id="camera" class="dark">
+      <div class="wrap">
+        <h2>Se det huvudet ser</h2>
+        <p class="sub">Visa frontkameran med en HUD ritad ovanpå. HUD:en markerar varje ansikte, låser på det närmaste och visar huvudets egna värden. Fyra utseenden, alla data precis som ansiktsteman, så du kan göra egna.</p>
+        <div class="themes">
+          <figure>
+            <img src="../media/hud-hunter.png" alt="HUD Hunter: rödtonad kamera, vita hörnrutor, MATCH under det låsta ansiktet, kompassband och analystext" loading="lazy">
+            <figcaption style="color:#fff">Hunter <span style="color:#b9c4d6">Röd analysvy med kompass och MATCH på målet.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="../media/hud-camcorder.png" alt="HUD Camcorder: grön REC, PLAYBACK, tidkod, batteri och ett sikte på det låsta ansiktet" loading="lazy">
+            <figcaption style="color:#fff">Camcorder <span style="color:#b9c4d6">REC, PLAYBACK, tidkod och batteri.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="../media/hud-flight.png" alt="HUD Flight: kompassband, konstgjord horisont, batteri, lutning och position" loading="lazy">
+            <figcaption style="color:#fff">Flight <span style="color:#b9c4d6">Kompass, konstgjord horisont, lutning och position.</span></figcaption>
+          </figure>
+        </div>
+        <h3 style="color:#fff; margin-top: 40px">På en riktig telefon</h3>
+        <p class="sub" style="margin-bottom: 20px">Skärmdumpar från en iPhone 18 Pro: rutan sitter på ansiktet den hittade, ögonen följer det, och telefonens eget batteri, kompassriktning och lutning syns på HUD:en.</p>
+        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+          <img class="shot" src="../media/device-hud-hunter.jpg" alt="HUD Hunter på en iPhone: röd kameravy, en ruta låst på en persons ansikte, MATCH, kompassriktning 095, batteri 60 procent" loading="lazy">
+          <img class="shot" src="../media/device-hud-flight.jpg" alt="HUD Flight på en iPhone: sikte på en persons ansikte, kompass 058, konstgjord horisont, lutning 17,6 grader, batteri 60 procent" loading="lazy">
+          <img class="shot" src="../media/device-hud-camcorder.jpg" alt="HUD Camcorder på en iPhone: sikte på en persons ansikte, robotens egna rader TASK SAY HELLO och SPEED 0.4 M/S, ansiktet i hörnet" loading="lazy">
+          <img class="shot" src="../media/device-hud-boot.jpg" alt="HUD Boot på en iPhone: starttext, hörn låsta på en persons ansikte, LOCK, kompassriktning och lutning" loading="lazy">
+        </div>
+        <div class="split" style="margin-top: 48px">
+          <div>
+            <h3 style="color:#fff">Lägg in din egen information</h3>
+            <ul class="list">
+              <li>Inbyggda värden: batteri, temperatur, kompassriktning, lutning, position, ansikten i bild, det låsta målet.</li>
+              <li>Instrument: kompassband, konstgjord horisont, batterimätare.</li>
+              <li>Roboten lägger till egna värden och rader när som helst, till exempel uppgift, hastighet eller mål.</li>
+              <li>Ett HUD-tema är en liten JSON-fil: färger, ton, scanlines, rutor, lås, textblock och instrument.</li>
+            </ul>
+          </div>
+          <div>
+            <img class="shot" src="../media/hud-camcorder-extras.png" alt="HUD Camcorder med robotens egna rader: TASK DELIVER CUP, SPEED 0.4 M/S och en kompass" loading="lazy">
+            <pre style="margin-top:16px"><span class="c"># robotens egna rader på HUD:en</span>
+openhead camera camcorder --follow
+openhead hud --set task="DELIVER CUP" --set speed=0.4 \
+  --line "TASK {task}" --line "SPEED {speed} M/S" --widget compass</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sensors" class="alt">
+      <div class="wrap">
+        <h2>Sensordata</h2>
+        <p class="sub">Allt huvudet känner av kommer som små JSON-meddelanden som du prenumererar på, i den takt du ber om. Vinklar följer huvudet: + åt dess vänster och uppåt; rörelse följer ROS-konventionerna. Diagrammen nedan är en inspelning på 15 sekunder från en iPhone 18 Pro i handen, med en person framför (<code>tools/sensor_plots.py</code> spelar in vilket huvud som helst).</p>
+        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="../media/sensors/orientation.svg" alt="Linjediagram: telefonens lutning framåt och åt sidan i grader under femton sekunder; framåtlutningen varierar mellan 5 och 22 grader" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="../media/sensors/acceleration.svg" alt="Linjediagram: acceleration x, y och z; x ligger nära 9,8 eftersom telefonen står liggande" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="../media/sensors/faces.svg" alt="Linjediagram: riktningen till ett ansikte mellan 5 och 14 grader när personen rör sig" loading="lazy"></figure>
+          <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="../media/sensors/path.svg" alt="Telefonens väg sedd ovanifrån, från ARKit: en promenad på ungefär 8 meter" loading="lazy"></figure>
+        </div>
+        <p class="note">Data: <a href="../media/sensors/imu.csv">imu.csv</a> · <a href="../media/sensors/faces.csv">faces.csv</a> · <a href="../media/sensors/pose.csv">pose.csv</a> · fler diagram: <a href="../media/sensors/rotation.svg">rotationshastighet</a>, <a href="../media/sensors/position.svg">position över tid</a>.</p>
+        <div style="overflow-x:auto; margin-top: 32px">
+          <table class="data">
+            <thead><tr><th>Ström</th><th>Takt</th><th>Fält</th><th>När</th></tr></thead>
+            <tbody>
+              <tr><td><code>imu</code></td><td>upp till 100 Hz</td><td>orientering (kvaternion), rotationshastighet, acceleration, sensortid</td><td>alltid</td></tr>
+              <tr><td><code>faces</code></td><td>15 Hz</td><td>id, riktning, höjdvinkel, storlek, säkerhet, ruta på skärmen, låst; avstånd med ARKit</td><td>lägena capture och sensing</td></tr>
+              <tr><td><code>pose</code></td><td>upp till 60 Hz</td><td>position (m), orientering, spårningsläge och orsak</td><td>läget sensing (ARKit)</td></tr>
+              <tr><td><code>gps</code></td><td>1 Hz</td><td>latitud, longitud, höjd, noggrannhet, hastighet, färdriktning</td><td>från 0.3; när användaren tillåtit platsåtkomst</td></tr>
+              <tr><td><code>env</code></td><td>upp till 10 Hz</td><td>lufttryck, höjdförändring, magnetfält, kompassriktning och noggrannhet</td><td>från 0.3; barometern efter åtkomst till Rörelse &amp; fitness</td></tr>
+              <tr><td><code>status</code></td><td>1 Hz</td><td>batteri, laddning, temperaturläge, vy, tema, känsla, läge, ansikten, klienter</td><td>alltid</td></tr>
+              <tr><td><code>log</code></td><td>när det händer</td><td>nivå, delsystem, meddelande</td><td>alltid (utvecklarläge för att läsa historiken)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Två kameralägen, eftersom ARKit äger kamerorna: <strong>capture</strong> visar frontkameran och hittar flera ansikten; <strong>sensing</strong> kör ARKit för huvudets position i rummet och följer ett ansikte med djupkameran.</p>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <h2>Så fungerar det</h2>
+        <p class="sub">Telefonen sitter liggande på roboten. Allt stannar i ditt lokala nätverk: inga konton, inget moln.</p>
+        <ol class="steps">
+          <li><h3>Montera och öppna</h3><p>Sätt telefonen liggande på roboten och öppna appen. Ansiktet syns direkt.</p></li>
+          <li><h3>Para en gång</h3><p>En styrenhet på samma wifi hittar huvudet och ber om att paras; du skriver in den sexsiffriga koden som visas på skärmen.</p></li>
+          <li><h3>Styr det</h3><p>Uttryck, blick, tal, undertexter, bilder och video kommer som små JSON-kommandon över en WebSocket.</p></li>
+          <li><h3>Kontrollera</h3><p>I utvecklarläget visar skärmdumpar och loggar exakt vad huvudet gjorde, för dig eller en AI-agent.</p></li>
+        </ol>
+        <div class="split" style="margin-top: 56px">
+          <div class="settings">
+            <img src="../media/settings_connection.jpg" alt="Inställningar: namn, port och nätverksadresser" loading="lazy">
+            <img src="../media/settings_head.jpg" alt="Inställningar: tema när inget är anslutet, montering av rörelsesensorn, utvecklarläge" loading="lazy">
+            <img src="../media/settings_dev_mode.jpg" alt="Inställningar: utvecklarläge och parade klienter" loading="lazy">
+            <img src="../media/settings_about.jpg" alt="Inställningar: version, protokoll och enhet" loading="lazy">
+          </div>
+          <div>
+            <h3>Inställningar på enheten</h3>
+            <ul class="list">
+              <li>Håll fingret på ansiktet i 1,5 sekunder för att öppna dem.</li>
+              <li>Namn och port, temat som visas när inget är anslutet, och hur telefonen är monterad.</li>
+              <li>Se varje parad styrenhet och återkalla vilken som helst av dem.</li>
+              <li>Utvecklarläget tillåter skärmdumpar, loggar och diagnostik över nätverket; låt det vara av på en robot som används.</li>
+            </ul>
+            <p class="note">Appen visar sina inställningar på engelska.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="developers" class="dark">
+      <div class="wrap split">
+        <div>
+          <h2>Byggd för utvecklare och AI-agenter</h2>
+          <p class="sub">Protokollet är produkten: JSON över WebSocket med ett publicerat schema. Runt det finns:</p>
+          <ul class="list">
+            <li>En Python-klient och kommandoradsverktyget <code>openhead</code>.</li>
+            <li>En simulator för datorn som talar samma protokoll, så att du kan utveckla innan en servo rör sig.</li>
+            <li>YAML-scenarier med referensbilder, som körs mot simulatorn och mot telefonen.</li>
+            <li>En MCP-server, så att en AI-agent kan styra huvudet och kontrollera sitt arbete.</li>
+            <li>Apache 2.0. <a href="https://github.com/PatrikBichis/openhead">Källkoden på GitHub</a>.</li>
+          </ul>
+        </div>
+        <pre><span class="c"># installera verktygen från Git-taggen</span>
+uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.2.0#subdirectory=python"
+
+<span class="c"># hitta huvudet och para (skriv koden från skärmen)</span>
+openhead discover
+openhead pair --device 192.168.1.20
+
+<span class="c"># få det att göra saker</span>
+openhead emotion curious
+openhead subtitle "Hej! Jag skriver när jag inte kan prata." --mouth
+openhead show clip.mp4 --overlay face-corner
+openhead camera hunter --follow
+openhead watch faces -n 5</pre>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>Frågor</h2>
+        <details>
+          <summary>Fungerar appen på egen hand?</summary>
+          <p>Den visar ansiktet och håller sig levande med blinkningar och andning, men den är gjord för att styras: av robotens dator, ett skript eller en AI-agent i samma nätverk.</p>
+        </details>
+        <details>
+          <summary>Vilka enheter stöds?</summary>
+          <p>iPhone 12 eller nyare och iPad med iPadOS 17 eller senare. iPhone 12 är grundnivån som varje funktion byggs och testas för.</p>
+        </details>
+        <details>
+          <summary>Samlar appen in data?</summary>
+          <p>Nej. Inget lämnar ditt lokala nätverk och det finns inga konton, ingen analys och ingen reklam. Plats och sensorvärden går bara till de styrenheter du parat, och bara när de ber om dem. Läs <a href="privacy.html">integritetspolicyn</a>.</p>
+        </details>
+        <details>
+          <summary>Spelar kameran in eller skickar video?</summary>
+          <p>Nej. Kameran körs bara när en parad styrenhet ber om det, och bilderna behandlas i telefonen och sparas eller skickas aldrig. Bara positioner och vinklar för ansikten lämnar telefonen, och ingen identifieras. Läs <a href="privacy.html">integritetspolicyn</a>.</p>
+        </details>
+        <details>
+          <summary>Kan jag använda det med ROS 2?</summary>
+          <p>Ja, via en brygga byggd på Python-klienten. Huvudet vet inget om robotens kropp; roboten äger sin kinematik.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>OpenHead · Apache 2.0</span>
+      <nav aria-label="Sidfot">
+        <a href="privacy.html">Integritetspolicy</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

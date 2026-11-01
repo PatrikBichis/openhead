@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Support · OpenHead</title>
   <meta name="description" content="Help for the OpenHead Robot Face app: getting started, pairing, common problems and how to get in touch.">
+  <link rel="alternate" hreflang="en" href="https://patrikbichis.github.io/openhead/support.html">
+  <link rel="alternate" hreflang="sv" href="https://patrikbichis.github.io/openhead/sv/support.html">
+  <link rel="alternate" hreflang="x-default" href="https://patrikbichis.github.io/openhead/support.html">
   <link rel="icon" href="media/favicon.png">
   <link rel="stylesheet" href="site.css">
 </head>
@@ -17,6 +20,7 @@
         <a href="privacy.html">Privacy</a>
         <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
       </nav>
+      <a class="lang" href="sv/support.html" hreflang="sv" lang="sv">Svenska</a>
     </div>
   </header>
 
@@ -54,6 +58,10 @@
       <details>
         <summary>A video or image does not show</summary>
         <p>The head fetches media itself, so the address must be reachable from the phone. Video should be H.264 MP4. <code>openhead show file.mp4</code> serves a local file from your computer automatically.</p>
+      </details>
+      <details>
+        <summary>GPS or the barometer sends nothing</summary>
+        <p>The <code>gps</code> and <code>env</code> streams arrive in version 0.3. The first time, iOS asks for Location and Motion &amp; Fitness; if you declined, switch them on in iOS Settings → OpenHead. Indoors, GPS can take a while to get a fix.</p>
       </details>
       <details>
         <summary>The app stops responding when the screen locks</summary>

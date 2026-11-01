@@ -172,3 +172,9 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; margin-left: auto; }
   .hero { padding: 48px 0; }
   .lead { font-size: 18px; }
 }
+
+/* Language switch: stays visible when the main nav is hidden on phones */
+.top .lang { margin-left: 22px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+  color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.top .lang:hover { color: var(--coral); border-color: var(--coral); }
+@media (max-width: 600px) { .top .lang { margin-left: auto; } }

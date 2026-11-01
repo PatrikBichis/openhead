@@ -65,17 +65,19 @@ The project is generated from `apps/ios/project.yml`; `OpenHead.xcodeproj` and `
 
 ```bash
 cd python
-uv run --with imageio-ffmpeg python ../tools/media.py            # stills and preview
+uv run --with imageio-ffmpeg python ../tools/media.py            # stills, creative and preview
 ```
 
 | Output | What |
 | --- | --- |
-| `apps/ios/appstore/screenshots/iphone-6.9/` | 6 screenshots, 2868 × 1320 (6.9" iPhone, landscape) |
-| `apps/ios/appstore/screenshots/ipad-13/` | 6 screenshots, 2752 × 2064 (13" iPad, landscape) |
+| `apps/ios/appstore/screenshots/iphone-6.9/` | 8 screenshots (6 faces, 2 camera HUDs), 2868 × 1320 (6.9" iPhone, landscape) |
+| `apps/ios/appstore/screenshots/ipad-13/` | 8 screenshots, 2752 × 2064 (13" iPad, landscape) |
+| `apps/ios/appstore/creative/header.png` | product page header, 3840 × 1646 (21:9) |
+| `apps/ios/appstore/creative/search-results.png` | search results art, 1920 × 1280 (3:2) |
 | `apps/ios/appstore/previews/iphone-6.9-landscape.mp4` | app preview, 1920 × 886, 30 fps, H.264 + stereo AAC, 28 s, with speech |
 | `docs/media/` | README GIF, mp4, theme pictures and emotion sheets |
 
-Upload them in App Store Connect under the app version (Previews and Screenshots). The 6.9" set is scaled down for smaller iPhones and the 13" set for smaller iPads. Speech uses a Windows SAPI voice; elsewhere the preview has a silent track. The settings pictures in `docs/media/settings_*.jpg` are real device screenshots.
+Upload them with `tools/appstore_media.py` (below). The 6.9" set is scaled down for smaller iPhones and the 13" set for smaller iPads. Speech uses a Windows SAPI voice; elsewhere the preview has a silent track. The settings pictures in `docs/media/settings_*.jpg` are real device screenshots.
 
 ## Store texts
 
@@ -88,7 +90,7 @@ uv run --project python python tools/appstore_metadata.py             # push; --
 
 It updates the version being prepared and the app info (nothing is submitted for review): version number from `protocol/VERSION` with its newest valid build, release type (manual), copyright, categories, age rating (`age_rating.json`) and review notes (`review_notes.txt`). Builds must be exported with `testFlightInternalTestingOnly` false (`ExportOptions.plist`) to be selectable.
 
-Screenshots (8 per size, including two camera HUDs) and the app preview are uploaded with `uv run --project python python tools/appstore_media.py`; it replaces each set. The privacy policy, support and marketing URLs point to the project site, GitHub Pages from `docs/` on `main` (`index.html`, `privacy.html`, `support.html`): https://patrikbichis.github.io/openhead/. Before the first App Store submission: the App Privacy answers in App Store Connect (not in the API; the app collects no data), age rating, price and availability, and the version number (App Store Connect has `1.0`, the builds are `0.1.0`).
+Screenshots, the header and search-results art and the app preview are uploaded with `uv run --project python python tools/appstore_media.py [screenshots] [creative] [previews]`; it replaces what is there. Header and search art are creative assets (2026): an image in the app's asset library (`appAssetLibraryImages`, category `CREATIVE_ASSETS`) placed on the version's localization (`appAssetLibraryPlacements`, `PRODUCT_PAGE_HEADER_ASSET` and `APP_STORE_SEARCH_RESULTS_ASSET`). They go live with the released version. The privacy policy, support and marketing URLs point to the project site, GitHub Pages from `docs/` on `main` (`index.html`, `privacy.html`, `support.html`, in English; Swedish under `docs/sv/`): https://patrikbichis.github.io/openhead/. Left for the web UI before the first submission: the App Privacy answers (not in the API; the app collects no data), App Review contact, price and availability, and content rights.
 
 ## Running on a robot
 

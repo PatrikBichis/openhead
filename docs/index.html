@@ -4,10 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OpenHead Robot Face</title>
-  <meta name="description" content="OpenHead turns an iPhone or iPad into the face of a robot: 28 expressions, a mouth that talks with the robot's voice, subtitles, images and video. Open source.">
+  <meta name="description" content="OpenHead turns an iPhone or iPad into the face of a robot: 28 expressions, a mouth that talks with the robot's voice, subtitles, images and video, a camera view with a HUD, face tracking, ARKit position and the phone's sensors. Open source.">
   <meta property="og:title" content="OpenHead Robot Face">
   <meta property="og:description" content="A phone as your robot's face. Open source.">
   <meta property="og:image" content="https://patrikbichis.github.io/openhead/media/cartoon-happy.png">
+  <link rel="alternate" hreflang="en" href="https://patrikbichis.github.io/openhead/">
+  <link rel="alternate" hreflang="sv" href="https://patrikbichis.github.io/openhead/sv/">
+  <link rel="alternate" hreflang="x-default" href="https://patrikbichis.github.io/openhead/">
   <link rel="icon" href="media/favicon.png">
   <link rel="stylesheet" href="site.css">
 </head>
@@ -24,6 +27,7 @@
         <a href="#developers">Developers</a>
         <a href="support.html">Support</a>
       </nav>
+      <a class="lang" href="sv/" hreflang="sv" lang="sv">Svenska</a>
     </div>
   </header>
 
@@ -90,7 +94,7 @@
           <div class="card">
             <div class="icon" aria-hidden="true">🧭</div>
             <h3>Knows where it is</h3>
-            <p>ARKit tracks the head's position and orientation in the room, 60 times a second, next to the motion sensors at up to 100 Hz. GPS, barometer, magnetometer and compass tell it where it is outside.</p>
+            <p>ARKit tracks the head's position and orientation in the room, 60 times a second, next to the motion sensors at up to 100 Hz. From 0.3, GPS, barometer, magnetometer and compass tell it where it is outside.</p>
           </div>
         </div>
       </div>
@@ -188,8 +192,8 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
               <tr><td><code>imu</code></td><td>up to 100 Hz</td><td>orientation (quaternion), rotation rate, acceleration, sensor time</td><td>always</td></tr>
               <tr><td><code>faces</code></td><td>15 Hz</td><td>id, bearing, elevation, size, confidence, box on screen, locked; distance with ARKit</td><td>modes capture and sensing</td></tr>
               <tr><td><code>pose</code></td><td>up to 60 Hz</td><td>position (m), orientation, tracking state and reason</td><td>mode sensing (ARKit)</td></tr>
-              <tr><td><code>gps</code></td><td>1 Hz</td><td>latitude, longitude, altitude, accuracy, speed, course</td><td>always, after the user allows location access</td></tr>
-              <tr><td><code>env</code></td><td>up to 10 Hz</td><td>air pressure, altitude change, magnetic field, compass heading and accuracy</td><td>always (barometer after Motion &amp; Fitness access)</td></tr>
+              <tr><td><code>gps</code></td><td>1 Hz</td><td>latitude, longitude, altitude, accuracy, speed, course</td><td>from 0.3; after the user allows location access</td></tr>
+              <tr><td><code>env</code></td><td>up to 10 Hz</td><td>air pressure, altitude change, magnetic field, compass heading and accuracy</td><td>from 0.3; the barometer after Motion &amp; Fitness access</td></tr>
               <tr><td><code>status</code></td><td>1 Hz</td><td>battery, charging, thermal state, view, theme, emotion, mode, faces, clients</td><td>always</td></tr>
               <tr><td><code>log</code></td><td>as it happens</td><td>level, subsystem, message</td><td>always (dev mode to read history)</td></tr>
             </tbody>
@@ -271,7 +275,7 @@ openhead watch faces -n 5</pre>
         </details>
         <details>
           <summary>Does it collect any data?</summary>
-          <p>No. Nothing leaves your local network and there are no accounts, analytics or ads. See the <a href="privacy.html">privacy policy</a>.</p>
+          <p>No. Nothing leaves your local network and there are no accounts, analytics or ads. Location and sensor readings go only to the controllers you paired, and only when they ask. See the <a href="privacy.html">privacy policy</a>.</p>
         </details>
         <details>
           <summary>Does the camera record or send video?</summary>
