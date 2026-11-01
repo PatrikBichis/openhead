@@ -178,3 +178,11 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; margin-left: auto; }
   color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
 .top .lang:hover { color: var(--coral); border-color: var(--coral); }
 @media (max-width: 600px) { .top .lang { margin-left: auto; } }
+
+/* App Store button and its QR code (a popover; without popover support the button does nothing) */
+button.btn { font: inherit; font-weight: 600; background: none; cursor: pointer; }
+.qr { border: 0; border-radius: var(--radius); padding: 28px; text-align: center; max-width: 340px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35); background: #fff; color: var(--ink); }
+.qr::backdrop { background: rgba(22, 41, 74, .55); }
+.qr img { display: block; margin: 0 auto; width: 264px; height: 264px; }
+.qr p { font-size: 15px; color: var(--ink-2); margin: 14px 0 18px; }

@@ -39,10 +39,16 @@
           <h1>A phone as your robot's face.</h1>
           <p class="lead">OpenHead turns an iPhone or iPad into an expressive robot head. Your robot, a Python script or an AI agent makes it smile, look around, talk and show things, over your own Wi-Fi.</p>
           <div class="buttons">
-            <a class="btn primary" href="https://github.com/PatrikBichis/openhead">View on GitHub</a>
-            <a class="btn ghost" href="#how">How it works</a>
+            <a class="btn primary" href="https://apps.apple.com/app/id6829240049"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9s-2-.9-3.4-.9c-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8 2.3-1.3 3.1-2.5c1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>App Store</a>
+            <button class="btn ghost" type="button" popovertarget="qr">QR code</button>
+            <a class="btn ghost" href="https://github.com/PatrikBichis/openhead">View on GitHub</a>
           </div>
-          <p class="note">The iOS app <strong>OpenHead Robot Face</strong> is in beta on TestFlight.</p>
+          <div id="qr" class="qr" popover>
+            <img src="media/appstore-qr.svg" width="264" height="264" alt="QR code that opens OpenHead Robot Face on the App Store">
+            <p>Point the iPhone camera at the code to open the app on the App Store.</p>
+            <button class="btn ghost" type="button" popovertarget="qr" popovertargetaction="hide">Close</button>
+          </div>
+          <p class="note">The iOS app <strong>OpenHead Robot Face</strong> for iPhone and iPad. The App Store page opens when the app is released; until then it is in beta on TestFlight.</p>
         </div>
         <div class="phone">
           <video src="media/openhead-preview.mp4" poster="media/cartoon-happy.png" autoplay muted loop playsinline
