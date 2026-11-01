@@ -7,6 +7,7 @@ All changes to `protocol/schema` are recorded here, in the same commit as the ch
 ### Changed
 
 - `gps`: a message is sent only when there is a new fix (new `sensor_time_s`), instead of repeating the latest fix every second while the head stands still.
+- `system.settings` `offline_theme` is the head's own theme: it applies as soon as it is set (before, only at the next start), and the face returns to it when the last paired client disconnects. Clients still switch theme with `face.set_theme`. The app's settings call it "Theme".
 
 ## 0.3.0 (2026-11-01)
 

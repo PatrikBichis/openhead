@@ -10,7 +10,15 @@ final class SettingsStore: ObservableObject {
     @Published var devMode: Bool { didSet { defaults.set(devMode, forKey: "dev_mode") } }
     /// Quaternion [x, y, z, w] from the device frame to the mount frame.
     @Published var mountOffset: [Double] { didSet { defaults.set(mountOffset, forKey: "mount_offset") } }
-    @Published var offlineTheme: String { didSet { defaults.set(offlineTheme, forKey: "offline_theme") } }
+    /// The face's own theme: shown at start, right away when changed, and again once the last
+    /// client disconnects (clients may switch it with face.set_theme while connected).
+    @Published var offlineTheme: String {
+        didSet {
+            defaults.set(offlineTheme, forKey: "offline_theme")
+            if offlineTheme != oldValue { onThemeChange?(offlineTheme) }
+        }
+    }
+    var onThemeChange: ((String) -> Void)?
 
     init() {
         name = defaults.string(forKey: "name") ?? "openhead"

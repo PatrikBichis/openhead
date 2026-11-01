@@ -56,6 +56,7 @@ final class AppModel: ObservableObject {
         location.onDenied = { [weak self] in
             self?.logs.log("warning", "sensors", "location access denied: gps sends nothing (Settings > OpenHead > Location)")
         }
+        settings.onThemeChange = { [weak self] name in self?.applyOwnTheme(name, why: "settings") }
         face.load(theme: settings.offlineTheme)
         fps.start()
         NotificationCenter.default.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification,
@@ -76,7 +77,22 @@ final class AppModel: ObservableObject {
 
     func linkStateChanged(ready: Bool, clients: Int) {
         linkReady = ready
+        let lastLeft = self.clients > 0 && clients == 0
         self.clients = clients
+        if lastLeft { applyOwnTheme(settings.offlineTheme, why: "no clients") }
+    }
+
+    /// Back to the theme chosen in the app's settings, unless it is already on.
+    private func applyOwnTheme(_ name: String, why: String) {
+        Task {
+            guard let state = try? await face.state(), state.theme != name else { return }
+            do {
+                try await face.setTheme(name, transitionMs: 300)
+                logs.log("info", "face", "theme \(name) (\(why))")
+            } catch {
+                logs.log("warning", "face", "theme \(name) failed: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func thermalChanged() {

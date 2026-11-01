@@ -34,13 +34,17 @@ struct SettingsView: View {
                     Text("Name and port changes apply after restarting the app.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
-                Section("Head") {
-                    Picker("Theme when offline", selection: $settings.offlineTheme) {
+                Section {
+                    Picker("Theme", selection: $settings.offlineTheme) {
                         ForEach(model.themeNames, id: \.self) { Text($0).tag($0) }
                     }
                     Picker("IMU mounting", selection: $settings.mountOffset) {
                         ForEach(mounts, id: \.self) { Text($0.name).tag($0.quaternion) }
                     }
+                } header: {
+                    Text("Head")
+                } footer: {
+                    Text("A connected robot or agent can switch the theme; the face returns to this one when the last one disconnects.")
                 }
                 Section {
                     Toggle("Dev mode", isOn: $settings.devMode)

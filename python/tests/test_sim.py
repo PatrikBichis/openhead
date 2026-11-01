@@ -202,6 +202,23 @@ async def test_settings_and_diagnostics(head):
     assert diagnostics.thermal_state == "nominal"
 
 
+async def test_own_theme_applies_now_and_after_the_last_client(sim, store):
+    """offline_theme is the head's own theme: set in its settings it shows at once; a client
+    may switch theme, and the face goes back when the last paired client leaves."""
+    head = await Head.connect("127.0.0.1", sim.port, client="pytest", store=store)
+    await head.pair("0000")
+    await head.system.set_setting("offline_theme", "minimal")
+    assert (await head.system.status()).theme == "minimal"
+    await head.face.set_theme("halloween")
+    assert (await head.system.status()).theme == "halloween"
+    await head.close()
+    for _ in range(50):
+        if (await sim.face.state())["theme"] == "minimal":
+            break
+        await asyncio.sleep(0.05)
+    assert (await sim.face.state())["theme"] == "minimal"
+
+
 async def test_modes(head):
     assert await head.mode.get() == "idle"
     assert (await head.system.status()).faces is None  # no camera, no count

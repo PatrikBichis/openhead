@@ -228,6 +228,8 @@ class SimServer:
             session.stop_subs()
             self.sessions.discard(session)
             self.log("info", "link", f"{session.client or peer} disconnected")
+            if session.token and not any(x.token for x in self.sessions):
+                await self._own_theme("no clients")
 
     async def _on_message(self, s: Session, raw: str | bytes) -> None:
         try:
@@ -448,6 +450,8 @@ class SimServer:
                     if d["action"] == "set":
                         self._require_dev(t)
                         self._set_setting(d["key"], d["value"])
+                        if d["key"] == "offline_theme":
+                            await self._own_theme("settings")
                     return {"settings": self.settings}
                 case "mode.set":
                     await self._set_mode(d["mode"])
@@ -603,6 +607,16 @@ class SimServer:
         shot_id = self.shots.add(png, s.token or "")
         return {"width": width, "height": height,
                 "url": f"http://{host}:{self.port + 1}/shot/{shot_id}.png", "expires_ms": 60000}
+
+    async def _own_theme(self, why: str) -> None:
+        """Back to the head's own theme (`offline_theme`), as the app does."""
+        name = self.settings["offline_theme"]
+        try:
+            if (await self.face.state())["theme"] != name:
+                await self.face.set_theme(name, 300)
+                self.log("info", "face", f"theme {name} ({why})")
+        except FaceError as exc:
+            self.log("warning", "face", f"theme {name} failed: {exc}")
 
     def _set_setting(self, key: str, value: Any) -> None:
         checks = {

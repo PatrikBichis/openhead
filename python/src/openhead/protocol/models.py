@@ -1555,7 +1555,7 @@ class SystemScreenshot(Command):
 
 class SystemSettings(Command):
     """
-    Read all settings, or set one. `set` needs dev mode. Known keys in 0.1: `name`, `port`, `mount_offset` ([x, y, z, w] quaternion), `offline_theme`.
+    Read all settings, or set one. `set` needs dev mode. Known keys in 0.1: `name`, `port`, `mount_offset` ([x, y, z, w] quaternion), `offline_theme` (the head's own theme: shown at start and as soon as it is set; a client may switch theme with `face.set_theme`, and the face returns to this one when the last paired client disconnects).
     """
 
     model_config = ConfigDict(
