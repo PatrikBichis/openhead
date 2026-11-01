@@ -1,1 +1,1 @@
-Give your robot a face: 28 expressions, a mouth that talks with its voice, subtitles for AI answers, and images or video on screen. Open source.
+Give your robot a face: 28 expressions, a mouth that talks and subtitles. New: camera view with a sci-fi HUD, face tracking and ARKit position. Open source.

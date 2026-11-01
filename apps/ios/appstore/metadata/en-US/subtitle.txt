@@ -1,1 +1,1 @@
-A phone as your robot's face
+Robot face with camera & HUD
