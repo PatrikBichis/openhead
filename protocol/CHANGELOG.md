@@ -2,6 +2,12 @@
 
 All changes to `protocol/schema` are recorded here, in the same commit as the change. The protocol follows [semver](https://semver.org) from 0.1.0; until 0.1.0 is tagged anything may change.
 
+## Unreleased
+
+### Changed
+
+- `gps`: a message is sent only when there is a new fix (new `sensor_time_s`), instead of repeating the latest fix every second while the head stands still.
+
 ## 0.3.0 (2026-11-01)
 
 ### Added

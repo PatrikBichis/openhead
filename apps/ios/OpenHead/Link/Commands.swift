@@ -220,9 +220,9 @@ extension LinkServer {
             let timer = Timer.scheduledTimer(withTimeInterval: 1 / rate, repeats: true) { [weak self, weak session] _ in
                 MainActor.assumeIsolated {
                     guard let self, let session else { return }
-                    let payload = topic == "gps" ? self.model.location.latest
+                    let payload = topic == "gps" ? self.model.location.newFix(for: session.id)
                                                  : self.model.env.payload(heading: self.model.heading)
-                    if let payload { session.send(topic, filtered(payload)) }  // nothing before the first reading
+                    if let payload { session.send(topic, filtered(payload)) }  // nothing before the first reading, nor a repeated fix
                 }
             }
             session.subscriptions[topic] = (fields, timer)

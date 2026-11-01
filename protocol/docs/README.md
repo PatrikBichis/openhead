@@ -18,7 +18,7 @@ Protocol version 0.3.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `face.set_emotion` | [FaceSetEmotion](commands/face.set_emotion.md) | Blend towards an emotion, independently of speech (the mouth envelope is added on top). |
 | `face.set_theme` | [FaceSetTheme](commands/face.set_theme.md) | Switch the face to an installed theme. |
 | `faces` | [Faces](topics/faces.md) | People in front of the head, up to 15 Hz while mode is `capture` (front camera, several faces, with `box`) or `sensing` (ARKit, one face, no `box`). |
-| `gps` | [Gps](topics/gps.md) | Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). |
+| `gps` | [Gps](topics/gps.md) | Where the head is on Earth, up to 1 Hz and only when there is a new fix, so a head standing still may send nothing for a while (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). |
 | `hello` | [Hello](messages/hello.md) | First message on a new connection. |
 | `imu` | [Imu](topics/imu.md) | Inertial sample, up to 100 Hz. |
 | `log` | [Log](topics/log.md) | One structured log line, sent as it happens. |

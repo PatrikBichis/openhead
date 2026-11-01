@@ -1297,7 +1297,7 @@ class Faces(Envelope, FacesFields):
 
 class Gps(Envelope, GpsFields):
     """
-    Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). Sent only after the user allows location access; the first subscription asks. WGS 84. Every payload field is present unless the subscription named `fields`; `alt_m`, `v_accuracy_m`, `speed_m_s` and `course_deg` are left out when unknown.
+    Where the head is on Earth, up to 1 Hz and only when there is a new fix, so a head standing still may send nothing for a while (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). Sent only after the user allows location access; the first subscription asks. WGS 84. Every payload field is present unless the subscription named `fields`; `alt_m`, `v_accuracy_m`, `speed_m_s` and `course_deg` are left out when unknown.
     """
 
     model_config = ConfigDict(

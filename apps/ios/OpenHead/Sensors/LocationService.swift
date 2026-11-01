@@ -7,6 +7,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private var users: Set<UUID> = []
     private(set) var latest: JSONObject?
+    private var sent: [UUID: Double] = [:]  // sensor_time_s of the last fix each session got
     var onDenied: (() -> Void)?
 
     override init() {
@@ -30,7 +31,15 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         manager.startUpdatingLocation()
     }
 
+    /// The latest fix if this session has not had it yet; a phone standing still sends nothing new.
+    func newFix(for id: UUID) -> JSONObject? {
+        guard let latest, let time = latest["sensor_time_s"] as? Double, sent[id] != time else { return nil }
+        sent[id] = time
+        return latest
+    }
+
     func stop(_ id: UUID) {
+        sent[id] = nil
         guard users.remove(id) != nil, users.isEmpty else { return }
         manager.stopUpdatingLocation()
         latest = nil
