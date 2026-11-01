@@ -186,3 +186,10 @@ button.btn { font: inherit; font-weight: 600; background: none; cursor: pointer;
 .qr::backdrop { background: rgba(22, 41, 74, .55); }
 .qr img { display: block; margin: 0 auto; width: 264px; height: 264px; }
 .qr p { font-size: 15px; color: var(--ink-2); margin: 14px 0 18px; }
+
+/* Apple's App Store badge (unchanged artwork, at least 40 px high) and the GitHub mark */
+.store { display: inline-flex; align-items: center; }
+.store img { display: block; height: 50px; width: auto; }
+.gh { flex: none; }
+.ghlink { display: inline-flex; align-items: center; gap: 6px; }
+table.data code { white-space: nowrap; }

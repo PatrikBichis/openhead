@@ -1,10 +1,21 @@
 # OpenHead
 
-**A phone or tablet as a robot's head: face, eyes, cameras, pose, and a protocol to drive it.**
+<p align="center"><img src="docs/media/icon.png" alt="" width="96"></p>
 
-OpenHead turns an iPhone or iPad into a self-contained robot head. The device renders an expressive face, streams its sensors (IMU, world pose, detected faces, GPS, barometer, magnetometer and compass) and exposes a small command API over Wi-Fi. Anything that can open a WebSocket can drive it: a ROS 2 node on a Jetson, a Python script, or an LLM agent through the bundled MCP server.
+**A phone as your robot's face: expressions, eyes that follow people, cameras, sensors and a protocol to drive it.**
 
-The protocol is the product. The iOS app is the first client; the desktop simulator is the second.
+OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone on the robot in landscape, and the robot, a Python script or an AI agent makes it smile, look around, talk, show pictures and video, and report what it senses: faces, where it is in the room, GPS, compass, air pressure and motion. Everything runs over your own Wi-Fi.
+
+<p align="center">
+  <a href="https://apps.apple.com/app/id6829240049"><img src="docs/media/appstore-badge-en.svg" alt="Download on the App Store" height="50"></a>
+</p>
+<p align="center">
+  <img src="docs/media/appstore-qr.svg" alt="QR code that opens OpenHead Robot Face on the App Store" width="140"><br>
+  <sub>Scan with an iPhone to open <i>OpenHead Robot Face</i> on the App Store. The page opens when the app is released; until then it is in beta on TestFlight.</sub>
+</p>
+<p align="center">
+  <b><a href="https://patrikbichis.github.io/openhead/">Website</a></b> · <a href="https://patrikbichis.github.io/openhead/sv/">På svenska</a> · <a href="https://patrikbichis.github.io/openhead/privacy.html">Privacy policy</a> · <a href="https://patrikbichis.github.io/openhead/support.html">Support</a> · <a href="https://github.com/PatrikBichis/openhead/releases/latest">Latest release</a>
+</p>
 
 <p align="center">
   <img src="docs/media/openhead.gif" alt="OpenHead talking, changing emotions and switching between the cartoon, minimal and halloween themes" width="640">
@@ -22,14 +33,119 @@ The protocol is the product. The iOS app is the first client; the desktop simula
 - **Subtitles.** Text on top of anything, for a robot without a speaker or an AI answer streaming in word by word; the newest three lines stay on screen, and the mouth can move with the text.
 - **Pictures, video and web pages.** PNG, JPEG, animated GIF, WebP and SVG; H.264 video (loop, mute, back to the face when it ends); web pages; the face can keep running in a corner. Local files are served to the head from the host.
 - **Camera view with a HUD** *(0.2)*. The front camera with a sci-fi heads-up display: boxes around faces, a locked target, compass tape, artificial horizon, battery, temperature and the robot's own lines (`display.hud`). HUD themes are JSON: `hunter`, `camcorder`, `boot`, `flight`.
-- **Finds people** *(0.2)*. Several faces at once (`faces`: bearing, elevation, size, box) at 15 Hz; the eyes can follow the person in front of the robot (`look_at {frame: face}`).
+- **Face tracking** *(0.2)*. Several faces at once (`faces`: bearing, elevation, size, box) at 15 Hz, with distance under ARKit; the robot's eyes follow the person in front of it and keep eye contact (`look_at {frame: face}`).
 - **Knows where it is** *(0.2)*. ARKit world tracking gives the head's position and orientation in the room (`pose`, 60 Hz) and follows one face with distance.
 - **Knows where on Earth** *(0.3)*. GPS (`gps`, 1 Hz): latitude, longitude, altitude, accuracy, speed and course.
 - **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; barometer, magnetometer and compass (`env`, 10 Hz, *0.3*); battery, thermal state, clients, what is on screen. Only sensors an iPhone 12 has: no LiDAR.
 - **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
 - **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
 
-Website: **[patrikbichis.github.io/openhead](https://patrikbichis.github.io/openhead/)** ([privacy policy](https://patrikbichis.github.io/openhead/privacy.html), [support](https://patrikbichis.github.io/openhead/support.html)). The iOS app is in TestFlight as *OpenHead Robot Face*; its store texts live in [`apps/ios/appstore/metadata`](apps/ios/appstore/metadata) and are pushed with `tools/appstore_metadata.py` (see [docs/ios.md](docs/ios.md)).
+---
+
+## Camera view and HUD
+
+| Hunter | Camcorder | Flight |
+| --- | --- | --- |
+| ![Hunter HUD: red analysis view, MATCH on the locked face](docs/media/hud-hunter.png) | ![Camcorder HUD: REC, PLAYBACK, timecode, battery](docs/media/hud-camcorder.png) | ![Flight HUD: compass, artificial horizon, tilt and position](docs/media/hud-flight.png) |
+
+Two camera modes, because ARKit owns the cameras and never hands out the front camera's image: **`capture`** shows the front camera (several faces with boxes; pose only as orientation from the IMU) and **`sensing`** runs ARKit (position and orientation in the room, one face with distance, no camera image). `display.show {content: camera, hud}` switches to `capture` by itself.
+
+```bash
+openhead camera hunter --follow            # camera view with a HUD; the eyes follow the nearest face
+openhead hud --set task="DELIVER CUP" --set speed=0.4 --line "TASK {task}" --line "SPEED {speed} M/S"
+openhead mode sensing && openhead watch pose -n 3
+```
+
+On a real phone (iPhone 18 Pro):
+
+| Hunter | Flight |
+| --- | --- |
+| ![Hunter HUD on an iPhone: box locked on a face, MATCH, compass, battery](docs/media/device-hud-hunter.jpg) | ![Flight HUD on an iPhone: crosshair on a face, compass, horizon, tilt](docs/media/device-hud-flight.jpg) |
+| **Camcorder, with the robot's own lines** | **Boot** |
+| ![Camcorder HUD on an iPhone: crosshair on a face, TASK and SPEED lines, face in the corner](docs/media/device-hud-camcorder.jpg) | ![Boot HUD on an iPhone: boot text, corners locked on a face, LOCK](docs/media/device-hud-boot.jpg) |
+
+Sensor data recorded from the phone (tilt, acceleration, rotation, face bearing, ARKit position and path), with CSV files, is on the [website](https://patrikbichis.github.io/openhead/#sensors); `tools/sensor_plots.py` records any head (`--from-csv` redraws).
+
+| Tilt (imu) | Face bearing (faces) | ARKit path (pose) |
+| --- | --- | --- |
+| ![Pitch and roll of the phone over 15 s](docs/media/sensors/orientation.svg) | ![Bearing of one face over 15 s](docs/media/sensors/faces.svg) | ![Path of the phone seen from above](docs/media/sensors/path.svg) |
+
+---
+
+## Sensors
+
+An iPhone 12 already carries every sensor a robot head needs. OpenHead reads them and streams the results over the same link as the face.
+
+| Sensor | What OpenHead does with it | Stream |
+| --- | --- | --- |
+| Front camera (TrueDepth) | face tracking: several faces; with ARKit, one face with its distance | `faces`, camera view |
+| Back camera | ARKit world tracking (visual-inertial SLAM): where the head is in the room and how it is turned | `pose` |
+| Accelerometer and gyroscope | orientation, rotation rate and acceleration in ROS conventions; tilt on the HUD | `imu` |
+| Magnetometer | magnetic field and compass heading (true north with location access) | `env` |
+| Barometer | air pressure and altitude change | `env` |
+| GNSS: GPS, GLONASS, Galileo, QZSS, BeiDou | latitude, longitude, altitude, accuracy, speed and course | `gps` |
+| Battery and temperature | battery level, charging and thermal state | `status` |
+
+Not used: the microphone (the robot's computer handles audio), the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none.
+
+---
+
+## On the phone
+
+Mount the phone in landscape and start the app: the face fills the screen. A long press (1.5 s) opens the settings; when a new client connects, a pairing code is shown for 60 s.
+
+| Connection | Head |
+| --- | --- |
+| ![Settings: name, port and addresses](docs/media/settings_connection.jpg) | ![Settings: theme when offline, IMU mounting, dev mode](docs/media/settings_head.jpg) |
+| **Dev mode and paired clients** | **About** |
+| ![Settings: dev mode and paired clients](docs/media/settings_dev_mode.jpg) | ![Settings: version, protocol and device](docs/media/settings_about.jpg) |
+
+---
+
+## Device support
+
+| Device | Face | IMU / status | World pose (0.2) | Face tracking (0.2) | GPS / env (0.3) |
+| --- | --- | --- | --- | --- | --- |
+| iPhone 12 and later | yes | yes | ARKit, back camera | front camera, concurrent with world tracking (A12+) | GNSS, barometer, magnetometer, compass |
+| iPad mini (5th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
+| iPad (7th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
+| Desktop simulator | yes | synthetic | synthetic | synthetic | synthetic |
+
+---
+
+## Privacy
+
+The app collects no data: no accounts, analytics or ads, and nothing leaves your local network. Camera images are processed on the phone and never stored or sent; location and sensor readings go only to the controllers you paired, when they ask. See the [privacy policy](https://patrikbichis.github.io/openhead/privacy.html).
+
+---
+
+# For developers
+
+The protocol is the product: JSON over WebSocket with a published schema. The iOS app is the first client; the desktop simulator is the second. Anything that can open a WebSocket can drive the head: a ROS 2 node on a Jetson, a Python script, or an LLM agent through the bundled MCP server.
+
+---
+
+## Quick start
+
+**Without hardware**
+
+```bash
+cd face && npm ci && npm run build && cd ..   # the face engine the simulator renders
+cd python && uv sync && uv run playwright install chromium
+uv run openhead sim                           # simulated head with a face window (pairing code 0000)
+uv run openhead pair 0000 --device localhost  # in a second terminal
+uv run openhead emotion curious --device localhost
+uv run openhead screenshot -o face.png --device localhost
+uv run openhead run ../scenarios/smoke.yaml --device localhost
+uv run openhead mcp --device localhost        # expose it to an agent (step 5)
+```
+
+**With an iPhone or iPad**
+
+1. Install the app from TestFlight (see [`docs/ios.md`](docs/ios.md)) and put the device on the same Wi-Fi as the host.
+2. Open the app; it shows a pairing code when the first client connects.
+3. `openhead discover`, then `openhead pair --device head-01.local`: connecting makes the head show a code for 60 s; type it at the prompt.
+4. `openhead run scenarios/smoke.yaml --device head-01.local`.
 
 ---
 
@@ -181,34 +297,6 @@ Shared emotion names, required in every theme (missing ones fall back to `neutra
 
 Built-in themes in v0.1: `cartoon`, `minimal`, `halloween`. Hosts discover themes and their extra expressions with `face.list`.
 
-### Camera view and HUD (0.2)
-
-| Hunter | Camcorder | Flight |
-| --- | --- | --- |
-| ![Hunter HUD: red analysis view, MATCH on the locked face](docs/media/hud-hunter.png) | ![Camcorder HUD: REC, PLAYBACK, timecode, battery](docs/media/hud-camcorder.png) | ![Flight HUD: compass, artificial horizon, tilt and position](docs/media/hud-flight.png) |
-
-Two camera modes, because ARKit owns the cameras and never hands out the front camera's image: **`capture`** shows the front camera (several faces with boxes; pose only as orientation from the IMU) and **`sensing`** runs ARKit (position and orientation in the room, one face with distance, no camera image). `display.show {content: camera, hud}` switches to `capture` by itself.
-
-```bash
-openhead camera hunter --follow            # camera view with a HUD; the eyes follow the nearest face
-openhead hud --set task="DELIVER CUP" --set speed=0.4 --line "TASK {task}" --line "SPEED {speed} M/S"
-openhead mode sensing && openhead watch pose -n 3
-```
-
-On a real phone (iPhone 18 Pro):
-
-| Hunter | Flight |
-| --- | --- |
-| ![Hunter HUD on an iPhone: box locked on a face, MATCH, compass, battery](docs/media/device-hud-hunter.jpg) | ![Flight HUD on an iPhone: crosshair on a face, compass, horizon, tilt](docs/media/device-hud-flight.jpg) |
-| **Camcorder, with the robot's own lines** | **Boot** |
-| ![Camcorder HUD on an iPhone: crosshair on a face, TASK and SPEED lines, face in the corner](docs/media/device-hud-camcorder.jpg) | ![Boot HUD on an iPhone: boot text, corners locked on a face, LOCK](docs/media/device-hud-boot.jpg) |
-
-Sensor data recorded from the phone (tilt, acceleration, rotation, face bearing, ARKit position and path), with CSV files, is on the [website](https://patrikbichis.github.io/openhead/#sensors); `tools/sensor_plots.py` records any head (`--from-csv` redraws).
-
-| Tilt (imu) | Face bearing (faces) | ARKit path (pose) |
-| --- | --- | --- |
-| ![Pitch and roll of the phone over 15 s](docs/media/sensors/orientation.svg) | ![Bearing of one face over 15 s](docs/media/sensors/faces.svg) | ![Path of the phone seen from above](docs/media/sensors/path.svg) |
-
 <details>
 <summary>All 28 emotions in each theme</summary>
 
@@ -323,53 +411,6 @@ openhead/
 ```
 
 Python and Swift models are generated from the schemas by `tools/protocol.py` and committed; hand-written copies are not allowed. All testing runs locally (`tools/check.py`, also as the pre-push hook); GitHub Actions only builds the iOS app and uploads it to TestFlight. The face bundle is built in that workflow and copied into the app before each build.
-
----
-
-## Quick start
-
-**Without hardware**
-
-```bash
-cd face && npm ci && npm run build && cd ..   # the face engine the simulator renders
-cd python && uv sync && uv run playwright install chromium
-uv run openhead sim                           # simulated head with a face window (pairing code 0000)
-uv run openhead pair 0000 --device localhost  # in a second terminal
-uv run openhead emotion curious --device localhost
-uv run openhead screenshot -o face.png --device localhost
-uv run openhead run ../scenarios/smoke.yaml --device localhost
-uv run openhead mcp --device localhost        # expose it to an agent (step 5)
-```
-
-**With an iPhone or iPad**
-
-1. Install the app from TestFlight (see [`docs/ios.md`](docs/ios.md)) and put the device on the same Wi-Fi as the host.
-2. Open the app; it shows a pairing code when the first client connects.
-3. `openhead discover`, then `openhead pair --device head-01.local`: connecting makes the head show a code for 60 s; type it at the prompt.
-4. `openhead run scenarios/smoke.yaml --device head-01.local`.
-
----
-
-## On the phone
-
-Mount the phone in landscape and start the app: the face fills the screen. A long press (1.5 s) opens the settings; when a new client connects, a pairing code is shown for 60 s.
-
-| Connection | Head |
-| --- | --- |
-| ![Settings: name, port and addresses](docs/media/settings_connection.jpg) | ![Settings: theme when offline, IMU mounting, dev mode](docs/media/settings_head.jpg) |
-| **Dev mode and paired clients** | **About** |
-| ![Settings: dev mode and paired clients](docs/media/settings_dev_mode.jpg) | ![Settings: version, protocol and device](docs/media/settings_about.jpg) |
-
----
-
-## Device support
-
-| Device | Face | IMU / status | World pose (0.2) | Face tracking (0.2) | GPS / env (0.3) |
-| --- | --- | --- | --- | --- | --- |
-| iPhone 12 and later | yes | yes | ARKit, back camera | front camera, concurrent with world tracking (A12+) | GNSS, barometer, magnetometer, compass |
-| iPad mini (5th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
-| iPad (7th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
-| Desktop simulator | yes | synthetic | synthetic | synthetic | synthetic |
 
 ---
 

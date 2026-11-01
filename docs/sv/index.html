@@ -39,9 +39,9 @@
           <h1>En telefon som robotens ansikte.</h1>
           <p class="lead">OpenHead gör en iPhone eller iPad till ett uttrycksfullt robothuvud. Din robot, ett Python-skript eller en AI-agent får det att le, se sig omkring, prata och visa saker, över ditt eget wifi.</p>
           <div class="buttons">
-            <a class="btn primary" href="https://apps.apple.com/app/id6829240049"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9s-2-.9-3.4-.9c-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8 2.3-1.3 3.1-2.5c1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>App Store</a>
+            <a class="store" href="https://apps.apple.com/app/id6829240049"><img src="../media/appstore-badge-sv.svg" alt="Ladda ned i App Store" height="50"></a>
             <button class="btn ghost" type="button" popovertarget="qr">QR-kod</button>
-            <a class="btn ghost" href="https://github.com/PatrikBichis/openhead">Se på GitHub</a>
+            <a class="btn ghost" href="https://github.com/PatrikBichis/openhead"><svg class="gh" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Se på GitHub</a>
           </div>
           <div id="qr" class="qr" popover>
             <img src="../media/appstore-qr.svg" width="264" height="264" alt="QR-kod som öppnar OpenHead Robot Face i App Store">
@@ -94,8 +94,8 @@
           </div>
           <div class="card">
             <div class="icon" aria-hidden="true">🙂</div>
-            <h3>Hittar människor</h3>
-            <p>Flera ansikten samtidigt, med riktning och storlek, 15 gånger i sekunden. Ögonen kan följa personen framför roboten.</p>
+            <h3>Ansiktsspårning</h3>
+            <p>Följer flera ansikten samtidigt, med riktning, storlek och plats på skärmen, 15 gånger i sekunden; med ARKit även avståndet. Robotens ögon följer personen framför den och håller ögonkontakt.</p>
           </div>
           <div class="card">
             <div class="icon" aria-hidden="true">🧭</div>
@@ -191,6 +191,23 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
           <figure style="margin:0"><img class="shot" style="background:#fcfcfb" src="../media/sensors/path.svg" alt="Telefonens väg sedd ovanifrån, från ARKit: en promenad på ungefär 8 meter" loading="lazy"></figure>
         </div>
         <p class="note">Data: <a href="../media/sensors/imu.csv">imu.csv</a> · <a href="../media/sensors/faces.csv">faces.csv</a> · <a href="../media/sensors/pose.csv">pose.csv</a> · fler diagram: <a href="../media/sensors/rotation.svg">rotationshastighet</a>, <a href="../media/sensors/position.svg">position över tid</a>.</p>
+        <h3 style="margin-top: 40px">Alla sensorer huvudet använder</h3>
+        <p class="sub" style="margin-bottom: 16px">En iPhone 12 har redan allt detta. OpenHead läser sensorerna och skickar resultaten; inget annat behöver kopplas in på roboten.</p>
+        <div style="overflow-x:auto">
+          <table class="data">
+            <thead><tr><th>Sensor</th><th>Vad OpenHead gör med den</th><th>Ström</th></tr></thead>
+            <tbody>
+              <tr><td>Frontkamera (TrueDepth)</td><td>ansiktsspårning: hittar flera ansikten; med ARKit följs ett ansikte med avstånd</td><td><code>faces</code>, kameravy</td></tr>
+              <tr><td>Bakre kamera</td><td>ARKit-spårning i rummet (visuell-inertiell SLAM): var huvudet är och hur det är vridet</td><td><code>pose</code></td></tr>
+              <tr><td>Accelerometer och gyroskop</td><td>orientering, rotationshastighet och acceleration enligt ROS; lutning på HUD:en</td><td><code>imu</code></td></tr>
+              <tr><td>Magnetometer</td><td>magnetfält och kompassriktning (geografisk nord med platsåtkomst)</td><td><code>env</code></td></tr>
+              <tr><td>Barometer</td><td>lufttryck och höjdförändring</td><td><code>env</code></td></tr>
+              <tr><td>GNSS: GPS, GLONASS, Galileo, QZSS, BeiDou</td><td>latitud, longitud, höjd, noggrannhet, hastighet och färdriktning</td><td><code>gps</code></td></tr>
+              <tr><td>Batteri och temperatur</td><td>batterinivå, laddning och temperaturläge</td><td><code>status</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Används inte: mikrofonen (robotens dator sköter ljudet), närhetssensorn (den släcker skärmen och skulle dölja ansiktet) och ljussensorn (inget öppet API). iPhone 12 har ingen LiDAR, och OpenHead behöver ingen.</p>
         <div style="overflow-x:auto; margin-top: 32px">
           <table class="data">
             <thead><tr><th>Ström</th><th>Takt</th><th>Fält</th><th>När</th></tr></thead>
@@ -302,7 +319,7 @@ openhead watch faces -n 5</pre>
       <nav aria-label="Sidfot">
         <a href="privacy.html">Integritetspolicy</a>
         <a href="support.html">Support</a>
-        <a href="https://github.com/PatrikBichis/openhead">GitHub</a>
+        <a class="ghlink" href="https://github.com/PatrikBichis/openhead"><svg class="gh" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
       </nav>
     </div>
   </footer>
