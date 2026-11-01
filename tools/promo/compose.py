@@ -241,11 +241,10 @@ def main():
     subprocess.run([ff, *base, "-c:v", "libx264", "-profile:v", "high", "-crf", "21",
                     "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
                     str(args.out)], check=True)
-    subprocess.run([ff, *base, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "34", "-row-mt", "1",
-                    "-pix_fmt", "yuv420p", str(args.out.with_suffix(".webm"))], check=True)
+    # H.264 only: plays everywhere, and the VP9 WebM this ffmpeg made failed to decode in Chromium.
     poster = Image.open(work / f"{int(3.5 * story.FPS):05d}.jpg")  # intro: the rig, the desk, the agent
     poster.save(args.out.with_name(args.out.stem + "-poster.jpg"), quality=88)
-    print(args.out, args.out.with_suffix(".webm"))
+    print(args.out)
 
 
 if __name__ == "__main__":
