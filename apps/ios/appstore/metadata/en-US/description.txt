@@ -2,6 +2,8 @@ OpenHead turns an iPhone or iPad into the face of a robot.
 
 Mount the phone in landscape on your robot, connect it to the same Wi-Fi as the robot's computer, and the robot can make the face smile, frown, look around, talk and show things. Anything that can open a WebSocket can drive it: a Python script, a robot's onboard computer, or an AI agent.
 
+The phone also gives the robot its cameras and sensors. Instead of wiring up a camera, an IMU and a tracking system, a robot builder gets face tracking, motion data and the head's position in the room from one device they already own, over the same connection.
+
 FACE
 • 28 expressions shared by every theme: happy, curious, thinking, surprised, sad, angry, sleepy, scared, confused, shocked, excited, bored, skeptical, worried, proud, laughing, nervous, smug and more.
 • Blend expressions, hold them for a moment, or layer a short reaction on top of a mood.
@@ -17,9 +19,16 @@ PICTURES, VIDEO AND WEB PAGES
 • Show an image (PNG, JPEG, GIF including animated, WebP, SVG), a video or a web page full screen, or keep the face running in a corner while it shows.
 • Files on the robot's computer are sent straight to the head over your network.
 
-SENSORS AND STATUS
+CAMERAS AND HUD
+• Show the front camera with a sci-fi heads-up display over it: boxes around faces, a locked target, compass, artificial horizon, battery and temperature. Four HUD themes, and the robot can add its own values, text and instruments.
+• Faces: the robot gets each person's bearing, elevation and size 15 times a second, and the eyes can follow them.
+• Screenshots of what the head shows, camera view included.
+
+POSITION AND SENSORS
+• World pose from ARKit (visual-inertial SLAM): the head's position in metres and its orientation in the room, up to 60 times a second, with tracking state. Distance to a face in sensing mode.
 • Motion sensor stream (orientation, rotation, acceleration) up to 100 times a second, in the robot's conventions.
 • Battery, temperature state and connected clients.
+• Camera images are processed on the phone and never stored or sent anywhere.
 
 SAFE ON YOUR NETWORK
 • A controller must be paired with a 6-digit code shown on the screen; each one gets its own token, which you can revoke in settings.

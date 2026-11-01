@@ -1,1 +1,1 @@
-Robot face with camera & HUD
+Robot face, cameras & sensors

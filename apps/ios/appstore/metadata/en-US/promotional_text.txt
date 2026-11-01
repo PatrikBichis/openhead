@@ -1,1 +1,1 @@
-Give your robot a face: 28 expressions, a mouth that talks and subtitles. New: camera view with a sci-fi HUD, face tracking and ARKit position. Open source.
+Skip the sensor wiring: your robot gets a face plus the phone's camera, face tracking, motion sensors and ARKit world pose (SLAM) over Wi-Fi. Open source.

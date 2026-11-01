@@ -1,1 +1,1 @@
-robotics,head,animatronic,emotion,expression,ROS,python,AI,MCP,maker,subtitles,tracking,ARKit,sci-fi
+robotics,head,animatronic,emotion,ROS,python,AI,MCP,maker,subtitles,HUD,tracking,ARKit,SLAM,IMU,pose
