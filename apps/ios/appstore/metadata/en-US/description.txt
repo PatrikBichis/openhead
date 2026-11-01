@@ -2,7 +2,7 @@ OpenHead turns an iPhone or iPad into the face of a robot.
 
 Mount the phone in landscape on your robot, connect it to the same Wi-Fi as the robot's computer, and the robot can make the face smile, frown, look around, talk and show things. Anything that can open a WebSocket can drive it: a Python script, a robot's onboard computer, or an AI agent.
 
-The phone also gives the robot its cameras and sensors. Instead of wiring up a camera, an IMU and a tracking system, a robot builder gets face tracking, motion data and the head's position in the room from one device they already own, over the same connection.
+The phone also gives the robot its cameras and sensors. Instead of wiring up a camera, an IMU and a tracking system, a robot builder gets face tracking, motion data, GPS, a barometer, a compass and the head's position in the room from one device they already own, over the same connection.
 
 FACE
 • 28 expressions shared by every theme: happy, curious, thinking, surprised, sad, angry, sleepy, scared, confused, shocked, excited, bored, skeptical, worried, proud, laughing, nervous, smug and more.
@@ -27,8 +27,10 @@ CAMERAS AND HUD
 POSITION AND SENSORS
 • World pose from ARKit (visual-inertial SLAM): the head's position in metres and its orientation in the room, up to 60 times a second, with tracking state. Distance to a face in sensing mode.
 • Motion sensor stream (orientation, rotation, acceleration) up to 100 times a second, in the robot's conventions.
+• GPS: latitude, longitude, altitude, accuracy, speed and course once a second, after you allow location access.
+• Barometer (air pressure, altitude change), magnetometer and compass heading up to 10 times a second.
 • Battery, temperature state and connected clients.
-• Camera images are processed on the phone and never stored or sent anywhere.
+• Camera images are processed on the phone and never stored or sent anywhere. Location and sensor readings go only to the robot controllers you paired, on your network.
 
 SAFE ON YOUR NETWORK
 • A controller must be paired with a 6-digit code shown on the screen; each one gets its own token, which you can revoke in settings.

@@ -1,1 +1,1 @@
-Skip the sensor wiring: your robot gets a face plus the phone's camera, face tracking, motion sensors and ARKit world pose (SLAM) over Wi-Fi. Open source.
+Skip the sensor wiring: your robot gets a face plus the phone's camera, face tracking, GPS, compass, barometer and ARKit world pose (SLAM) over Wi-Fi. Open source.

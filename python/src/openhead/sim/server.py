@@ -35,11 +35,12 @@ from .shots import ShotServer
 
 log = logging.getLogger("openhead.sim")
 
-DEVICE_MESSAGES = {"ack", "error", "welcome", "pair_required", "imu", "status", "log"}
+DEVICE_MESSAGES = {"ack", "error", "welcome", "pair_required", "imu", "status", "log", "faces",
+                   "pose", "gps", "env"}
 CAPABILITIES = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
-                "status", "log", "screenshot", "camera", "faces", "pose"]
+                "status", "log", "screenshot", "camera", "faces", "pose", "gps", "env"]
 TOPIC_RATES = {"imu": (50.0, 100.0), "status": (1.0, 1.0), "log": (0.0, 0.0),  # default, max
-               "faces": (15.0, 15.0), "pose": (30.0, 60.0)}
+               "faces": (15.0, 15.0), "pose": (30.0, 60.0), "gps": (1.0, 1.0), "env": (10.0, 10.0)}
 LOG_LEVELS = ["debug", "info", "notice", "warning", "error", "fault"]
 PAIR_MAX_FAILURES = 5
 PAIR_LOCK_S = 300
@@ -439,7 +440,8 @@ class SimServer:
                         "uptime_s": round(time.monotonic() - self.started, 1),
                         "thermal_state": "nominal", "memory_mb": 0, "frame_rate": 60,
                         "permissions": {"local_network": "not_required",
-                                        "motion": "not_required", "camera": "not_required"},
+                                        "motion": "not_required", "camera": "not_required",
+                                        "location": "not_required", "motion_fitness": "not_required"},
                         "arkit": {"world_tracking": False, "face_tracking": False},
                     }
                 case "system.settings":
@@ -473,6 +475,10 @@ class SimServer:
             task = asyncio.create_task(self._stream(s, "faces", rate, fields, self._faces))
         elif topic == "pose":
             task = asyncio.create_task(self._stream(s, "pose", rate, fields, self._pose))
+        elif topic in ("gps", "env"):
+            sample = scene.gps_at if topic == "gps" else scene.env_at
+            task = asyncio.create_task(self._stream(
+                s, topic, rate, fields, lambda _s, f=sample: self._sensor(f)))
         s.subs[topic] = (task, fields)
         return {"topic": topic, "rate_hz": rate}
 
@@ -487,6 +493,9 @@ class SimServer:
 
     async def _pose(self, s: Session) -> dict | None:
         return scene.pose_at(time.monotonic() - self.mode_started) if self.mode == "sensing" else None
+
+    async def _sensor(self, sample) -> dict:
+        return sample(time.monotonic() - self.started)
 
     async def _set_mode(self, mode: str) -> None:
         """capture: synthetic people with boxes; sensing: one face without a box, plus pose."""

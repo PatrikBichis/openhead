@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "OpenHeadProtocol",
-  "description": "All OpenHead protocol 0.2.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
+  "description": "All OpenHead protocol 0.3.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
   "$defs": {
     "Ack": {
       "title": "Ack",
@@ -110,9 +110,11 @@
         "status",
         "log",
         "faces",
-        "pose"
+        "pose",
+        "gps",
+        "env"
       ],
-      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later."
+      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use."
     },
     "CommonUnit": {
       "title": "CommonUnit",
@@ -365,6 +367,89 @@
         "type"
       ],
       "unevaluatedProperties": false
+    },
+    "Env": {
+      "title": "Env",
+      "description": "Barometer, magnetometer and compass, up to 10 Hz. A field is left out when the device lacks the sensor or has no reading yet; the barometer needs Motion & Fitness access, which the first subscription asks for. Magnetic field in the `imu` device frame (+x right, +y up, +z out of the screen, portrait). Every available field is present unless the subscription named `fields`.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/EnvFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "env"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "EnvFields": {
+      "title": "EnvFields",
+      "type": "object",
+      "properties": {
+        "pressure_kpa": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Air pressure in kilopascals."
+        },
+        "relative_altitude_m": {
+          "type": "number",
+          "description": "Change in altitude in metres since the barometer started (this subscription or an earlier one still running)."
+        },
+        "magnetic_field_ut": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Raw magnetic field in microtesla, device frame; includes the device's own bias."
+        },
+        "heading_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "Compass heading of the screen's top edge as the head is mounted (landscape), degrees clockwise from north."
+        },
+        "heading_ref": {
+          "type": "string",
+          "enum": [
+            "true",
+            "magnetic"
+          ],
+          "description": "`true` north needs location access; otherwise magnetic north."
+        },
+        "heading_accuracy_deg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum heading error in degrees."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Seconds since device boot (the clock of `imu`)."
+        }
+      }
+    },
+    "EnvPayload": {
+      "title": "EnvPayload",
+      "type": "object",
+      "description": "Payload when the subscription names no `fields`: every reading the device has.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/EnvFields"
+        }
+      ],
+      "required": [
+        "sensor_time_s"
+      ]
     },
     "Envelope": {
       "title": "Envelope",
@@ -1047,6 +1132,92 @@
         "sensor_time_s"
       ]
     },
+    "Gps": {
+      "title": "Gps",
+      "description": "Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). Sent only after the user allows location access; the first subscription asks. WGS 84. Every payload field is present unless the subscription named `fields`; `alt_m`, `v_accuracy_m`, `speed_m_s` and `course_deg` are left out when unknown.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "$ref": "#/$defs/GpsFields"
+        }
+      ],
+      "properties": {
+        "type": {
+          "const": "gps"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "GpsFields": {
+      "title": "GpsFields",
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Latitude in degrees, + north."
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Longitude in degrees, + east."
+        },
+        "alt_m": {
+          "type": "number",
+          "description": "Altitude above mean sea level in metres."
+        },
+        "h_accuracy_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Radius of horizontal uncertainty in metres (68 %)."
+        },
+        "v_accuracy_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Vertical uncertainty in metres."
+        },
+        "speed_m_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Ground speed in m/s."
+        },
+        "course_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "Direction of travel, degrees clockwise from true north."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "When the fix was taken, seconds since device boot (the clock of `imu`)."
+        }
+      }
+    },
+    "GpsPayload": {
+      "title": "GpsPayload",
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/GpsFields"
+        }
+      ],
+      "required": [
+        "lat",
+        "lon",
+        "h_accuracy_m",
+        "sensor_time_s"
+      ]
+    },
     "Hello": {
       "title": "Hello",
       "description": "First message on a new connection. Without a valid token the device answers `pair_required`; with one it answers `welcome`. The major version must match the device's.",
@@ -1085,7 +1256,7 @@
     },
     "Hud": {
       "title": "Hud",
-      "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.",
+      "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}, {lat} {lon} {alt} {gps_acc} (while `gps` runs), {pressure} hPa (while `env` runs). Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.",
       "type": "object",
       "properties": {
         "name": {
@@ -1942,6 +2113,14 @@
             },
             "camera": {
               "$ref": "#/$defs/SystemDiagnosticsPermission"
+            },
+            "location": {
+              "$ref": "#/$defs/SystemDiagnosticsPermission",
+              "description": "For `gps` and true-north heading; absent from 0.2 devices."
+            },
+            "motion_fitness": {
+              "$ref": "#/$defs/SystemDiagnosticsPermission",
+              "description": "For the barometer in `env`; absent from 0.2 devices."
             }
           },
           "required": [
@@ -2547,7 +2726,7 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9_.-]*$"
           },
-          "description": "Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them). Clients ignore unknown values."
+          "description": "Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`. Clients ignore unknown values."
         },
         "themes": {
           "type": "array",

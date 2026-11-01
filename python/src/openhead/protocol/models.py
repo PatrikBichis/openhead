@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
 class OpenHeadProtocol(RootModel[Any]):
     root: Any = Field(..., title="OpenHeadProtocol")
     """
-    All OpenHead protocol 0.2.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
+    All OpenHead protocol 0.3.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
     """
 
 
@@ -18,6 +18,54 @@ class CommonName(RootModel[str]):
     root: str = Field(..., pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName")
     """
     Lower-case identifier used for themes and emotions.
+    """
+
+
+class EnvFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    pressure_kpa: float | None = Field(None, ge=0.0)
+    """
+    Air pressure in kilopascals.
+    """
+    relative_altitude_m: float | None = None
+    """
+    Change in altitude in metres since the barometer started (this subscription or an earlier one still running).
+    """
+    magnetic_field_ut: list[float] | None = Field(None, max_length=3, min_length=3)
+    """
+    Raw magnetic field in microtesla, device frame; includes the device's own bias.
+    """
+    heading_deg: float | None = Field(None, ge=0.0, le=360.0)
+    """
+    Compass heading of the screen's top edge as the head is mounted (landscape), degrees clockwise from north.
+    """
+    heading_ref: Literal["true", "magnetic"] | None = None
+    """
+    `true` north needs location access; otherwise magnetic north.
+    """
+    heading_accuracy_deg: float | None = Field(None, ge=0.0)
+    """
+    Maximum heading error in degrees.
+    """
+    sensor_time_s: float | None = Field(None, ge=0.0)
+    """
+    Seconds since device boot (the clock of `imu`).
+    """
+
+
+class EnvPayload(EnvFields):
+    """
+    Payload when the subscription names no `fields`: every reading the device has.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    sensor_time_s: float = Field(..., ge=0.0)
+    """
+    Seconds since device boot (the clock of `imu`).
     """
 
 
@@ -229,6 +277,70 @@ class FacesPayload(FacesFields):
     faces: list[FacesFace] = Field(..., max_length=16)
     source: Literal["vision", "arkit", "sim"]
     sensor_time_s: float = Field(..., ge=0.0)
+
+
+class GpsFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    lat: float | None = Field(None, ge=-90.0, le=90.0)
+    """
+    Latitude in degrees, + north.
+    """
+    lon: float | None = Field(None, ge=-180.0, le=180.0)
+    """
+    Longitude in degrees, + east.
+    """
+    alt_m: float | None = None
+    """
+    Altitude above mean sea level in metres.
+    """
+    h_accuracy_m: float | None = Field(None, ge=0.0)
+    """
+    Radius of horizontal uncertainty in metres (68 %).
+    """
+    v_accuracy_m: float | None = Field(None, ge=0.0)
+    """
+    Vertical uncertainty in metres.
+    """
+    speed_m_s: float | None = Field(None, ge=0.0)
+    """
+    Ground speed in m/s.
+    """
+    course_deg: float | None = Field(None, ge=0.0, le=360.0)
+    """
+    Direction of travel, degrees clockwise from true north.
+    """
+    sensor_time_s: float | None = Field(None, ge=0.0)
+    """
+    When the fix was taken, seconds since device boot (the clock of `imu`).
+    """
+
+
+class GpsPayload(GpsFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    lat: float = Field(..., ge=-90.0, le=90.0)
+    """
+    Latitude in degrees, + north.
+    """
+    lon: float = Field(..., ge=-180.0, le=180.0)
+    """
+    Longitude in degrees, + east.
+    """
+    h_accuracy_m: float = Field(..., ge=0.0)
+    """
+    Radius of horizontal uncertainty in metres (68 %).
+    """
+    sensor_time_s: float = Field(..., ge=0.0)
+    """
+    When the fix was taken, seconds since device boot (the clock of `imu`).
+    """
 
 
 class Hello(Envelope):
@@ -584,11 +696,11 @@ class SubscribeResult(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    topic: Literal["imu", "status", "log", "faces", "pose"] = Field(
+    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env"] = Field(
         ..., title="CommonTopic"
     )
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
     """
     rate_hz: float = Field(..., ge=0.0)
     """
@@ -609,6 +721,18 @@ class DiagnosticsPermissions(BaseModel):
     camera: Literal["granted", "denied", "not_determined", "not_required"] = Field(
         ..., title="SystemDiagnosticsPermission"
     )
+    location: Literal["granted", "denied", "not_determined", "not_required"] | None = (
+        Field(None, title="SystemDiagnosticsPermission")
+    )
+    """
+    For `gps` and true-north heading; absent from 0.2 devices.
+    """
+    motion_fitness: (
+        Literal["granted", "denied", "not_determined", "not_required"] | None
+    ) = Field(None, title="SystemDiagnosticsPermission")
+    """
+    For the barometer in `env`; absent from 0.2 devices.
+    """
 
 
 class DiagnosticsArkit(BaseModel):
@@ -971,6 +1095,20 @@ class DisplaySubtitle(Command):
     """
 
 
+class Env(Envelope, EnvFields):
+    """
+    Barometer, magnetometer and compass, up to 10 Hz. A field is left out when the device lacks the sensor or has no reading yet; the barometer needs Motion & Fitness access, which the first subscription asks for. Magnetic field in the `imu` device frame (+x right, +y up, +z out of the screen, portrait). Every available field is present unless the subscription named `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["env"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
 class Expressions(BaseModel):
     """
     A theme's `expressions.json`: a face parameter preset per shared emotion name, plus theme-specific ones under `extra`. Only `neutral` is required and must set every parameter; missing shared names fall back to it. Parameters a preset leaves out keep the neutral value.
@@ -1157,6 +1295,20 @@ class Faces(Envelope, FacesFields):
     """
 
 
+class Gps(Envelope, GpsFields):
+    """
+    Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). Sent only after the user allows location access; the first subscription asks. WGS 84. Every payload field is present unless the subscription named `fields`; `alt_m`, `v_accuracy_m`, `speed_m_s` and `course_deg` are left out when unknown.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["gps"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
 class Tint(BaseModel):
     """
     Colour laid over the camera image (works over a native camera view too).
@@ -1319,11 +1471,11 @@ class Subscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log", "faces", "pose"] = Field(
+    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env"] = Field(
         ..., title="CommonTopic"
     )
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
     """
     rate_hz: float | None = Field(None, gt=0.0, le=1000.0)
     """
@@ -1583,11 +1735,11 @@ class Unsubscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log", "faces", "pose"] = Field(
+    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env"] = Field(
         ..., title="CommonTopic"
     )
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
     """
 
 
@@ -1634,7 +1786,7 @@ class DisplayHud(Command):
 
 class Hud(BaseModel):
     """
-    A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.
+    A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}, {lat} {lon} {alt} {gps_acc} (while `gps` runs), {pressure} hPa (while `env` runs). Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.
     """
 
     model_config = ConfigDict(
@@ -1728,7 +1880,7 @@ class Welcome(Envelope):
     device: WelcomeDevice
     capabilities: list[str]
     """
-    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them). Clients ignore unknown values.
+    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`. Clients ignore unknown values.
     """
     themes: list[str]
     dev_mode: bool

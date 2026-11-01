@@ -14,6 +14,7 @@ extension LinkServer {
                 sub.timer?.invalidate()
                 if topic == "imu" { model.motion.unsubscribe(session.id) }
                 if topic == "log" { model.logs.listeners[session.id] = nil }
+                model.stopSensor(topic, session.id)
             }
             return nil
 
@@ -181,6 +182,7 @@ extension LinkServer {
         let fields = m["fields"] as? [String]
         if let old = session.subscriptions.removeValue(forKey: topic) {
             old.timer?.invalidate()
+            model.stopSensor(topic, session.id)
         }
         func filtered(_ payload: JSONObject) -> JSONObject {
             guard let fields else { return payload }
@@ -203,6 +205,24 @@ extension LinkServer {
                     guard let self, let session else { return }
                     let payload = topic == "faces" ? self.model.facesPayload : self.model.ar.latestPose
                     if let payload { session.send(topic, filtered(payload)) }  // nothing in other modes
+                }
+            }
+            session.subscriptions[topic] = (fields, timer)
+            return ["topic": topic, "rate_hz": rate]
+        case "gps", "env":
+            let rate = topic == "gps" ? min(m.double("rate_hz") ?? 1, 1) : min(m.double("rate_hz") ?? 10, 10)
+            if topic == "gps" {
+                model.location.start(session.id)
+            } else {
+                model.env.start(session.id)
+                model.heading.start(session.id.uuidString)
+            }
+            let timer = Timer.scheduledTimer(withTimeInterval: 1 / rate, repeats: true) { [weak self, weak session] _ in
+                MainActor.assumeIsolated {
+                    guard let self, let session else { return }
+                    let payload = topic == "gps" ? self.model.location.latest
+                                                 : self.model.env.payload(heading: self.model.heading)
+                    if let payload { session.send(topic, filtered(payload)) }  // nothing before the first reading
                 }
             }
             session.subscriptions[topic] = (fields, timer)

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Hud",
-  "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.",
+  "description": "A HUD theme (`face/huds/<name>/hud.json`): what is drawn over the camera view. Text lines are templates. Built in: {faces} faces seen, {target} locked face id or NONE, {status} LOCKED or SEARCHING, {id} {conf} {bearing} {elevation} {size} of the locked face, {frame} frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical, {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y} {z} position in metres and {tracking} (mode sensing), {mode}, {clients}, {lat} {lon} {alt} {gps_acc} (while `gps` runs), {pressure} hPa (while `env` runs). Hosts add their own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names show as `-`.",
   "type": "object",
   "properties": {
     "name": {

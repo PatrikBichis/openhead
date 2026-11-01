@@ -1,6 +1,6 @@
 // Generated from protocol/schema by tools/protocol.py (quicktype). Do not edit.
 
-public let protocolVersion = "0.2.0"
+public let protocolVersion = "0.3.0"
 
 /// Message `type` to its generated model.
 public let messageTypes: [String: any Codable.Type] = [
@@ -9,6 +9,7 @@ public let messageTypes: [String: any Codable.Type] = [
     "display.hud": DisplayHud.self,
     "display.show": DisplayShow.self,
     "display.subtitle": DisplaySubtitle.self,
+    "env": Env.self,
     "error": ProtocolError.self,
     "face.blink": FaceBlink.self,
     "face.envelope": FaceEnvelope.self,
@@ -17,6 +18,7 @@ public let messageTypes: [String: any Codable.Type] = [
     "face.set_emotion": FaceSetEmotion.self,
     "face.set_theme": FaceSetTheme.self,
     "faces": Faces.self,
+    "gps": Gps.self,
     "hello": Hello.self,
     "imu": Imu.self,
     "log": Log.self,

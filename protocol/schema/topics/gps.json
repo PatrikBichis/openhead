@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gps",
+  "description": "Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). Sent only after the user allows location access; the first subscription asks. WGS 84. Every payload field is present unless the subscription named `fields`; `alt_m`, `v_accuracy_m`, `speed_m_s` and `course_deg` are left out when unknown.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "gps"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "fields": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Latitude in degrees, + north."
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Longitude in degrees, + east."
+        },
+        "alt_m": {
+          "type": "number",
+          "description": "Altitude above mean sea level in metres."
+        },
+        "h_accuracy_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Radius of horizontal uncertainty in metres (68 %)."
+        },
+        "v_accuracy_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Vertical uncertainty in metres."
+        },
+        "speed_m_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Ground speed in m/s."
+        },
+        "course_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "Direction of travel, degrees clockwise from true north."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "When the fix was taken, seconds since device boot (the clock of `imu`)."
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
+      "required": [
+        "lat",
+        "lon",
+        "h_accuracy_m",
+        "sensor_time_s"
+      ]
+    }
+  }
+}

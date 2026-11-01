@@ -101,8 +101,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("mode", parents=[common], help="show or set who owns the cameras")
     p.add_argument("mode", nargs="?", choices=["idle", "capture", "sensing"])
 
-    p = sub.add_parser("watch", parents=[common], help="print a stream: faces, pose, imu or status")
-    p.add_argument("topic", choices=["faces", "pose", "imu", "status"])
+    p = sub.add_parser("watch", parents=[common], help="print a stream: faces, pose, gps, env, imu or status")
+    p.add_argument("topic", choices=["faces", "pose", "gps", "env", "imu", "status"])
     p.add_argument("--rate", type=float)
     p.add_argument("-n", type=int, default=0, help="stop after n messages (0: until Ctrl+C)")
 

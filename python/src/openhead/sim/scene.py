@@ -1,4 +1,4 @@
-"""Synthetic people and pose for the simulator's camera modes (protocol 0.2).
+"""Synthetic people, pose, location and environment for the simulator (protocols 0.2, 0.3).
 
 Two people in front of the head: one walks slowly from side to side, the other comes and
 goes. The camera view is mirrored, like a selfie, so a person to the head's left (+bearing)
@@ -44,7 +44,7 @@ def hud_values(t: float, mode: str, clients: int) -> dict:
     """What a phone reports to the HUD: battery, thermal state, heading, tilt, position."""
     # The same slow look-around as the synthetic IMU (yaw, pitch, roll), seen from the front.
     values = {"battery": 87, "charging": False, "thermal": "nominal",
-              "heading": round((90 + math.degrees(0.35 * math.sin(0.5 * t))) % 360, 1),
+              "heading": heading_at(t),
               "pitch": round(math.degrees(0.12 * math.sin(0.31 * t + 1)), 1),
               "roll": round(math.degrees(0.04 * math.sin(0.73 * t)), 1),
               "mode": mode, "clients": clients}
@@ -52,6 +52,9 @@ def hud_values(t: float, mode: str, clients: int) -> dict:
         pose = pose_at(t)
         values.update(zip("xyz", pose["position"]))
         values["tracking"] = pose["tracking_state"]
+    gps = gps_at(t)
+    values.update(lat=gps["lat"], lon=gps["lon"], alt=gps["alt_m"], gps_acc=gps["h_accuracy_m"],
+                  pressure=round(env_at(t)["pressure_kpa"] * 10, 1))
     return values
 
 
@@ -70,3 +73,36 @@ def pose_at(t: float) -> dict:
     if state == "limited":
         pose["tracking_reason"] = "initializing"
     return pose
+
+
+HOME = (59.32747, 18.05443, 14.0)  # a park bench in Stockholm; lat, lon, metres above sea level
+
+
+def gps_at(t: float) -> dict:
+    """A walk on a 20 m circle around HOME, one lap in 5 minutes."""
+    w = 2 * math.pi / 300
+    north, east = 20 * math.sin(w * t), 20 * (1 - math.cos(w * t))
+    lat = HOME[0] + north / 111_320
+    lon = HOME[1] + east / (111_320 * math.cos(math.radians(HOME[0])))
+    course = math.degrees(math.atan2(math.sin(w * t), math.cos(w * t))) % 360
+    return {"lat": round(lat, 7), "lon": round(lon, 7), "alt_m": round(HOME[2] + 0.5 * math.sin(w * t), 1),
+            "h_accuracy_m": 4.7, "v_accuracy_m": 3.1, "speed_m_s": round(20 * w, 2),
+            "course_deg": round(course, 1), "sensor_time_s": round(t, 3)}
+
+
+def env_at(t: float) -> dict:
+    """Barometer that follows the walk's altitude, Earth's field in Stockholm, compass heading."""
+    heading = heading_at(t)
+    rel = 0.5 * math.sin(2 * math.pi / 300 * t)
+    h = math.radians(heading)
+    # About 50 uT, 72 degrees down; horizontal part along the screen as the head turns.
+    horizontal, down = 15.5, 47.6
+    return {"pressure_kpa": round(101.325 - rel * 0.012, 4), "relative_altitude_m": round(rel, 2),
+            "magnetic_field_ut": [round(-horizontal * math.sin(h), 2), round(horizontal * math.cos(h), 2),
+                                  round(-down, 2)],
+            "heading_deg": heading, "heading_ref": "true", "heading_accuracy_deg": 10.0,
+            "sensor_time_s": round(t, 3)}
+
+
+def heading_at(t: float) -> float:
+    return round((90 + math.degrees(0.35 * math.sin(0.5 * t))) % 360, 1)

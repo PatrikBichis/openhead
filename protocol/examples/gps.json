@@ -1,0 +1,13 @@
+{
+  "type": "gps",
+  "ts": 1793462400000,
+  "seq": 51,
+  "lat": 59.32747,
+  "lon": 18.05443,
+  "alt_m": 14.2,
+  "h_accuracy_m": 4.7,
+  "v_accuracy_m": 3.1,
+  "speed_m_s": 0.6,
+  "course_deg": 212.4,
+  "sensor_time_s": 81240.1
+}

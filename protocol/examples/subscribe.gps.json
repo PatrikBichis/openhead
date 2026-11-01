@@ -1,0 +1,8 @@
+{
+  "type": "subscribe",
+  "ts": 1793462400000,
+  "seq": 10,
+  "id": "s-2",
+  "topic": "gps",
+  "rate_hz": 1
+}

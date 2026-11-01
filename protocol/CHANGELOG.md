@@ -2,6 +2,19 @@
 
 All changes to `protocol/schema` are recorded here, in the same commit as the change. The protocol follows [semver](https://semver.org) from 0.1.0; until 0.1.0 is tagged anything may change.
 
+## 0.3.0 (2026-11-01)
+
+### Added
+
+- Topic `gps` (1 Hz): latitude, longitude, altitude, horizontal and vertical accuracy, speed, course, sensor time. The first subscription asks for location access.
+- Topic `env` (10 Hz): air pressure and relative altitude (barometer), raw magnetic field (magnetometer), compass heading with true/magnetic reference and accuracy. The barometer asks for Motion & Fitness access.
+- Capabilities `gps` and `env` in `welcome`; `location` and `motion_fitness` in `system.diagnostics` permissions (optional, absent from 0.2 devices).
+- HUD templates `{lat}`, `{lon}`, `{alt}`, `{gps_acc}` while `gps` runs and `{pressure}` (hPa) while `env` runs.
+
+### Notes
+
+- Sensors are those of an iPhone 12. The proximity sensor is left out: turning it on blanks the screen when something is near, which would hide the face. The ambient light sensor has no public API.
+
 ## 0.2.0 (2026-11-01)
 
 ### Added

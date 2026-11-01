@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from . import models
 
-PROTOCOL_VERSION = "0.2.0"
+PROTOCOL_VERSION = "0.3.0"
 
 MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "ack": models.Ack,
@@ -13,6 +13,7 @@ MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "display.hud": models.DisplayHud,
     "display.show": models.DisplayShow,
     "display.subtitle": models.DisplaySubtitle,
+    "env": models.Env,
     "error": models.Error,
     "face.blink": models.FaceBlink,
     "face.envelope": models.FaceEnvelope,
@@ -21,6 +22,7 @@ MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "face.set_emotion": models.FaceSetEmotion,
     "face.set_theme": models.FaceSetTheme,
     "faces": models.Faces,
+    "gps": models.Gps,
     "hello": models.Hello,
     "imu": models.Imu,
     "log": models.Log,

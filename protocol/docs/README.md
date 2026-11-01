@@ -1,6 +1,6 @@
 # OpenHead protocol reference
 
-Protocol version 0.2.0. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
+Protocol version 0.3.0. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
 
 | Type | Schema | Description |
 | --- | --- | --- |
@@ -9,6 +9,7 @@ Protocol version 0.2.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `display.hud` | [DisplayHud](commands/display.hud.md) | Put your own information on the camera view's HUD, on top of the theme. |
 | `display.show` | [DisplayShow](commands/display.show.md) | Change what fills the screen. |
 | `display.subtitle` | [DisplaySubtitle](commands/display.subtitle.md) | Text on top of whatever is shown (face, image, video, web page): for a robot without a speaker, or to show an AI answer as it streams in. |
+| `env` | [Env](topics/env.md) | Barometer, magnetometer and compass, up to 10 Hz. |
 | `error` | [Error](messages/error.md) | Failed command (with `id`) or failed handshake (without). |
 | `face.blink` | [FaceBlink](commands/face.blink.md) | Blink once now, in the theme's blink style. |
 | `face.envelope` | [FaceEnvelope](commands/face.envelope.md) | Mouth envelope from the host's speech audio, sent as a stream at 20-30 Hz while speaking. |
@@ -17,6 +18,7 @@ Protocol version 0.2.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `face.set_emotion` | [FaceSetEmotion](commands/face.set_emotion.md) | Blend towards an emotion, independently of speech (the mouth envelope is added on top). |
 | `face.set_theme` | [FaceSetTheme](commands/face.set_theme.md) | Switch the face to an installed theme. |
 | `faces` | [Faces](topics/faces.md) | People in front of the head, up to 15 Hz while mode is `capture` (front camera, several faces, with `box`) or `sensing` (ARKit, one face, no `box`). |
+| `gps` | [Gps](topics/gps.md) | Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it, otherwise Wi-Fi). |
 | `hello` | [Hello](messages/hello.md) | First message on a new connection. |
 | `imu` | [Imu](topics/imu.md) | Inertial sample, up to 100 Hz. |
 | `log` | [Log](topics/log.md) | One structured log line, sent as it happens. |

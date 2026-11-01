@@ -35,7 +35,8 @@ Controls an OpenHead robot head: a phone showing an expressive face.
 - Show things: show_image and show_video (URL or local file), show_web (URL), show_camera
   (what the head sees, with a HUD), show_face to go back.
 - Sense people and place: set_mode capture (camera, several faces) or sensing (ARKit pose and
-  one face); get_faces, get_pose; look_at_face makes the eyes follow someone. subtitle writes text on screen (append to stream an answer; mouth=True to "speak").
+  one face); get_faces, get_pose; look_at_face makes the eyes follow someone. get_location
+  (GPS) and get_environment (air pressure, magnetic field, compass) work in any mode. subtitle writes text on screen (append to stream an answer; mouth=True to "speak").
 - Check your work: take_screenshot shows what is on screen; tail_logs and get_status explain
   what happened; wait_for blocks until a status or log condition holds.
 - Screenshots, logs and diagnostics need dev mode on the device.
@@ -239,6 +240,33 @@ def build_server(link: HeadLink) -> MCPServer:
             return await asyncio.wait_for(first(), timeout_s)
         except TimeoutError as exc:
             raise ToolError("no pose: is the mode sensing? (set_mode)") from exc
+
+    async def first_sample(topic: str, rate: float, timeout_s: float, hint: str) -> dict:
+        head = await link.get()
+
+        async def first() -> dict:
+            async with head.subscribe(topic, rate) as sub:
+                async for msg in sub:
+                    return msg.model_dump(exclude_none=True, exclude={"type", "seq"})
+            raise ToolError("subscription ended")
+
+        try:
+            return await asyncio.wait_for(first(), timeout_s)
+        except TimeoutError as exc:
+            raise ToolError(hint) from exc
+
+    @mcp.tool(annotations=READ_ONLY)
+    async def get_location(timeout_s: float = 10.0) -> dict:
+        """Where the head is on Earth: lat, lon (degrees), alt_m, h_accuracy_m, speed and course.
+        The first call asks the user on the device to allow location access."""
+        return await first_sample("gps", 1, timeout_s,
+                                  "no location yet: allow location access on the device, or wait for a fix")
+
+    @mcp.tool(annotations=READ_ONLY)
+    async def get_environment(timeout_s: float = 3.0) -> dict:
+        """Air pressure (kPa) and altitude change, raw magnetic field (uT) and compass heading
+        (degrees from north) from the head's barometer, magnetometer and compass."""
+        return await first_sample("env", 10, timeout_s, "no environment data: the device may lack these sensors")
 
     @mcp.tool(annotations=CHANGES_FACE)
     async def show_image(url_or_path: str,

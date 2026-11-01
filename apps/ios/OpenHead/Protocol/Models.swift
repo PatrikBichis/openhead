@@ -15,6 +15,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let displayHud: DisplayHud?
     public let displayShow: DisplayShow?
     public let displaySubtitle: DisplaySubtitle?
+    public let env: Env?
+    public let envFields: EnvFields?
+    public let envPayload: EnvPayload?
     public let faceBlink: FaceBlink?
     public let faceEnvelope: FaceEnvelope?
     public let faceList: FaceList?
@@ -29,6 +32,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let facesFace: FacesFace?
     public let facesFields: FacesFields?
     public let facesPayload: FacesPayload?
+    public let gps: Gps?
+    public let gpsFields: GpsFields?
+    public let gpsPayload: GpsPayload?
     public let hello: Hello?
     public let hud: Hud?
     public let hudBlock: HudBlock?
@@ -74,6 +80,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case displayHud = "DisplayHud"
         case displayShow = "DisplayShow"
         case displaySubtitle = "DisplaySubtitle"
+        case env = "Env"
+        case envFields = "EnvFields"
+        case envPayload = "EnvPayload"
         case faceBlink = "FaceBlink"
         case faceEnvelope = "FaceEnvelope"
         case faceList = "FaceList"
@@ -88,6 +97,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case facesFace = "FacesFace"
         case facesFields = "FacesFields"
         case facesPayload = "FacesPayload"
+        case gps = "Gps"
+        case gpsFields = "GpsFields"
+        case gpsPayload = "GpsPayload"
         case hello = "Hello"
         case hud = "Hud"
         case hudBlock = "HudBlock"
@@ -128,12 +140,15 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, env: Env?, envFields: EnvFields?, envPayload: EnvPayload?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, gps: Gps?, gpsFields: GpsFields?, gpsPayload: GpsPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
         self.displayHud = displayHud
         self.displayShow = displayShow
         self.displaySubtitle = displaySubtitle
+        self.env = env
+        self.envFields = envFields
+        self.envPayload = envPayload
         self.faceBlink = faceBlink
         self.faceEnvelope = faceEnvelope
         self.faceList = faceList
@@ -148,6 +163,9 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.facesFace = facesFace
         self.facesFields = facesFields
         self.facesPayload = facesPayload
+        self.gps = gps
+        self.gpsFields = gpsFields
+        self.gpsPayload = gpsPayload
         self.hello = hello
         self.hud = hud
         self.hudBlock = hudBlock
@@ -568,6 +586,156 @@ public enum Position: String, Codable, Equatable, Sendable {
 
 public enum DisplaySubtitleType: String, Codable, Equatable, Sendable {
     case displaySubtitle = "display.subtitle"
+}
+
+
+/// Barometer, magnetometer and compass, up to 10 Hz. A field is left out when the device
+/// lacks the sensor or has no reading yet; the barometer needs Motion & Fitness access,
+/// which the first subscription asks for. Magnetic field in the `imu` device frame (+x
+/// right, +y up, +z out of the screen, portrait). Every available field is present unless
+/// the subscription named `fields`.
+// MARK: - Env
+public struct Env: Codable, Equatable, Sendable {
+    /// Maximum heading error in degrees.
+    public let headingAccuracyDeg: Double?
+    /// Compass heading of the screen's top edge as the head is mounted (landscape), degrees
+    /// clockwise from north.
+    public let headingDeg: Double?
+    /// `true` north needs location access; otherwise magnetic north.
+    public let headingRef: HeadingRef?
+    /// Raw magnetic field in microtesla, device frame; includes the device's own bias.
+    public let magneticFieldUt: [Double]?
+    /// Air pressure in kilopascals.
+    public let pressureKpa: Double?
+    /// Change in altitude in metres since the barometer started (this subscription or an earlier
+    /// one still running).
+    public let relativeAltitudeM: Double?
+    /// Seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: EnvType
+
+    public enum CodingKeys: String, CodingKey {
+        case headingAccuracyDeg = "heading_accuracy_deg"
+        case headingDeg = "heading_deg"
+        case headingRef = "heading_ref"
+        case magneticFieldUt = "magnetic_field_ut"
+        case pressureKpa = "pressure_kpa"
+        case relativeAltitudeM = "relative_altitude_m"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(headingAccuracyDeg: Double?, headingDeg: Double?, headingRef: HeadingRef?, magneticFieldUt: [Double]?, pressureKpa: Double?, relativeAltitudeM: Double?, sensorTimeS: Double?, seq: Int, ts: Int, type: EnvType) {
+        self.headingAccuracyDeg = headingAccuracyDeg
+        self.headingDeg = headingDeg
+        self.headingRef = headingRef
+        self.magneticFieldUt = magneticFieldUt
+        self.pressureKpa = pressureKpa
+        self.relativeAltitudeM = relativeAltitudeM
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.ts = ts
+        self.type = type
+    }
+}
+
+/// `true` north needs location access; otherwise magnetic north.
+public enum HeadingRef: String, Codable, Equatable, Sendable {
+    case headingRefTrue = "true"
+    case magnetic = "magnetic"
+}
+
+public enum EnvType: String, Codable, Equatable, Sendable {
+    case env = "env"
+}
+
+
+// MARK: - EnvFields
+public struct EnvFields: Codable, Equatable, Sendable {
+    /// Maximum heading error in degrees.
+    public let headingAccuracyDeg: Double?
+    /// Compass heading of the screen's top edge as the head is mounted (landscape), degrees
+    /// clockwise from north.
+    public let headingDeg: Double?
+    /// `true` north needs location access; otherwise magnetic north.
+    public let headingRef: HeadingRef?
+    /// Raw magnetic field in microtesla, device frame; includes the device's own bias.
+    public let magneticFieldUt: [Double]?
+    /// Air pressure in kilopascals.
+    public let pressureKpa: Double?
+    /// Change in altitude in metres since the barometer started (this subscription or an earlier
+    /// one still running).
+    public let relativeAltitudeM: Double?
+    /// Seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case headingAccuracyDeg = "heading_accuracy_deg"
+        case headingDeg = "heading_deg"
+        case headingRef = "heading_ref"
+        case magneticFieldUt = "magnetic_field_ut"
+        case pressureKpa = "pressure_kpa"
+        case relativeAltitudeM = "relative_altitude_m"
+        case sensorTimeS = "sensor_time_s"
+    }
+
+    public init(headingAccuracyDeg: Double?, headingDeg: Double?, headingRef: HeadingRef?, magneticFieldUt: [Double]?, pressureKpa: Double?, relativeAltitudeM: Double?, sensorTimeS: Double?) {
+        self.headingAccuracyDeg = headingAccuracyDeg
+        self.headingDeg = headingDeg
+        self.headingRef = headingRef
+        self.magneticFieldUt = magneticFieldUt
+        self.pressureKpa = pressureKpa
+        self.relativeAltitudeM = relativeAltitudeM
+        self.sensorTimeS = sensorTimeS
+    }
+}
+
+
+/// Payload when the subscription names no `fields`: every reading the device has.
+// MARK: - EnvPayload
+public struct EnvPayload: Codable, Equatable, Sendable {
+    /// Maximum heading error in degrees.
+    public let headingAccuracyDeg: Double?
+    /// Compass heading of the screen's top edge as the head is mounted (landscape), degrees
+    /// clockwise from north.
+    public let headingDeg: Double?
+    /// `true` north needs location access; otherwise magnetic north.
+    public let headingRef: HeadingRef?
+    /// Raw magnetic field in microtesla, device frame; includes the device's own bias.
+    public let magneticFieldUt: [Double]?
+    /// Air pressure in kilopascals.
+    public let pressureKpa: Double?
+    /// Change in altitude in metres since the barometer started (this subscription or an earlier
+    /// one still running).
+    public let relativeAltitudeM: Double?
+    /// Seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case headingAccuracyDeg = "heading_accuracy_deg"
+        case headingDeg = "heading_deg"
+        case headingRef = "heading_ref"
+        case magneticFieldUt = "magnetic_field_ut"
+        case pressureKpa = "pressure_kpa"
+        case relativeAltitudeM = "relative_altitude_m"
+        case sensorTimeS = "sensor_time_s"
+    }
+
+    public init(headingAccuracyDeg: Double?, headingDeg: Double?, headingRef: HeadingRef?, magneticFieldUt: [Double]?, pressureKpa: Double?, relativeAltitudeM: Double?, sensorTimeS: Double) {
+        self.headingAccuracyDeg = headingAccuracyDeg
+        self.headingDeg = headingDeg
+        self.headingRef = headingRef
+        self.magneticFieldUt = magneticFieldUt
+        self.pressureKpa = pressureKpa
+        self.relativeAltitudeM = relativeAltitudeM
+        self.sensorTimeS = sensorTimeS
+    }
 }
 
 
@@ -1045,6 +1213,155 @@ public struct FacesPayload: Codable, Equatable, Sendable {
 }
 
 
+/// Where the head is on Earth, up to 1 Hz (CoreLocation: GNSS where the device has it,
+/// otherwise Wi-Fi). Sent only after the user allows location access; the first subscription
+/// asks. WGS 84. Every payload field is present unless the subscription named `fields`;
+/// `alt_m`, `v_accuracy_m`, `speed_m_s` and `course_deg` are left out when unknown.
+// MARK: - Gps
+public struct Gps: Codable, Equatable, Sendable {
+    /// Altitude above mean sea level in metres.
+    public let altM: Double?
+    /// Direction of travel, degrees clockwise from true north.
+    public let courseDeg: Double?
+    /// Radius of horizontal uncertainty in metres (68 %).
+    public let hAccuracyM: Double?
+    /// Latitude in degrees, + north.
+    public let lat: Double?
+    /// Longitude in degrees, + east.
+    public let lon: Double?
+    /// When the fix was taken, seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Ground speed in m/s.
+    public let speedMS: Double?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: GpsType
+    /// Vertical uncertainty in metres.
+    public let vAccuracyM: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case altM = "alt_m"
+        case courseDeg = "course_deg"
+        case hAccuracyM = "h_accuracy_m"
+        case lat = "lat"
+        case lon = "lon"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case speedMS = "speed_m_s"
+        case ts = "ts"
+        case type = "type"
+        case vAccuracyM = "v_accuracy_m"
+    }
+
+    public init(altM: Double?, courseDeg: Double?, hAccuracyM: Double?, lat: Double?, lon: Double?, sensorTimeS: Double?, seq: Int, speedMS: Double?, ts: Int, type: GpsType, vAccuracyM: Double?) {
+        self.altM = altM
+        self.courseDeg = courseDeg
+        self.hAccuracyM = hAccuracyM
+        self.lat = lat
+        self.lon = lon
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.speedMS = speedMS
+        self.ts = ts
+        self.type = type
+        self.vAccuracyM = vAccuracyM
+    }
+}
+
+public enum GpsType: String, Codable, Equatable, Sendable {
+    case gps = "gps"
+}
+
+
+// MARK: - GpsFields
+public struct GpsFields: Codable, Equatable, Sendable {
+    /// Altitude above mean sea level in metres.
+    public let altM: Double?
+    /// Direction of travel, degrees clockwise from true north.
+    public let courseDeg: Double?
+    /// Radius of horizontal uncertainty in metres (68 %).
+    public let hAccuracyM: Double?
+    /// Latitude in degrees, + north.
+    public let lat: Double?
+    /// Longitude in degrees, + east.
+    public let lon: Double?
+    /// When the fix was taken, seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double?
+    /// Ground speed in m/s.
+    public let speedMS: Double?
+    /// Vertical uncertainty in metres.
+    public let vAccuracyM: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case altM = "alt_m"
+        case courseDeg = "course_deg"
+        case hAccuracyM = "h_accuracy_m"
+        case lat = "lat"
+        case lon = "lon"
+        case sensorTimeS = "sensor_time_s"
+        case speedMS = "speed_m_s"
+        case vAccuracyM = "v_accuracy_m"
+    }
+
+    public init(altM: Double?, courseDeg: Double?, hAccuracyM: Double?, lat: Double?, lon: Double?, sensorTimeS: Double?, speedMS: Double?, vAccuracyM: Double?) {
+        self.altM = altM
+        self.courseDeg = courseDeg
+        self.hAccuracyM = hAccuracyM
+        self.lat = lat
+        self.lon = lon
+        self.sensorTimeS = sensorTimeS
+        self.speedMS = speedMS
+        self.vAccuracyM = vAccuracyM
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
+// MARK: - GpsPayload
+public struct GpsPayload: Codable, Equatable, Sendable {
+    /// Altitude above mean sea level in metres.
+    public let altM: Double?
+    /// Direction of travel, degrees clockwise from true north.
+    public let courseDeg: Double?
+    /// Radius of horizontal uncertainty in metres (68 %).
+    public let hAccuracyM: Double
+    /// Latitude in degrees, + north.
+    public let lat: Double
+    /// Longitude in degrees, + east.
+    public let lon: Double
+    /// When the fix was taken, seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double
+    /// Ground speed in m/s.
+    public let speedMS: Double?
+    /// Vertical uncertainty in metres.
+    public let vAccuracyM: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case altM = "alt_m"
+        case courseDeg = "course_deg"
+        case hAccuracyM = "h_accuracy_m"
+        case lat = "lat"
+        case lon = "lon"
+        case sensorTimeS = "sensor_time_s"
+        case speedMS = "speed_m_s"
+        case vAccuracyM = "v_accuracy_m"
+    }
+
+    public init(altM: Double?, courseDeg: Double?, hAccuracyM: Double, lat: Double, lon: Double, sensorTimeS: Double, speedMS: Double?, vAccuracyM: Double?) {
+        self.altM = altM
+        self.courseDeg = courseDeg
+        self.hAccuracyM = hAccuracyM
+        self.lat = lat
+        self.lon = lon
+        self.sensorTimeS = sensorTimeS
+        self.speedMS = speedMS
+        self.vAccuracyM = vAccuracyM
+    }
+}
+
+
 /// First message on a new connection. Without a valid token the device answers
 /// `pair_required`; with one it answers `welcome`. The major version must match the device's.
 // MARK: - Hello
@@ -1090,7 +1407,8 @@ public enum HelloType: String, Codable, Equatable, Sendable {
 /// frame counter, {time} timecode since the view opened, {rand:N} N random digits; from the
 /// device: {battery} percent, {charging} YES/NO, {thermal} nominal/fair/serious/critical,
 /// {heading} compass degrees, {heading_name} N/NE/E..., {pitch} and {roll} degrees, {x} {y}
-/// {z} position in metres and {tracking} (mode sensing), {mode}, {clients}. Hosts add their
+/// {z} position in metres and {tracking} (mode sensing), {mode}, {clients}, {lat} {lon}
+/// {alt} {gps_acc} (while `gps` runs), {pressure} hPa (while `env` runs). Hosts add their
 /// own with `display.hud {values}` and use them the same way, e.g. {speed}. Unknown names
 /// show as `-`.
 // MARK: - Hud
@@ -2098,9 +2416,11 @@ public struct Subscribe: Codable, Equatable, Sendable {
 }
 
 /// Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`;
-/// `gps` and `env` arrive later.
+/// `gps` asks for location access and `env` for Motion & Fitness access on first use.
 public enum CommonTopic: String, Codable, Equatable, Sendable {
+    case env = "env"
     case faces = "faces"
+    case gps = "gps"
     case imu = "imu"
     case log = "log"
     case pose = "pose"
@@ -2234,21 +2554,32 @@ public struct DiagnosticsLastCrash: Codable, Equatable, Sendable {
 public struct DiagnosticsPermissions: Codable, Equatable, Sendable {
     public let camera: SystemDiagnosticsPermission
     public let localNetwork: SystemDiagnosticsPermission
+    /// For `gps` and true-north heading; absent from 0.2 devices.
+    public let location: SystemDiagnosticsPermission?
     public let motion: SystemDiagnosticsPermission
+    /// For the barometer in `env`; absent from 0.2 devices.
+    public let motionFitness: SystemDiagnosticsPermission?
 
     public enum CodingKeys: String, CodingKey {
         case camera = "camera"
         case localNetwork = "local_network"
+        case location = "location"
         case motion = "motion"
+        case motionFitness = "motion_fitness"
     }
 
-    public init(camera: SystemDiagnosticsPermission, localNetwork: SystemDiagnosticsPermission, motion: SystemDiagnosticsPermission) {
+    public init(camera: SystemDiagnosticsPermission, localNetwork: SystemDiagnosticsPermission, location: SystemDiagnosticsPermission?, motion: SystemDiagnosticsPermission, motionFitness: SystemDiagnosticsPermission?) {
         self.camera = camera
         self.localNetwork = localNetwork
+        self.location = location
         self.motion = motion
+        self.motionFitness = motionFitness
     }
 }
 
+/// For `gps` and true-north heading; absent from 0.2 devices.
+///
+/// For the barometer in `env`; absent from 0.2 devices.
 public enum SystemDiagnosticsPermission: String, Codable, Equatable, Sendable {
     case denied = "denied"
     case granted = "granted"
@@ -2519,7 +2850,7 @@ public enum UnsubscribeType: String, Codable, Equatable, Sendable {
 public struct Welcome: Codable, Equatable, Sendable {
     /// Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`,
     /// `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose`
-    /// (where the device supports them). Clients ignore unknown values.
+    /// (where the device supports them); 0.3 `gps`, `env`. Clients ignore unknown values.
     public let capabilities: [String]
     public let devMode: Bool
     public let device: WelcomeDevice

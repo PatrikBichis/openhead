@@ -59,6 +59,14 @@
             },
             "camera": {
               "$ref": "#/$defs/permission"
+            },
+            "location": {
+              "$ref": "#/$defs/permission",
+              "description": "For `gps` and true-north heading; absent from 0.2 devices."
+            },
+            "motion_fitness": {
+              "$ref": "#/$defs/permission",
+              "description": "For the barometer in `env`; absent from 0.2 devices."
             }
           },
           "required": [

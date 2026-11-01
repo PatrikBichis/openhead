@@ -2,7 +2,7 @@
 
 **A phone or tablet as a robot's head: face, eyes, cameras, pose, and a protocol to drive it.**
 
-OpenHead turns an iPhone or iPad into a self-contained robot head. The device renders an expressive face, streams its sensors (IMU, status, and later world pose, detected faces and GPS) and exposes a small command API over Wi-Fi. Anything that can open a WebSocket can drive it: a ROS 2 node on a Jetson, a Python script, or an LLM agent through the bundled MCP server.
+OpenHead turns an iPhone or iPad into a self-contained robot head. The device renders an expressive face, streams its sensors (IMU, world pose, detected faces, GPS, barometer, magnetometer and compass) and exposes a small command API over Wi-Fi. Anything that can open a WebSocket can drive it: a ROS 2 node on a Jetson, a Python script, or an LLM agent through the bundled MCP server.
 
 The protocol is the product. The iOS app is the first client; the desktop simulator is the second.
 
@@ -24,7 +24,8 @@ The protocol is the product. The iOS app is the first client; the desktop simula
 - **Camera view with a HUD** *(0.2)*. The front camera with a sci-fi heads-up display: boxes around faces, a locked target, compass tape, artificial horizon, battery, temperature and the robot's own lines (`display.hud`). HUD themes are JSON: `hunter`, `camcorder`, `boot`, `flight`.
 - **Finds people** *(0.2)*. Several faces at once (`faces`: bearing, elevation, size, box) at 15 Hz; the eyes can follow the person in front of the robot (`look_at {frame: face}`).
 - **Knows where it is** *(0.2)*. ARKit world tracking gives the head's position and orientation in the room (`pose`, 60 Hz) and follows one face with distance.
-- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; battery, thermal state, clients, what is on screen.
+- **Knows where on Earth** *(0.3)*. GPS (`gps`, 1 Hz): latitude, longitude, altitude, accuracy, speed and course.
+- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; barometer, magnetometer and compass (`env`, 10 Hz, *0.3*); battery, thermal state, clients, what is on screen. Only sensors an iPhone 12 has: no LiDAR.
 - **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
 - **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
 
@@ -51,7 +52,7 @@ flowchart LR
     subgraph Device["Head device (iPhone / iPad)"]
         Face["Face engine<br/>web-based · themes · expressions"]
         Display["Display<br/>image · video · web · subtitles · overlay"]
-        Sensors["Sensors<br/>IMU · status · (pose · faces · GPS)"]
+        Sensors["Sensors<br/>IMU · status · pose · faces · GPS · env"]
         Cam["Cameras<br/>(v0.2)"]
         Link["Link<br/>WebSocket server · mDNS · pairing"]
         Face --- Link
@@ -92,7 +93,8 @@ The device is the server. Hosts discover it over mDNS (`_openhead._tcp`), pair o
 | Pose: position + orientation in world frame (ARKit) | head → host | subscription, ≤ 60 Hz | 0.2 |
 | Faces: detected faces with bearing and size | head → host | subscription, ≤ 15 Hz | 0.2 |
 | Cameras: still / clip from front or back | host → head | command, result over HTTP | 0.2 |
-| GPS, barometer, magnetometer | head → host | subscription, low rate | 0.2 |
+| GPS: latitude, longitude, altitude, accuracy, speed, course | head → host | subscription, 1 Hz | 0.3 |
+| Environment: air pressure, altitude change, magnetic field, compass heading | head → host | subscription, ≤ 10 Hz | 0.3 |
 
 Minimum iOS/iPadOS 17. Universal app, full screen on iPad.
 
@@ -226,6 +228,7 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 | Tool `pair(code)` | `pair` with the code the user reads off the device |
 | Tools `list_themes`, `set_theme`, `set_emotion`, `look_at`, `look_at_face`, `show_image`, `show_video`, `show_web`, `show_camera`, `set_hud`, `show_face`, `subtitle` | `face.*`, `display.*` |
 | Tools `set_mode`, `get_faces`, `get_pose` | `mode.*`, `faces`, `pose` (0.2) |
+| Tools `get_location`, `get_environment` | `gps`, `env` (0.3) |
 | Tools `get_status`, `take_screenshot` (returns image), `tail_logs`, `get_diagnostics` | `system.*` (dev mode required for the last three) |
 | Tool `wait_for(topic, predicate, timeout_s)` | A subscription that returns on first match (`status`, `log`; `faces` in 0.2) |
 | Tool `run_scenario(path)` | Runs a YAML scenario and returns the report with screenshots |
@@ -358,12 +361,12 @@ Mount the phone in landscape and start the app: the face fills the screen. A lon
 
 ## Device support
 
-| Device | Face | IMU / status | World pose (0.2) | Face tracking (0.2) |
-| --- | --- | --- | --- | --- |
-| iPhone 12 and later | yes | yes | ARKit, back camera | front camera, concurrent with world tracking (A12+) |
-| iPad mini (5th gen+) | yes | yes | ARKit | on-device vision |
-| iPad (7th gen+) | yes | yes | ARKit | on-device vision |
-| Desktop simulator | yes | synthetic | synthetic | synthetic |
+| Device | Face | IMU / status | World pose (0.2) | Face tracking (0.2) | GPS / env (0.3) |
+| --- | --- | --- | --- | --- | --- |
+| iPhone 12 and later | yes | yes | ARKit, back camera | front camera, concurrent with world tracking (A12+) | GNSS, barometer, magnetometer, compass |
+| iPad mini (5th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
+| iPad (7th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
+| Desktop simulator | yes | synthetic | synthetic | synthetic | synthetic |
 
 ---
 
@@ -383,6 +386,7 @@ Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 - [x] 10. Video, subtitles and a display test suite
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
 - [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
+- [ ] 13. v0.3: `gps` and `env` streams (green on the simulator; device check and tag open)
 
 ---
 

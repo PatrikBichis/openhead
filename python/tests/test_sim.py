@@ -241,6 +241,18 @@ async def test_sensing_streams_pose_and_one_face_without_box(head):
     await head.mode.set("idle")
 
 
+
+async def test_gps_and_env_stream_in_any_mode(head):
+    async with head.subscribe("gps", 5) as sub:
+        assert sub.rate_hz == 1
+        gps = await anext(sub)
+    assert 59 < gps.lat < 60 and 18 < gps.lon < 19 and gps.h_accuracy_m > 0
+    async with head.subscribe("env", 10, fields=["pressure_kpa", "heading_deg"]) as sub:
+        env = await anext(sub)
+    assert 90 < env.pressure_kpa < 110 and 0 <= env.heading_deg <= 360
+    assert env.magnetic_field_ut is None  # only the fields asked for
+
+
 # --- streams -----------------------------------------------------------------
 
 

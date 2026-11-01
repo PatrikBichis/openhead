@@ -24,7 +24,8 @@ log = logging.getLogger("openhead.client")
 
 TOPIC_MODELS: dict[str, type[BaseModel]] = {
     "imu": models.Imu, "status": models.Status, "log": models.Log,
-    "faces": models.Faces, "pose": models.Pose,
+    "faces": models.Faces, "pose": models.Pose, "gps": models.Gps,
+    "env": models.Env,
 }
 
 

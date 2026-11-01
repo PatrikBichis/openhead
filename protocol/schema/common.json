@@ -64,9 +64,11 @@
         "status",
         "log",
         "faces",
-        "pose"
+        "pose",
+        "gps",
+        "env"
       ],
-      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` and `env` arrive later."
+      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use."
     },
     "log_level": {
       "type": "string",

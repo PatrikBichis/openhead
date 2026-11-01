@@ -193,6 +193,7 @@ final class LinkServer {
             sub.timer?.invalidate()
             if topic == "imu" { model.motion.unsubscribe(session.id) }
             if topic == "log" { model.logs.listeners[session.id] = nil }
+            model.stopSensor(topic, session.id)
         }
         session.subscriptions.removeAll()
     }
@@ -200,7 +201,7 @@ final class LinkServer {
     // MARK: - messages
 
     private static let deviceMessages: Set<String> = ["ack", "error", "welcome", "pair_required",
-                                                      "imu", "status", "log", "faces", "pose"]
+                                                      "imu", "status", "log", "faces", "pose", "gps", "env"]
 
     private func handle(_ session: Session, _ data: Data) {
         guard let message = (try? JSONSerialization.jsonObject(with: data)) as? JSONObject else {
@@ -317,7 +318,8 @@ final class LinkServer {
                            "safe_area": screen.safeArea],
             ],
             "capabilities": ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
-                             "status", "log", "screenshot", "camera", "faces"] + (model.supportsSensing ? ["pose"] : []),
+                             "status", "log", "screenshot", "camera", "faces", "gps", "env"]
+                + (model.supportsSensing ? ["pose"] : []),
             "themes": model.themeNames,
             "dev_mode": model.settings.devMode,
         ])

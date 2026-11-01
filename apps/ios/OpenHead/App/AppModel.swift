@@ -12,6 +12,8 @@ final class AppModel: ObservableObject {
     let camera = CameraService()
     let ar = ARService()
     let heading = HeadingService()
+    let location = LocationService()
+    let env = EnvService()
     private(set) lazy var link = LinkServer(model: self)
 
     @Published var display: DisplayContent = .face
@@ -51,6 +53,9 @@ final class AppModel: ObservableObject {
         face.onView = { [weak self] view in self?.pageChangedView(view) }
         camera.onFaces = { [weak self] faces in self?.facesChanged(faces, source: "vision") }
         ar.onFaces = { [weak self] faces in self?.facesChanged(faces, source: "arkit") }
+        location.onDenied = { [weak self] in
+            self?.logs.log("warning", "sensors", "location access denied: gps sends nothing (Settings > OpenHead > Location)")
+        }
         face.load(theme: settings.offlineTheme)
         fps.start()
         NotificationCenter.default.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification,
@@ -166,6 +171,8 @@ final class AppModel: ObservableObject {
                 "local_network": linkReady ? "granted" : "not_determined",
                 "motion": "not_required",
                 "camera": CameraService.permission,
+                "location": location.permission,
+                "motion_fitness": EnvService.permission,
             ],
             "arkit": [
                 "world_tracking": ARWorldTrackingConfiguration.isSupported,

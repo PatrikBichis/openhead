@@ -47,16 +47,29 @@ extension AppModel {
         Task { try? await face.setFaces(json) }
     }
 
+    /// Stop the location or environment sensors a session used (protocol 0.3).
+    func stopSensor(_ topic: String, _ id: UUID) {
+        switch topic {
+        case "gps":
+            location.stop(id)
+        case "env":
+            env.stop(id)
+            heading.stop(id.uuidString)
+        default:
+            break
+        }
+    }
+
     var facesPayload: JSONObject? {
         guard mode != "idle" else { return nil }
         return ["faces": faces.map(\.json), "source": facesSource,
                 "sensor_time_s": (ProcessInfo.processInfo.systemUptime * 1000).rounded() / 1000]
     }
 
-    /// Battery, thermal state, heading, tilt and position for the HUD, 10 times a second
+    /// Battery, thermal state, heading, tilt, position, location and pressure for the HUD, 10 times a second
     /// while the camera view shows.
     func startHudFeed() {
-        heading.start()
+        heading.start("hud")
         motion.subscribe(hudMotionId, rate: 10) { [weak self] sample in self?.tilt = Self.tiltFrom(sample.accel) }
         hudTimer?.invalidate()
         hudTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
@@ -67,7 +80,7 @@ extension AppModel {
     func stopHudFeed() {
         hudTimer?.invalidate()
         hudTimer = nil
-        heading.stop()
+        heading.stop("hud")
         motion.unsubscribe(hudMotionId)
     }
 
@@ -89,6 +102,13 @@ extension AppModel {
             values["z"] = p[2]
             values["tracking"] = pose["tracking_state"]
         }
+        if let gps = location.latest {  // while a session subscribes to gps
+            values["lat"] = gps["lat"]
+            values["lon"] = gps["lon"]
+            values["alt"] = gps["alt_m"]
+            values["gps_acc"] = gps["h_accuracy_m"]
+        }
+        if let pressure = env.pressureHpa { values["pressure"] = pressure }
         Task { try? await face.setHudValues(values) }
     }
 
