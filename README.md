@@ -25,7 +25,7 @@ OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone 
 <p align="center">
   <a href="docs/media/desk-assistant.mp4"><img src="docs/media/desk-assistant-poster.jpg" alt="3D render: the OpenHead bench rig on a desk, an iPhone 12 on a four-servo neck following a person" width="640"></a>
 </p>
-<p align="center"><a href="docs/media/desk-assistant.mp4">A desk AI assistant (3D render, 41 s)</a>: the bench rig follows a face, talks, uses both cameras at once and streams its sensors to an agent. Real footage comes next.</p>
+<p align="center"><a href="docs/media/desk-assistant.mp4">A desk AI assistant (3D render, 41 s)</a>: the bench rig follows a face, talks, uses both cameras at once and streams its sensors to an agent. Real footage comes next.<br>Build it: printed parts, parts list, firmware and an MCP server for the neck in <a href="https://github.com/PatrikBichis/openhead-desktop-body">OpenHead desk body</a>.</p>
 
 | Cartoon | Minimal | Halloween |
 | --- | --- | --- |
