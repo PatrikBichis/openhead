@@ -112,17 +112,20 @@ test("the eyes follow the locked face, then another, then stop", async ({ page }
   const gaze = () =>
     page.evaluate(() => {
       for (let i = 0; i < 40; i++) window.openhead.tick(20);
-      return window.openhead.params().gaze_x;
+      const p = window.openhead.params();
+      return [p.gaze_x, p.gaze_y];
     });
   await page.evaluate(() => window.openhead.followFace(null));
-  const toLocked = await gaze(); // face 3, bearing +12: the viewer's right
+  const toLocked = await gaze(); // face 3, bearing +12: the viewer's right; elevation -4: down
   await page.evaluate(() => window.openhead.followFace(7));
-  const toSeven = await gaze(); // bearing -20: the viewer's left
+  const toSeven = await gaze(); // bearing -20: the viewer's left; elevation +3: up
   await page.evaluate(() => window.openhead.followFace(undefined));
   const rest = await gaze();
-  expect(toLocked).toBeGreaterThan(0.15);
-  expect(toSeven).toBeLessThan(-0.25);
-  expect(Math.abs(rest)).toBeLessThan(0.1);
+  expect(toLocked[0]).toBeGreaterThan(0.15);
+  expect(toLocked[1]).toBeLessThan(-0.15);
+  expect(toSeven[0]).toBeLessThan(-0.25);
+  expect(toSeven[1]).toBeGreaterThan(0.1);
+  expect(Math.abs(rest[0])).toBeLessThan(0.1);
 });
 
 test("clear hides the HUD", async ({ page }) => {

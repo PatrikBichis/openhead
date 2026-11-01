@@ -219,7 +219,9 @@ export class Screen {
     if (this.following !== undefined) {
       const target = this.hud.locked();
       // Head frame, as face.look_at: +bearing is the head's left, which is the viewer's right.
-      if (target) this.engine.setGaze(clamp(target.bearing / 45), clamp(target.elevation / 45));
+      // A person moves far less up and down than sideways (about ±10° at a metre), and the
+      // eyes have less room vertically, so elevation gets more gain.
+      if (target) this.engine.setGaze(clamp(target.bearing / 45), clamp(target.elevation / 15));
       else this.engine.setGaze(0, 0);
     }
     if (this.view === "camera") {
