@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from . import models
 
-PROTOCOL_VERSION = "0.3.0"
+PROTOCOL_VERSION = "0.3.1"
 
 MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "ack": models.Ack,

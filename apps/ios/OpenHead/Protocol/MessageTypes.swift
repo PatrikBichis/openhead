@@ -1,6 +1,6 @@
 // Generated from protocol/schema by tools/protocol.py (quicktype). Do not edit.
 
-public let protocolVersion = "0.3.0"
+public let protocolVersion = "0.3.1"
 
 /// Message `type` to its generated model.
 public let messageTypes: [String: any Codable.Type] = [

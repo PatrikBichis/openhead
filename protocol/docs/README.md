@@ -1,6 +1,6 @@
 # OpenHead protocol reference
 
-Protocol version 0.3.0. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
+Protocol version 0.3.1. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
 
 | Type | Schema | Description |
 | --- | --- | --- |

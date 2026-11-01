@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "OpenHeadProtocol",
-  "description": "All OpenHead protocol 0.3.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
+  "description": "All OpenHead protocol 0.3.1 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.",
   "$defs": {
     "Ack": {
       "title": "Ack",

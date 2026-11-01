@@ -1,7 +1,6 @@
-New in this build (0.3):
-• GPS: openhead watch gps. iOS asks for location access the first time; the location goes only to the paired controller on your network.
-• Barometer, magnetometer and compass: openhead watch env. iOS asks for Motion & Fitness the first time (for the barometer).
-• The HUD can show {lat}, {lon}, {alt} and {pressure} while those streams run.
-• The compass heading now follows the screen as the phone is mounted in landscape.
+New in this build (0.3.1):
+• Theme: the theme you pick in the app's settings applies at once (it was only read at start). A connected robot or agent can still switch theme; the face goes back to yours when the last one disconnects.
+• Eyes that follow a face now move about three times as far up and down.
+• GPS sends a position only when there is a new fix, instead of repeating it every second.
 
-Please try on an iPhone 12: openhead watch gps -n 3 near a window, openhead watch env -n 5 while turning the phone (heading should change, pressure stay near your local value), and run scenarios/camera.yaml again to check that 0.2 still works.
+Please try on an iPhone 12: pick Halloween in settings (the face should change at once), connect a client, switch with openhead theme cartoon and disconnect (the face should go back to Halloween). Then turn on face following and move your head up and down.

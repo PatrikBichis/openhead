@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
 class OpenHeadProtocol(RootModel[Any]):
     root: Any = Field(..., title="OpenHeadProtocol")
     """
-    All OpenHead protocol 0.3.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
+    All OpenHead protocol 0.3.1 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
     """
 
 
