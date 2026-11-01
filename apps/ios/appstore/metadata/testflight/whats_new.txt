@@ -1,7 +1,7 @@
-New in this build (0.2):
-• Camera view with a HUD: openhead camera hunter --follow. Four HUD looks: hunter, camcorder, boot, flight. iOS asks for camera permission the first time.
-• Finds people: boxes around faces, the nearest is locked, and the eyes follow it (--follow). openhead watch faces prints where they are.
-• The HUD shows battery, temperature, compass heading, tilt and the robot's own lines: openhead hud --set task="SAY HI" --line "TASK {task}".
-• ARKit position: openhead mode sensing, then openhead watch pose. Move the phone around and see the position change.
+New in this build (0.3):
+• GPS: openhead watch gps. iOS asks for location access the first time; the location goes only to the paired controller on your network.
+• Barometer, magnetometer and compass: openhead watch env. iOS asks for Motion & Fitness the first time (for the barometer).
+• The HUD can show {lat}, {lon}, {alt} and {pressure} while those streams run.
+• The compass heading now follows the screen as the phone is mounted in landscape.
 
-Please try: run scenarios/camera.yaml (openhead run scenarios/camera.yaml) while standing in front of the phone, then check that the boxes sit on faces, the eyes follow you, the compass turns with the phone, and the pose moves when you carry it.
+Please try on an iPhone 12: openhead watch gps -n 3 near a window, openhead watch env -n 5 while turning the phone (heading should change, pressure stay near your local value), and run scenarios/camera.yaml again to check that 0.2 still works.
