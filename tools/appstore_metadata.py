@@ -1,6 +1,6 @@
 """Push the store texts in apps/ios/appstore/metadata/ to App Store Connect.
 
-    uv run --project python python tools/appstore_metadata.py [--dry-run] [--build N]
+    uv run --project python python tools/appstore_metadata.py [--dry-run] [--build N] [--testflight-only]
 
 metadata/<locale>/     App Store page per language (en-US is the primary, sv-SE Swedish):
                        name, description, subtitle, promotional_text, keywords, support_url,
@@ -170,6 +170,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dry-run", action="store_true", help="show what would change")
     parser.add_argument("--build", help="build number for What to Test (default: newest)")
+    parser.add_argument("--testflight-only", action="store_true",
+                        help="only the TestFlight texts; leave the App Store page and version alone "
+                             "(e.g. while a version is in review)")
     args = parser.parse_args()
     env = read_env()
     asc = Asc(env)
@@ -205,6 +208,11 @@ def main() -> int:
         sync.upsert("betaBuildLocalizations", found[0] if found else None, attrs,
                     {"relationships": {"build": {"data": {"type": "builds", "id": build["id"]}}}},
                     f"What to Test, build {build['attributes']['version']}")
+
+    if args.testflight_only:
+        if args.dry_run:
+            print("dry run: nothing changed")
+        return 0
 
     # App Store page, one folder per language
     for folder in sorted(p for p in META.iterdir() if p.is_dir() and re.fullmatch(r"[a-z]{2}(-[A-Z]{2})?", p.name)):
