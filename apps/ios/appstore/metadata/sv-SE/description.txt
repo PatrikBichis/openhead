@@ -1,0 +1,43 @@
+OpenHead gör en iPhone eller iPad till ansiktet på en robot.
+
+Sätt telefonen liggande på roboten, anslut den till samma wifi som robotens dator, och roboten kan få ansiktet att le, rynka pannan, se sig omkring, prata och visa saker. Allt som kan öppna en WebSocket kan styra det: ett Python-skript, robotens egen dator eller en AI-agent.
+
+Telefonen ger också roboten dess kameror och sensorer. I stället för att koppla in en kamera, en IMU och ett positioneringssystem får en robotbyggare ansiktsspårning, rörelsedata, GPS, barometer, kompass och huvudets position i rummet från en enhet de redan har, över samma anslutning.
+
+ANSIKTE
+• 28 uttryck som alla teman delar: glad, nyfiken, fundersam, förvånad, ledsen, arg, sömnig, rädd, förvirrad, chockad, uppspelt, uttråkad, skeptisk, orolig, stolt, skrattande, nervös, självbelåten och fler.
+• Blanda uttryck, håll dem en stund eller lägg en kort reaktion ovanpå ett humör.
+• Tre teman: Cartoon, Minimal (ljusstreck, låg ström) och Halloween.
+• Ögonen följer en punkt på skärmen, en riktning från huvudet eller personen framför roboten; blinkningar, andning och små ögonrörelser håller ansiktet levande när inget händer.
+• Munnen rör sig med robotens röst: roboten skickar hur högt den talar 25 gånger i sekunden.
+
+UNDERTEXTER
+• Visa text ovanpå allt: för en robot utan högtalare, eller för att visa ett AI-svar ord för ord medan det strömmar in. De senaste raderna stannar kvar.
+• Munnen kan röra sig med texten som om den talade.
+
+BILDER, VIDEO OCH WEBBSIDOR
+• Visa en bild (PNG, JPEG, GIF även animerad, WebP, SVG), en video eller en webbsida i helskärm, eller låt ansiktet fortsätta i ett hörn medan den visas.
+• Filer på robotens dator skickas direkt till huvudet över ditt nätverk.
+
+KAMEROR OCH HUD
+• Visa frontkameran med en sci-fi-HUD ovanpå: rutor runt ansikten, ett låst mål, kompass, konstgjord horisont, batteri och temperatur. Fyra HUD-teman, och roboten kan lägga till egna värden, texter och instrument.
+• Ansiktsspårning: roboten får varje persons riktning, höjdvinkel och storlek 15 gånger i sekunden, och ögonen kan följa dem.
+• Skärmdumpar av det huvudet visar, även kameravyn.
+
+POSITION OCH SENSORER
+• Position från ARKit (visuell-inertiell SLAM): huvudets plats i meter och dess riktning i rummet, upp till 60 gånger i sekunden, med spårningsläge. Avstånd till ett ansikte i läget sensing.
+• Rörelsesensorer (orientering, rotation, acceleration) upp till 100 gånger i sekunden, enligt robotens konventioner.
+• GPS: latitud, longitud, höjd, noggrannhet, hastighet och färdriktning en gång i sekunden, när du har tillåtit platsåtkomst.
+• Barometer (lufttryck, höjdförändring), magnetometer och kompassriktning upp till 10 gånger i sekunden.
+• Batteri, temperaturläge och anslutna klienter.
+• Kamerabilder behandlas i telefonen och sparas eller skickas aldrig någonstans. Plats och sensorvärden går bara till de robotstyrenheter du har parat, i ditt nätverk.
+
+SÄKERT I DITT NÄTVERK
+• En styrenhet måste paras med en sexsiffrig kod som visas på skärmen; var och en får en egen token som du kan återkalla i inställningarna.
+• Allt stannar i ditt lokala nätverk. Inga konton, inget moln, ingen spårning.
+
+FÖR UTVECKLARE
+• Öppet protokoll (JSON över WebSocket) med publicerat schema, ett Python-bibliotek och kommandoradsverktyg, en simulator för datorn och en MCP-server så att AI-agenter som Claude, Codex och Copilot kan styra huvudet och kontrollera sitt arbete med skärmdumpar och loggar.
+• Öppen källkod under Apache 2.0-licensen: github.com/PatrikBichis/openhead
+
+Appen visar ansiktet på egen hand; för att styra det kör du OpenHead-verktygen (eller din egen kod) på en dator i samma nätverk. Håll fingret på ansiktet i 1,5 sekunder för att öppna inställningarna (på engelska).

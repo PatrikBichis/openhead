@@ -2,9 +2,10 @@
 
     uv run --project python python tools/appstore_metadata.py [--dry-run] [--build N]
 
-metadata/en-US/        App Store page: description, subtitle, promotional_text, keywords,
-                       support_url, marketing_url, privacy_policy_url (the version being
-                       prepared and the app info; not submitted)
+metadata/<locale>/     App Store page per language (en-US is the primary, sv-SE Swedish):
+                       name, description, subtitle, promotional_text, keywords, support_url,
+                       marketing_url, privacy_policy_url (the version being prepared and the
+                       app info; a missing language is created; not submitted)
 metadata/testflight/   beta_description (TestFlight app description) and whats_new
                        ("What to Test" for the newest build, or --build N)
 metadata/app.json      release type and categories; with copyright.txt, age_rating.json and
@@ -18,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -129,6 +131,41 @@ def prepare_version(asc: Asc, app: str, sync: Sync, locale: str) -> None:
                     "review notes")
 
 
+def store_page(asc: Asc, app: str, sync: Sync, store: Path) -> None:
+    """Name, subtitle and privacy policy (app info) and the page texts of the version being prepared."""
+    locale = store.name
+    info_fields = fields(store, {"name": "name", "subtitle": "subtitle", "privacy_policy_url": "privacyPolicyUrl"})
+    if info_fields:  # name, subtitle and privacy policy belong to the app info, not the version
+        infos = [i for i in asc.request("GET", f"/apps/{app}/appInfos")["data"]
+                 if i["attributes"].get("appStoreState") != "READY_FOR_SALE"]
+        for info in infos[:1]:
+            locs = [x for x in asc.request("GET", f"/appInfos/{info['id']}/appInfoLocalizations")["data"]
+                    if x["attributes"]["locale"] == locale]
+            sync.upsert("appInfoLocalizations", locs[0] if locs else None,
+                        info_fields if locs else {**info_fields, "locale": locale},
+                        {"relationships": {"appInfo": {"data": {"type": "appInfos", "id": info["id"]}}}},
+                        f"App Store name, subtitle and privacy policy, {locale}")
+    version_fields = fields(store, {"description": "description", "keywords": "keywords",
+                                    "promotional_text": "promotionalText",
+                                    "support_url": "supportUrl", "marketing_url": "marketingUrl"})
+    if version_fields:
+        versions = [v for v in asc.request("GET", f"/apps/{app}/appStoreVersions")["data"]
+                    if v["attributes"]["appStoreState"] in ("PREPARE_FOR_SUBMISSION",
+                                                            "DEVELOPER_REJECTED", "REJECTED",
+                                                            "METADATA_REJECTED")]
+        if not versions:
+            print(f"App Store page {locale}: no version in preparation; nothing to update")
+        for v in versions[:1]:
+            locs = [x for x in asc.request(
+                "GET", f"/appStoreVersions/{v['id']}/appStoreVersionLocalizations")["data"]
+                if x["attributes"]["locale"] == locale]
+            sync.upsert("appStoreVersionLocalizations", locs[0] if locs else None,
+                        version_fields if locs else {**version_fields, "locale": locale},
+                        {"relationships": {"appStoreVersion": {"data": {
+                            "type": "appStoreVersions", "id": v["id"]}}}},
+                        f"App Store page {locale}, version {v['attributes']['versionString']}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dry-run", action="store_true", help="show what would change")
@@ -169,36 +206,12 @@ def main() -> int:
                     {"relationships": {"build": {"data": {"type": "builds", "id": build["id"]}}}},
                     f"What to Test, build {build['attributes']['version']}")
 
-    # App Store page: subtitle (app info) and the version being prepared
-    info_fields = fields(store, {"subtitle": "subtitle", "privacy_policy_url": "privacyPolicyUrl"})
-    if info_fields:  # subtitle and privacy policy belong to the app info, not the version
-        infos = [i for i in asc.request("GET", f"/apps/{app}/appInfos")["data"]
-                 if i["attributes"].get("appStoreState") != "READY_FOR_SALE"]
-        for info in infos[:1]:
-            locs = [x for x in asc.request("GET", f"/appInfos/{info['id']}/appInfoLocalizations")["data"]
-                    if x["attributes"]["locale"] == locale]
-            if locs:
-                sync.upsert("appInfoLocalizations", locs[0], info_fields, {},
-                            "App Store subtitle and privacy policy")
-    version_fields = fields(store, {"description": "description", "keywords": "keywords",
-                                    "promotional_text": "promotionalText",
-                                    "support_url": "supportUrl", "marketing_url": "marketingUrl"})
-    if version_fields:
-        versions = [v for v in asc.request("GET", f"/apps/{app}/appStoreVersions")["data"]
-                    if v["attributes"]["appStoreState"] in ("PREPARE_FOR_SUBMISSION",
-                                                            "DEVELOPER_REJECTED", "REJECTED",
-                                                            "METADATA_REJECTED")]
-        if not versions:
-            print("App Store page: no version in preparation; nothing to update")
-        for v in versions[:1]:
-            locs = [x for x in asc.request(
-                "GET", f"/appStoreVersions/{v['id']}/appStoreVersionLocalizations")["data"]
-                if x["attributes"]["locale"] == locale]
-            sync.upsert("appStoreVersionLocalizations", locs[0] if locs else None,
-                        version_fields if locs else {**version_fields, "locale": locale},
-                        {"relationships": {"appStoreVersion": {"data": {
-                            "type": "appStoreVersions", "id": v["id"]}}}},
-                        f"App Store page, version {v['attributes']['versionString']}")
+    # App Store page, one folder per language
+    for folder in sorted(p for p in META.iterdir() if p.is_dir() and re.fullmatch(r"[a-z]{2}(-[A-Z]{2})?", p.name)):
+        try:
+            store_page(asc, app, sync, folder)
+        except SystemExit as exc:  # e.g. the version is in review and cannot change
+            print(f"App Store page {folder.name}: {exc}")
     prepare_version(asc, app, sync, locale)
     if args.dry_run:
         print("dry run: nothing changed")

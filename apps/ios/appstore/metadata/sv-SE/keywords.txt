@@ -1,0 +1,1 @@
+robot,robotik,ansikte,huvud,känslor,uttryck,ROS,python,AI,MCP,maker,HUD,ARKit,SLAM,GPS,kompass

@@ -1,0 +1,1 @@
+Slipp sensorkablarna: roboten får ett ansikte plus telefonens kamera, ansiktsspårning, GPS, kompass, barometer och ARKit-position (SLAM) över wifi. Öppen källkod.
