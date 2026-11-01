@@ -375,7 +375,11 @@ Mount the phone in landscape and start the app: the face fills the screen. A lon
 
 ## Status
 
-Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.2.0)): camera view with HUD, faces and ARKit pose on top of 0.1. Robot integrations pin a tag.
+Protocol `0.3.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.3.0)): GPS and environment sensors (`gps`, `env`) on top of 0.2's camera view with HUD, faces and ARKit pose. Robot integrations pin a tag:
+
+```bash
+uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python"
+```
 
 - [x] 1. Repo skeleton, local schema validation
 - [x] 2. Protocol schemas 0.1 with generated models and docs
@@ -389,7 +393,7 @@ Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 - [x] 10. Video, subtitles and a display test suite
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
 - [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
-- [x] 13. v0.3: `gps` and `env` streams (green on the simulator and on an iPhone 12, TestFlight build 11, with `camera.yaml`; tag open)
+- [x] 13. v0.3: `gps` and `env` streams (green on the simulator and on an iPhone 12, TestFlight build 11, with `camera.yaml`); tagged `0.3.0`
 
 ---
 
