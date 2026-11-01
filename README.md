@@ -22,6 +22,11 @@ OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone 
 </p>
 <p align="center"><a href="docs/media/openhead-preview.mp4">Watch with sound (mp4, 28 s)</a>: speech drives the mouth, emotions are separate commands.</p>
 
+<p align="center">
+  <a href="docs/media/desk-assistant.mp4"><img src="docs/media/desk-assistant-poster.jpg" alt="3D render: the OpenHead bench rig on a desk, an iPhone 12 on a four-servo neck following a person" width="640"></a>
+</p>
+<p align="center"><a href="docs/media/desk-assistant.mp4">A desk AI assistant (3D render, 41 s)</a>: the bench rig follows a face, talks, uses both cameras at once and streams its sensors to an agent. Real footage comes next.</p>
+
 | Cartoon | Minimal | Halloween |
 | --- | --- | --- |
 | ![Cartoon theme, happy](docs/media/cartoon-happy.png) | ![Minimal theme, surprised](docs/media/minimal-surprised.png) | ![Halloween theme, cackle](docs/media/halloween-cackle.png) |
@@ -485,7 +490,7 @@ openhead/
 ├── scenarios/              # YAML scenarios, run against simulator and device
 ├── examples/
 ├── docs/                   # website (GitHub Pages) · ios.md · dev-loop.md · themes.md · agents.md
-├── tools/                  # protocol.py · check.py (all local tests) · apple_setup.py · appstore_*.py · media.py
+├── tools/                  # protocol.py · check.py (all local tests) · apple_setup.py · appstore_*.py · media.py · promo/ (3D film, Blender)
 └── .github/workflows/      # ios-testflight (manual; the only workflow)
 ```
 
