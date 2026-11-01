@@ -41,6 +41,17 @@ SCENES = [  # (file, theme, emotion, gaze)
     ("05-cartoon-laughing", "cartoon", "laughing", (0, 0)),
     ("06-halloween-scared", "halloween", "scared", (-0.5, 0.2)),
 ]
+# Camera view scenes for the App Store: the HUD over the synthetic camera (two people).
+HUD_SCENES = [("07-hud-hunter", "hunter"), ("08-hud-flight", "flight")]
+HUD_FACES = [
+    {"id": 3, "bearing": 12, "elevation": -4, "size": 0.2, "confidence": 0.94,
+     "box": {"x": 0.26, "y": 0.2, "w": 0.16, "h": 0.34}},
+    {"id": 7, "bearing": -20, "elevation": 3, "size": 0.1, "confidence": 0.81,
+     "box": {"x": 0.68, "y": 0.28, "w": 0.09, "h": 0.19}},
+]
+HUD_VALUES = {"battery": 82, "charging": False, "thermal": "nominal", "heading": 47, "pitch": 4.5,
+              "roll": -3, "x": 0.4, "y": 0.02, "z": -1.2, "tracking": "normal", "mode": "capture",
+              "clients": 1}
 EMOTIONS = ["neutral", "happy", "curious", "thinking", "surprised", "sad", "angry", "sleepy",
             "scared", "mischievous", "confused", "shocked", "excited", "bored", "skeptical",
             "worried", "disgusted", "embarrassed", "proud", "determined", "relieved", "annoyed",
@@ -88,6 +99,15 @@ async def stills() -> None:
             for name, theme, emotion, gaze in SCENES:
                 await pose(face, theme, emotion, gaze)
                 save_png(await shot(face), APPSTORE / "screenshots" / device / f"{name}.png")
+            await face.set_theme("cartoon", 0)
+            await face.set_emotion("happy", 1.0, "replace", None)
+            for name, hud in HUD_SCENES:
+                await face.show_camera(hud)
+                await face.set_faces(HUD_FACES)
+                await face.set_hud_values(HUD_VALUES)
+                await asyncio.sleep(1.2)
+                save_png(await shot(face), APPSTORE / "screenshots" / device / f"{name}.png")
+            await face.clear()
         finally:
             await face.close()
 

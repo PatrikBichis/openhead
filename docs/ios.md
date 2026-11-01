@@ -86,7 +86,9 @@ uv run --project python python tools/appstore_metadata.py --dry-run   # what wou
 uv run --project python python tools/appstore_metadata.py             # push; --build N for What to Test
 ```
 
-It updates the version being prepared and the app info (nothing is submitted for review). The privacy policy, support and marketing URLs point to the project site, GitHub Pages from `docs/` on `main` (`index.html`, `privacy.html`, `support.html`): https://patrikbichis.github.io/openhead/. Before the first App Store submission: the App Privacy answers in App Store Connect (not in the API; the app collects no data), age rating, price and availability, and the version number (App Store Connect has `1.0`, the builds are `0.1.0`).
+It updates the version being prepared and the app info (nothing is submitted for review): version number from `protocol/VERSION` with its newest valid build, release type (manual), copyright, categories, age rating (`age_rating.json`) and review notes (`review_notes.txt`). Builds must be exported with `testFlightInternalTestingOnly` false (`ExportOptions.plist`) to be selectable.
+
+Screenshots (8 per size, including two camera HUDs) and the app preview are uploaded with `uv run --project python python tools/appstore_media.py`; it replaces each set. The privacy policy, support and marketing URLs point to the project site, GitHub Pages from `docs/` on `main` (`index.html`, `privacy.html`, `support.html`): https://patrikbichis.github.io/openhead/. Before the first App Store submission: the App Privacy answers in App Store Connect (not in the API; the app collects no data), age rating, price and availability, and the version number (App Store Connect has `1.0`, the builds are `0.1.0`).
 
 ## Running on a robot
 
