@@ -389,7 +389,7 @@ Protocol `0.2.0` is tagged ([release](https://github.com/PatrikBichis/openhead/r
 - [x] 10. Video, subtitles and a display test suite
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
 - [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
-- [ ] 13. v0.3: `gps` and `env` streams (green on the simulator; device check and tag open)
+- [x] 13. v0.3: `gps` and `env` streams (green on the simulator and on an iPhone 12, TestFlight build 11, with `camera.yaml`; tag open)
 
 ---
 
