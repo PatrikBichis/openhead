@@ -343,6 +343,14 @@ args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@
   }
 }</pre>
         </details>
+        <details class="agent">
+          <summary>Över nätverket (HTTP)</summary>
+          <p>För en agent på en annan dator: kör servern på robotens dator med en token. Utan <code>--token</code> lyssnar den bara på 127.0.0.1.</p>
+          <pre>openhead mcp --http 0.0.0.0:8800 --token "$(openssl rand -hex 16)" --device 192.168.1.20
+
+# Claude Code on the other machine
+claude mcp add --transport http openhead http://robot-pc.local:8800/mcp --header "Authorization: Bearer &lt;token&gt;"</pre>
+        </details>
         <p class="note" style="margin-top: 20px"><strong>Första gången:</strong> be agenten para med huvudet och läs upp den sexsiffriga koden från telefonen. Prova sedan ”Se nyfiken ut och skriv <em>Hej</em> som undertext”, ”Visa kameran med HUD:en hunter; hur många personer ser du?” eller ”Åt vilket håll pekar huvudet, och vad är lufttrycket?”</p>
       </div>
     </section>

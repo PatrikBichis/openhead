@@ -135,9 +135,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--idle", action=argparse.BooleanOptionalAction, default=None,
                    help="idle motion (default: on with a window, off headless)")
 
-    p = sub.add_parser("mcp", parents=[common], help="MCP server (stdio) exposing the head to agents")
+    p = sub.add_parser("mcp", parents=[common], help="MCP server (stdio, or HTTP) exposing the head to agents")
     p.add_argument("--selftest", action="store_true",
                    help="run every tool against a headless simulator and exit")
+    p.add_argument("--http", metavar="[HOST:]PORT",
+                   help="serve Streamable HTTP at http://HOST:PORT/mcp instead of stdio (HOST defaults to 127.0.0.1)")
+    p.add_argument("--token", default=os.environ.get("OPENHEAD_MCP_TOKEN"),
+                   help="bearer token clients must send with --http; required on a network address "
+                        "(default $OPENHEAD_MCP_TOKEN)")
 
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO if args.verbose or args.cmd == "sim" else logging.WARNING,
@@ -167,13 +172,18 @@ async def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "mcp":
         try:
             from ..mcp.selftest import selftest
-            from ..mcp.server import serve_stdio
+            from ..mcp.server import serve_http, serve_stdio
         except ImportError as exc:
             print(f"the MCP server needs the [mcp] extra: {exc}", file=sys.stderr)
             return 1
         if args.selftest:
             return await selftest()
-        await serve_stdio(args.device, args.client.replace("openhead-cli", "openhead-mcp"))
+        client = args.client.replace("openhead-cli", "openhead-mcp")
+        if args.http:
+            host, _, port = args.http.rpartition(":")
+            await serve_http(args.device, client, host or "127.0.0.1", int(port), args.token)
+        else:
+            await serve_stdio(args.device, client)
         return 0
 
     host, port = await resolve_device(args.device)

@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import hmac
 import json
 import logging
+import sys
 import time
 from collections import deque
 from pathlib import Path
@@ -429,5 +431,49 @@ async def serve_stdio(device: str, client: str) -> None:
     link = HeadLink(device, client=client)
     try:
         await build_server(link).run_stdio_async()
+    finally:
+        await link.close()
+
+
+LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
+class BearerAuth:
+    """ASGI wrapper: every HTTP request needs `Authorization: Bearer <token>`."""
+
+    def __init__(self, app, token: str):
+        self.app = app
+        self.expected = f"Bearer {token}".encode()
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] == "http":
+            given = dict(scope["headers"]).get(b"authorization", b"")
+            if not hmac.compare_digest(given, self.expected):
+                await send({"type": "http.response.start", "status": 401,
+                            "headers": [(b"content-type", b"text/plain"), (b"www-authenticate", b"Bearer")]})
+                await send({"type": "http.response.body", "body": b"missing or wrong bearer token"})
+                return
+        await self.app(scope, receive, send)
+
+
+async def serve_http(device: str, client: str, host: str, port: int, token: str | None) -> None:
+    """Streamable HTTP at http://host:port/mcp, for agents on another machine. Anyone who reaches
+    it controls the head, so a non-loopback address needs a bearer token."""
+    import uvicorn
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    if host not in LOOPBACK and not token:
+        raise SystemExit("--http on a network address needs --token (or OPENHEAD_MCP_TOKEN)")
+    link = HeadLink(device, client=client)
+    # Loopback keeps the SDK's DNS-rebinding check; on the network the token protects the server.
+    security = None if host in LOOPBACK else TransportSecuritySettings(enable_dns_rebinding_protection=False)
+    app = build_server(link).streamable_http_app(host=host, transport_security=security)
+    if token:
+        app = BearerAuth(app, token)
+    server = uvicorn.Server(uvicorn.Config(app, host=host, port=port, log_level="warning"))
+    print(f"MCP over HTTP: http://{host}:{port}/mcp" + (" (bearer token required)" if token else ""),
+          file=sys.stderr)
+    try:
+        await server.serve()
     finally:
         await link.close()

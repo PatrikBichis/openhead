@@ -172,6 +172,15 @@ args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@
 }
 ```
 
+**Over the network (Streamable HTTP)**, for an agent on another machine than the one next to the robot. Run the server on the robot's computer with a token, and point the agent at it:
+
+```bash
+openhead mcp --http 0.0.0.0:8800 --token "$(openssl rand -hex 16)" --device 192.168.1.20
+claude mcp add --transport http openhead http://robot-pc.local:8800/mcp --header "Authorization: Bearer <token>"
+```
+
+Without `--token` the HTTP server only listens on `127.0.0.1`; anyone who reaches it controls the head, so keep the token secret.
+
 **First time:** ask the agent to pair with the head and read it the 6-digit code shown on the phone (the `pair` tool); the token is saved in `~/.openhead/tokens.json` and shared with the `openhead` CLI. Then try:
 
 - "Look curious, then write *Hello, I am OpenHead* as a subtitle and move the mouth with it."
@@ -395,7 +404,7 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 | Tool `run_scenario(path)` | Runs a YAML scenario and returns the report with screenshots |
 | Resources `openhead://status`, `openhead://themes`, `openhead://logs` | Latest cached value |
 
-High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use the WebSocket API. Transport is stdio; Streamable HTTP is planned. Setup for Claude Code, Claude Desktop, Codex, Cursor, VS Code and Gemini CLI: [Use it from an AI agent](#use-it-from-an-ai-agent).
+High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use the WebSocket API. Transports: stdio, and Streamable HTTP with `--http [HOST:]PORT` (a bearer token is required on a network address). Setup for Claude Code, Claude Desktop, Codex, Cursor, VS Code and Gemini CLI: [Use it from an AI agent](#use-it-from-an-ai-agent).
 
 ```bash
 openhead mcp --device auto        # stdio, for Claude Code / Claude Desktop / local agents

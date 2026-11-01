@@ -342,6 +342,14 @@ args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@
   }
 }</pre>
         </details>
+        <details class="agent">
+          <summary>Over the network (HTTP)</summary>
+          <p>For an agent on another machine: run the server on the robot's computer with a token. Without <code>--token</code> it only listens on 127.0.0.1.</p>
+          <pre>openhead mcp --http 0.0.0.0:8800 --token "$(openssl rand -hex 16)" --device 192.168.1.20
+
+# Claude Code on the other machine
+claude mcp add --transport http openhead http://robot-pc.local:8800/mcp --header "Authorization: Bearer &lt;token&gt;"</pre>
+        </details>
         <p class="note" style="margin-top: 20px"><strong>First time:</strong> ask the agent to pair with the head and read it the 6-digit code on the phone. Then try “Look curious and write <em>Hello</em> as a subtitle”, “Show the camera with the hunter HUD; how many people do you see?” or “Which way is the head facing, and what is the air pressure?”</p>
       </div>
     </section>
