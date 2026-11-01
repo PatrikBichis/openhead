@@ -199,3 +199,9 @@ button.btn { font: inherit; font-weight: 600; background: none; cursor: pointer;
 .gh { flex: none; }
 .ghlink { display: inline-flex; align-items: center; gap: 6px; }
 table.data code { white-space: nowrap; }
+
+/* AI agent setup: one folding box per agent */
+details.agent { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 4px 18px; margin: 10px 0; }
+details.agent summary { font-weight: 700; padding: 12px 0; cursor: pointer; }
+details.agent p { margin: 0 0 10px; font-size: 15px; color: var(--ink-2); }
+details.agent pre { margin: 0 0 16px; white-space: pre-wrap; word-break: break-word; font-size: 13px; }

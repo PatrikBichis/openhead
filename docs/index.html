@@ -25,6 +25,7 @@
         <a href="#sensors">Sensors</a>
         <a href="#how">How it works</a>
         <a href="#developers">Developers</a>
+        <a href="#agents">AI agents</a>
         <a href="support.html">Support</a>
       </nav>
       <a class="lang" href="sv/" hreflang="sv" lang="sv">Svenska</a>
@@ -282,6 +283,66 @@ openhead subtitle "Hello! I write when I can't speak." --mouth
 openhead show clip.mp4 --overlay face-corner
 openhead camera hunter --follow
 openhead watch faces -n 5</pre>
+      </div>
+    </section>
+
+    <section id="agents" class="alt">
+      <div class="wrap">
+        <h2>Use it from an AI agent</h2>
+        <p class="sub">OpenHead includes an MCP server, so an AI agent can drive the head and check its own work: emotions, subtitles, the camera with a HUD, who is in front of it, GPS and compass, screenshots. It runs on your computer and talks to the phone over Wi-Fi. You need <a href="https://docs.astral.sh/uv/">uv</a> and the head's address from the app's settings (or <code>auto</code>).</p>
+        <details class="agent">
+          <summary>Claude Code</summary>
+          <p>In a terminal:</p>
+          <pre>claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20</pre>
+        </details>
+        <details class="agent">
+          <summary>Claude Desktop</summary>
+          <p>Settings → Developer → Edit Config (<code>claude_desktop_config.json</code>), then restart. If <code>uvx</code> is not found, give its full path.</p>
+          <pre>{
+  "mcpServers": {
+    "openhead": {
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}</pre>
+        </details>
+        <details class="agent">
+          <summary>Codex CLI</summary>
+          <p>In a terminal, or in <code>~/.codex/config.toml</code>:</p>
+          <pre>codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+
+# or ~/.codex/config.toml
+[mcp_servers.openhead]
+command = "uvx"
+args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]</pre>
+        </details>
+        <details class="agent">
+          <summary>Cursor and Gemini CLI</summary>
+          <p>Cursor: <code>~/.cursor/mcp.json</code>. Gemini CLI: <code>~/.gemini/settings.json</code>. The same block as Claude Desktop:</p>
+          <pre>{
+  "mcpServers": {
+    "openhead": {
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}</pre>
+        </details>
+        <details class="agent">
+          <summary>VS Code with GitHub Copilot</summary>
+          <p>Agent mode, <code>.vscode/mcp.json</code>:</p>
+          <pre>{
+  "servers": {
+    "openhead": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}</pre>
+        </details>
+        <p class="note" style="margin-top: 20px"><strong>First time:</strong> ask the agent to pair with the head and read it the 6-digit code on the phone. Then try “Look curious and write <em>Hello</em> as a subtitle”, “Show the camera with the hunter HUD; how many people do you see?” or “Which way is the head facing, and what is the air pressure?”</p>
       </div>
     </section>
 

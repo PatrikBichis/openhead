@@ -25,6 +25,7 @@
         <a href="#sensors">Sensorer</a>
         <a href="#how">Så fungerar det</a>
         <a href="#developers">Utvecklare</a>
+        <a href="#agents">AI-agenter</a>
         <a href="support.html">Support</a>
       </nav>
       <a class="lang" href="../" hreflang="en" lang="en">English</a>
@@ -283,6 +284,66 @@ openhead subtitle "Hej! Jag skriver när jag inte kan prata." --mouth
 openhead show clip.mp4 --overlay face-corner
 openhead camera hunter --follow
 openhead watch faces -n 5</pre>
+      </div>
+    </section>
+
+    <section id="agents" class="alt">
+      <div class="wrap">
+        <h2>Använd det från en AI-agent</h2>
+        <p class="sub">OpenHead har en MCP-server, så att en AI-agent kan styra huvudet och kontrollera sitt arbete: känslor, undertexter, kameran med HUD, vem som står framför, GPS och kompass, skärmdumpar. Den körs på din dator och pratar med telefonen över wifi. Du behöver <a href="https://docs.astral.sh/uv/">uv</a> och huvudets adress från appens inställningar (eller <code>auto</code>).</p>
+        <details class="agent">
+          <summary>Claude Code</summary>
+          <p>I en terminal:</p>
+          <pre>claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20</pre>
+        </details>
+        <details class="agent">
+          <summary>Claude Desktop</summary>
+          <p>Settings → Developer → Edit Config (<code>claude_desktop_config.json</code>), starta sedan om. Om <code>uvx</code> inte hittas, ange hela sökvägen.</p>
+          <pre>{
+  "mcpServers": {
+    "openhead": {
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}</pre>
+        </details>
+        <details class="agent">
+          <summary>Codex CLI</summary>
+          <p>I en terminal, eller i <code>~/.codex/config.toml</code>:</p>
+          <pre>codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+
+# or ~/.codex/config.toml
+[mcp_servers.openhead]
+command = "uvx"
+args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]</pre>
+        </details>
+        <details class="agent">
+          <summary>Cursor och Gemini CLI</summary>
+          <p>Cursor: <code>~/.cursor/mcp.json</code>. Gemini CLI: <code>~/.gemini/settings.json</code>. Samma block som för Claude Desktop:</p>
+          <pre>{
+  "mcpServers": {
+    "openhead": {
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}</pre>
+        </details>
+        <details class="agent">
+          <summary>VS Code med GitHub Copilot</summary>
+          <p>Agentläge, <code>.vscode/mcp.json</code>:</p>
+          <pre>{
+  "servers": {
+    "openhead": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}</pre>
+        </details>
+        <p class="note" style="margin-top: 20px"><strong>Första gången:</strong> be agenten para med huvudet och läs upp den sexsiffriga koden från telefonen. Prova sedan ”Se nyfiken ut och skriv <em>Hej</em> som undertext”, ”Visa kameran med HUD:en hunter; hur många personer ser du?” eller ”Åt vilket håll pekar huvudet, och vad är lufttrycket?”</p>
       </div>
     </section>
 

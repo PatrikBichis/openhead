@@ -14,7 +14,7 @@ OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone 
   <sub>Scan with an iPhone to open <i>OpenHead Robot Face</i> on the App Store. The page opens when the app is released; until then it is in beta on TestFlight.</sub>
 </p>
 <p align="center">
-  <b><a href="https://patrikbichis.github.io/openhead/">Website</a></b> · <a href="https://patrikbichis.github.io/openhead/sv/">På svenska</a> · <a href="https://patrikbichis.github.io/openhead/privacy.html">Privacy policy</a> · <a href="https://patrikbichis.github.io/openhead/support.html">Support</a> · <a href="https://github.com/PatrikBichis/openhead/releases/latest">Latest release</a>
+  <b><a href="https://patrikbichis.github.io/openhead/">Website</a></b> · <a href="https://patrikbichis.github.io/openhead/sv/">På svenska</a> · <a href="https://patrikbichis.github.io/openhead/privacy.html">Privacy policy</a> · <a href="https://patrikbichis.github.io/openhead/support.html">Support</a> · <a href="#use-it-from-an-ai-agent">Use with an AI agent</a> · <a href="https://github.com/PatrikBichis/openhead/releases/latest">Latest release</a>
 </p>
 
 <p align="center">
@@ -110,6 +110,76 @@ Mount the phone in landscape and start the app: the face fills the screen. A lon
 | iPad mini (5th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
 | iPad (7th gen+) | yes | yes | ARKit | on-device vision | Wi-Fi location (GNSS on cellular models), barometer, compass |
 | Desktop simulator | yes | synthetic | synthetic | synthetic | synthetic |
+
+## Use it from an AI agent
+
+OpenHead includes an MCP server, so an AI agent can drive the head and check its own work: set emotions, write subtitles, show the camera with a HUD, see who is in front of it, read GPS and the compass, and take screenshots. It runs on your computer and talks to the phone over Wi-Fi; nothing goes through a cloud service.
+
+You need [uv](https://docs.astral.sh/uv/) and the head's address (shown in the app's settings; `auto` finds it with mDNS). Every agent starts the same command, straight from the release tag:
+
+```bash
+uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+```
+
+**Claude Code**
+
+```bash
+claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+```
+
+**Claude Desktop**: Settings → Developer → Edit Config (`claude_desktop_config.json`), then restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "openhead": {
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}
+```
+
+If Claude Desktop cannot find `uvx`, put its full path in `command` (`where uvx` on Windows, `which uvx` on macOS).
+
+**Codex CLI**
+
+```bash
+codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+```
+
+or in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.openhead]
+command = "uvx"
+args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+```
+
+**Cursor** (`~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project) and **Gemini CLI** (`~/.gemini/settings.json`): the same `mcpServers` block as Claude Desktop.
+
+**VS Code with GitHub Copilot** (agent mode), `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "openhead": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+    }
+  }
+}
+```
+
+**First time:** ask the agent to pair with the head and read it the 6-digit code shown on the phone (the `pair` tool); the token is saved in `~/.openhead/tokens.json` and shared with the `openhead` CLI. Then try:
+
+- "Look curious, then write *Hello, I am OpenHead* as a subtitle and move the mouth with it."
+- "Show the camera with the hunter HUD. How many people do you see, and where?"
+- "Where is the head, which way is it facing, and what is the air pressure?"
+- "Take a screenshot and check that the face looks happy." (needs dev mode on the phone)
+
+No phone yet? Clone the repo and run `uv run --project python openhead sim`, then use `--device localhost` (pairing code `0000`). The tools are listed under [MCP server](#mcp-server).
 
 ---
 
@@ -325,7 +395,7 @@ Voice is **not** part of a theme. A *persona* (theme + resting emotion + TTS voi
 | Tool `run_scenario(path)` | Runs a YAML scenario and returns the report with screenshots |
 | Resources `openhead://status`, `openhead://themes`, `openhead://logs` | Latest cached value |
 
-High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use the WebSocket API. Transport is stdio; Streamable HTTP is planned.
+High-rate streams (IMU, envelope) are intentionally not exposed over MCP; use the WebSocket API. Transport is stdio; Streamable HTTP is planned. Setup for Claude Code, Claude Desktop, Codex, Cursor, VS Code and Gemini CLI: [Use it from an AI agent](#use-it-from-an-ai-agent).
 
 ```bash
 openhead mcp --device auto        # stdio, for Claude Code / Claude Desktop / local agents
