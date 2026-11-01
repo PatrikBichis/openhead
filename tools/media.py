@@ -143,6 +143,29 @@ async def stills() -> None:
         await face.close()
 
 
+CREATIVE = [  # App Store creative assets: (file, points, pixel ratio, faces)
+    ("header", (1920, 823), 2, HUD_FACES),  # product page header, 21:9, 3840 x 1646
+    ("search-results", (1920, 1280), 1,     # search results, 3:2; second person clear of the text
+     [HUD_FACES[0], {**HUD_FACES[1], "box": {"x": 0.56, "y": 0.36, "w": 0.09, "h": 0.14}}]),
+]
+
+
+async def creative() -> None:
+    """Header and search-results art: the camera view with a HUD, the face in a corner."""
+    for name, size, ratio, faces in CREATIVE:
+        face = BrowserFace(size=size, idle=False, pixel_ratio=ratio)
+        await face.start()
+        try:
+            await pose(face, "cartoon", "happy", (0.35, 0))
+            await face.show_camera("hunter", overlay="face-corner")
+            await face.set_faces(faces)
+            await face.set_hud_values(HUD_VALUES)
+            await asyncio.sleep(1.2)
+            save_png(await shot(face), APPSTORE / "creative" / f"{name}.png")
+        finally:
+            await face.close()
+
+
 LINES = {
     "intro": "Hi! I'm Open Head. A phone that works as a robot's face.",
     "feel": "I can show how I feel.",
@@ -262,11 +285,13 @@ def readme_media(preview_mp4: Path) -> None:
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("what", nargs="*", choices=["stills", "preview"],
-                        default=["stills", "preview"])
+    parser.add_argument("what", nargs="*", choices=["stills", "creative", "preview"],
+                        default=["stills", "creative", "preview"])
     args = parser.parse_args()
     if "stills" in args.what:
         await stills()
+    if "creative" in args.what:
+        await creative()
     if "preview" in args.what:
         await preview()
 
