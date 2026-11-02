@@ -1,16 +1,19 @@
 """Render the phone screen for every frame of the promo with the real face engine.
 
     cd python
-    uv run python ../tools/promo/screen.py OUT_DIR [--every N]
+    uv run python ../tools/promo/screen.py OUT_DIR [--every N] [--voice ../build/promo/voice.json]
 
 Drives face/dist in headless Chromium in test mode (no clock: the engine advances exactly
-1/30 s per frame), with the emotions, gaze, subtitle and camera view from story.py.
+1/30 s per frame), with the emotions, gaze, spoken subtitles and camera view from story.py.
+With voice.py's output the subtitles appear when each line is heard and the mouth follows the
+voice's loudness (the envelope), as on the phone; without it the mouth follows the text.
 """
 
 from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import sys
 from pathlib import Path
 
@@ -29,7 +32,15 @@ async def main() -> None:
     p.add_argument("out", type=Path)
     p.add_argument("--every", type=int, default=1, help="render every Nth frame (previews)")
     p.add_argument("--frames", type=str, help="a:b, only these frames")
+    p.add_argument("--voice", type=Path, help="voice.json from voice.py")
     args = p.parse_args()
+    voice = json.loads(args.voice.read_text(encoding="utf-8")) if args.voice else None
+    said = {}  # film frame -> subtitle text, when the voice says it
+    if voice:
+        heads = [c for c in voice["clips"] if c["who"] == "head"]
+        cues = [(s, v) for s in story.SCENES for _, k, v in s.cues if k == "say"]
+        for clip, (_, text) in zip(heads, cues, strict=True):
+            said[int(clip["start"] * story.FPS)] = text
     args.out.mkdir(parents=True, exist_ok=True)
 
     face = BrowserFace(size=(844, 390), pixel_ratio=2)
@@ -55,11 +66,22 @@ async def main() -> None:
                 await page.evaluate("(v) => window.openhead.setHudValues(v)", HUD_VALUES)
             elif scene is not None and scene.screen == "camera":
                 await page.evaluate("() => window.openhead.show('face')")
-            if s.subtitle:
-                await page.evaluate("(t) => window.openhead.subtitle(t, {mouth: true})", s.subtitle)
-            elif scene is not None and scene.subtitle:
+            if scene is not None and any(k == "say" for _, k, _ in scene.cues):
                 await page.evaluate("() => window.openhead.subtitle('', {mode: 'clear'})")
             scene = s
+        for at, kind, value in s.cues:
+            if int((s.start + at) * story.FPS) == n:
+                if kind == "emotion":
+                    await page.evaluate("([e]) => window.openhead.setEmotion(e, 1, 'replace')", [value])
+                elif kind == "say" and not voice:
+                    await page.evaluate("(t) => window.openhead.subtitle(t, {mode: 'append', mouth: true})",
+                                        value)
+                else:
+                    await page.evaluate("() => window.openhead.subtitle('', {mode: 'clear'})")
+        if n in said:
+            await page.evaluate("(t) => window.openhead.subtitle(t, {mode: 'append'})", said[n])
+        if voice and voice["envelope"][n] > 0.03:
+            await page.evaluate("(v) => window.openhead.setEnvelope(v)", voice["envelope"][n])
         if s.screen == "camera":
             bearing, elevation = story.face_bearing(f)
             size = 0.16

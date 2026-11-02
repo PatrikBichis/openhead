@@ -7,6 +7,7 @@ head's (x forward, y left, z up, metres, desk at z = 0).
 
 from __future__ import annotations
 
+import itertools
 import math
 from dataclasses import dataclass, field
 
@@ -35,38 +36,55 @@ class Scene:
     sensors: tuple[str, ...] = ()
     screen: str = "face"      # face | camera
     emotion: str = "neutral"
-    subtitle: str = ""
+    # (seconds into the scene, kind, value): kind is emotion, say (subtitle with the mouth,
+    # appended) or clear, as an agent's speech.say would play them on the phone.
+    cues: tuple[tuple[float, str, str], ...] = ()
 
+
+HEARD = "Tell me a joke!"
+SAY = "[happy] Why did the robot go on holiday? [pause] It needed to recharge! [laugh]"
 
 SCENES = [
     Scene("intro", 0, 5, "OpenHead", "An iPhone becomes a robot head. Here: a desk AI assistant.",
           (), emotion="happy"),
-    Scene("follow", 5, 12.5, "Face tracking", "The front camera finds you; the neck and the eyes follow.",
+    Scene("follow", 5, 12, "Face tracking", "The front camera finds you; the neck and the eyes follow.",
           ("front",), emotion="curious"),
-    Scene("talk", 12.5, 18.5, "Talks and shows text", "Subtitles with a moving mouth; sound goes to the speaker.",
-          ("front", "speaker"), emotion="happy", subtitle="Your 10:00 meeting starts in five minutes."),
-    Scene("sensing", 18.5, 26, "Front and back camera at once",
+    Scene("listen", 12, 16.5, "Listens", "Speech to text on the phone; the words go to your agent.",
+          ("front", "mic"), emotion="curious", cues=((3.0, "emotion", "thinking"),)),
+    Scene("talk", 16.5, 24, "Talks, with feeling",
+          "Its own voice, a mouth that follows it, and emotions where the text says so.",
+          ("front", "speaker"), emotion="happy",
+          cues=((0.3, "say", "Why did the robot go on holiday?"), (2.9, "say", " It needed to recharge!"),
+                (5.0, "emotion", "laughing"), (5.0, "say", " Ha ha ha!"))),
+    Scene("sensing", 24, 31, "Front and back camera at once",
           "ARKit: world tracking with the back camera, your face with the front.",
           ("front", "back", "imu"), emotion="focused"),
-    Scene("camera", 26, 31, "Camera view with HUD", "What the head sees, with faces, compass and horizon.",
+    Scene("walk", 31, 40.5, "Knows where it is",
+          "On a walking robot (Open Duck Mini), ARKit gives position and heading to the agent.",
+          ("back", "imu", "wifi"), emotion="excited"),
+    Scene("camera", 40.5, 45.5, "Camera view with HUD", "What the head sees, with faces, compass and horizon.",
           ("front", "imu", "compass"), screen="camera", emotion="neutral"),
-    Scene("sensors", 31, 37, "Every sensor, streamed to your agent",
-          "IMU, compass, barometer and GPS over Wi-Fi, to Python or any MCP agent.",
+    Scene("sensors", 45.5, 51.5, "Every sensor, streamed to your agent",
+          "IMU, compass, barometer, GPS, microphone and speaker, to Python or any MCP agent.",
           ("imu", "compass", "barometer", "gps", "wifi"), emotion="excited"),
-    Scene("end", 37, 41, "OpenHead", "Free on the App Store · open source on GitHub", (), emotion="happy"),
+    Scene("end", 51.5, 55.5, "OpenHead", "Free on the App Store · open source on GitHub", (), emotion="happy"),
 ]
 LENGTH = SCENES[-1].end
 FRAMES = int(LENGTH * FPS)
+WALK = next(s for s in SCENES if s.key == "walk")
+DUCK_SECONDS = WALK.end - WALK.start + 0.5
 
 SENSORS = [  # (key, label, colour)
     ("front", "Front TrueDepth camera", TEAL),
     ("back", "Back camera + ARKit SLAM", GOLD),
+    ("mic", "Microphone + speech to text", TEAL),
+    ("speaker", "Speaker + voice", NAVY),
     ("imu", "Accelerometer + gyroscope", CORAL),
     ("compass", "Magnetometer / compass", CORAL),
     ("barometer", "Barometer", CORAL),
     ("gps", "GPS / GNSS", CORAL),
-    ("speaker", "Speaker (Bluetooth)", NAVY),
     ("wifi", "Wi-Fi link to the agent", NAVY),
+    ("lidar", "LiDAR depth: Pro, optional (0.5)", INK_2),  # never lit: not in the app yet
 ]
 
 HEAD = (0.075, 0.0, 0.29)        # roughly the phone's centre with the neck at rest
@@ -90,13 +108,22 @@ def mix(a: float, b: float, k: float) -> float:
     return a + (b - a) * k
 
 
+def _sway(t: float) -> float:
+    """How far the person moves about: a lot while being followed, little while talking."""
+    keys = [(5, 0.0), (6, 1.0), (12, 1.0), (13, 0.35), (23.5, 0.35), (24.5, 1.0), (45.5, 1.0), (47.5, 0.0)]
+    for (t0, a0), (t1, a1) in itertools.pairwise(keys):
+        if t < t1:
+            return a0 if t < t0 else mix(a0, a1, smooth((t - t0) / (t1 - t0)))
+    return keys[-1][1]
+
+
 def person(t: float) -> tuple[float, float, float]:
     """Head of the person at the desk: drifts in front of the rig during face tracking."""
     base = (0.62, 0.05, 0.43)
     if t < 5:
         return base
     u = t - 5
-    y = 0.05 + 0.28 * math.sin(u * 0.75) * (1 if t < 31 else max(0.0, 1 - (t - 31) / 2))
+    y = 0.05 + 0.28 * math.sin(u * 0.75) * _sway(t)
     z = 0.43 + 0.04 * math.sin(u * 1.3 + 0.4)
     x = 0.62 - 0.06 * math.sin(u * 0.4)
     return (x, y, z)
@@ -112,7 +139,7 @@ def _aim(target: tuple[float, float, float]) -> tuple[float, float]:
 def look_target(t: float) -> tuple[float, float, float]:
     """Where the head wants to look."""
     s = scene_at(t)
-    if s.key in ("follow", "talk", "camera"):
+    if s.key in ("follow", "listen", "talk", "camera", "walk"):
         return person(t)
     if s.key == "sensing":
         u = (t - s.start) / (s.end - s.start)
@@ -170,6 +197,8 @@ def frame(n: int) -> Frame:
         roll = 0.18 * math.sin((t - s.start) * 2.2)
     if s.key == "talk":  # small nods while speaking
         pitch += 0.05 * math.sin((t - s.start) * 5.0)
+    if s.key == "listen":  # a listening tilt
+        roll = 0.12 * smooth((t - s.start) / 0.8)
     # Split the head's pitch between the neck and the head (the neck leans a little forward).
     neck = 0.12 + 0.35 * pitch
     head = 0.65 * pitch

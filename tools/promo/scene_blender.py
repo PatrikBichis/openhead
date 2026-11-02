@@ -1,18 +1,20 @@
 """Build and render the promo's 3D scene in Blender from the bench head's MuJoCo model.
 
     blender -b -P tools/promo/scene_blender.py -- --rig ../inf-open-duck-mini-v2/cad/benchhead \
-        --screen build/promo/screen --assets build/promo/assets --out build/promo/frames \
-        [--frames 0:1230] [--every 1] [--scale 100] [--save scene.blend]
+        --screen build/promo/screen --assets build/promo/assets --duck build/promo/duck.json \
+        --out build/promo/frames [--frames 0:1665] [--scale 100] [--save scene.blend]
 
 The rig (four STS3215 in Open Duck's neck, the phone holder, the tower) comes from
 `out/benchhead.xml` and its STL files; the joints move as story.py says, and the phone's
-screen plays the frames screen.py rendered with the real face engine.
+screen plays the frames screen.py rendered with the real face engine. The walking scene
+replays Open Duck Mini with the same head, as duck_walk.py recorded it in MuJoCo.
 """
 
 from __future__ import annotations
 
 import argparse
 import contextlib
+import json
 import math
 import random
 import sys
@@ -549,25 +551,31 @@ def face_bracket(person_root):
     return objs
 
 
-def speaker_rings(center: Vector, total):
+def sound_rings(name, parent, origin: Vector, scene: str, color, total, travel=0.2):
+    """Rings that grow and travel along the parent's +x: a voice going out (the speaker) or
+    coming in (the microphone)."""
     objs = []
-    talk = next(iter(scene_range("talk")))
+    rng = next(iter(scene_range(scene)))
     for i in range(3):
-        bpy.ops.mesh.primitive_torus_add(major_radius=1, minor_radius=0.012, location=center)
+        bpy.ops.mesh.primitive_torus_add(major_radius=1, minor_radius=0.05)
         ring = bpy.context.active_object
-        ring.name = f"sound {i}"
-        m = glow(f"sound {i}", story.CORAL, 4.0, 0.9)
+        ring.name = f"sound {name} {i}"
+        ring.parent = parent
+        ring.rotation_euler = (0, math.radians(90), 0)  # the ring stands across +x
+        m = glow(f"sound {name} {i}", color, 4.0, 0.9)
         assign(ring, m)
-        em = m.node_tree.nodes["Emission"]
-        for n in range(talk[0], talk[1] + 1, 2):
-            u = ((n - talk[0]) / story.FPS * 0.9 + i / 3) % 1.0
-            r = 0.07 + u * 0.16
+        fade = m.node_tree.nodes["Mix Shader"].inputs["Fac"]  # fade out, not down to a dark ring
+        for n in range(rng[0], rng[1] + 1, 2):
+            u = ((n - rng[0]) / story.FPS * 0.9 + i / 3) % 1.0
+            r = 0.012 + u * 0.035
             ring.scale = (r, r, r)
+            ring.location = origin + Vector((u * travel, 0, 0))
             ring.keyframe_insert("scale", frame=frame_no(n))
-            em.inputs["Strength"].default_value = 5.0 * (1 - u) ** 1.5
-            em.inputs["Strength"].keyframe_insert("default_value", frame=frame_no(n))
+            ring.keyframe_insert("location", frame=frame_no(n))
+            fade.default_value = 0.95 * (1 - u) ** 1.5
+            fade.keyframe_insert("default_value", frame=frame_no(n))
         constant_interp(ring)
-        key_visible(ring, [talk], total)
+        key_visible(ring, [rng], total)
         objs.append(ring)
     return objs
 
@@ -594,48 +602,190 @@ def compass_ring(total):
     return objs
 
 
-def feature_points(back_cam_obj, total):
-    """ARKit-style feature points that light up where the back camera has looked."""
-    random.seed(4)
+def room_points(seed, count, floor_box=None):
+    """Feature points on the backdrop and the desk, or on the backdrop and a patch of floor."""
+    random.seed(seed)
     pts = []
-    for _ in range(320):
+    for _ in range(count):
         kind = random.random()
-        if kind < 0.45:   # backdrop wall
+        if kind < 0.4:    # backdrop wall
             p = Vector((-1.25 - random.random() * 0.4, random.uniform(-1.6, 1.6), random.uniform(0.0, 1.3)))
-        elif kind < 0.8:  # desk surface
+        elif kind < 0.75 and floor_box is None:  # desk surface
             p = Vector((random.uniform(-0.48, 0.3), random.uniform(-0.9, 0.9), 0.001))
-        else:             # props and floor
-            p = Vector((random.uniform(-1.2, 0.8), random.uniform(-1.6, 1.6), -0.759))
+        else:             # floor
+            (x0, x1), (y0, y1) = floor_box or ((-1.2, 0.8), (-1.6, 1.6))
+            p = Vector((random.uniform(x0, x1), random.uniform(y0, y1), -0.759))
         pts.append(p)
-    sensing = scene_range("sensing")[0]
+    return pts
+
+
+def feature_points(cam_obj, forward: Vector, scene: str, pts, total, reach=3.0):
+    """ARKit-style feature points that light up where a back camera has looked."""
+    rng = scene_range(scene)[0]
     seen_at = [None] * len(pts)
-    scene = bpy.context.scene
-    for n in range(sensing[0], sensing[1], 2):
-        scene.frame_set(frame_no(n))
-        mw = back_cam_obj.matrix_world
+    sc = bpy.context.scene
+    for n in range(rng[0], rng[1], 2):
+        sc.frame_set(frame_no(n))
+        mw = cam_obj.matrix_world
         origin = mw.translation
-        fwd = (mw.to_3x3() @ Vector((-1, 0, 0))).normalized()
+        fwd = (mw.to_3x3() @ forward).normalized()
         for i, p in enumerate(pts):
             if seen_at[i] is None:
                 d = p - origin
-                if d.length < 3.0 and d.normalized().dot(fwd) > math.cos(math.radians(34)):
+                if d.length < reach and d.normalized().dot(fwd) > math.cos(math.radians(34)):
                     seen_at[i] = n
-    mesh = bpy.data.meshes.new("dot")
-    import bmesh
-    bm = bmesh.new()
-    bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.0055)
-    bm.to_mesh(mesh)
-    bm.free()
-    mat = glow("feature", story.GOLD, 8.0)
+    mesh = bpy.data.meshes.get("dot")
+    if mesh is None:
+        import bmesh
+        mesh = bpy.data.meshes.new("dot")
+        bm = bmesh.new()
+        bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.0055)
+        bm.to_mesh(mesh)
+        bm.free()
+        mesh.materials.append(glow("feature", story.GOLD, 8.0))
     objs = []
     for i, p in enumerate(pts):
         if seen_at[i] is None:
             continue
-        o = link(bpy.data.objects.new(f"pt{i}", mesh))
+        o = link(bpy.data.objects.new(f"pt {scene} {i}", mesh))
         o.location = p
-        o.data.materials.append(mat) if not o.data.materials else None
-        key_visible(o, [(seen_at[i], sensing[1])], total)
+        key_visible(o, [(seen_at[i], rng[1])], total)
         objs.append(o)
+    return objs
+
+
+# ---------------------------------------------------------------- Open Duck Mini, walking
+
+
+DUCK_ORIGIN = Vector((1.4, -1.9, -0.76))  # where the recorded walk starts, on the studio floor
+DUCK_YAW = math.radians(60)
+
+
+def duck_material(mesh: str):
+    if "iphone" in mesh:
+        return principled("iPhone", "#0c0d10", rough=0.22, metal=0.6, coat=0.6)
+    if "servo" in mesh or "motor" in mesh:
+        return principled("Servo", "#141416", rough=0.55)
+    if "lager" in mesh:
+        return principled("Steel", (0.62, 0.62, 0.64, 1), rough=0.22, metal=1.0)
+    if "tpu" in mesh:
+        return principled("TPU", "#1d1b22", rough=0.8)
+    return pla("PLA red", RED)
+
+
+class Duck:
+    """The recorded walk: objects keyed per frame, and the phone's path for the camera."""
+
+    def __init__(self, path: Path, total: int):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.frames = data["frames"]
+        self.a, self.b = scene_range("walk")[0]
+        self.root = empty("duck", None, DUCK_ORIGIN)
+        self.root.rotation_euler = (0, 0, DUCK_YAW)
+        self.world = Matrix.Translation(DUCK_ORIGIN) @ Matrix.Rotation(DUCK_YAW, 4, "Z")
+        self.objs = {}
+        for i, m in enumerate(data["meshes"]):
+            if m["file"]:
+                o = link(bpy.data.objects.new("duck " + m["mesh"], import_stl(Path(m["file"]), 1.0)))
+                assign(o, duck_material(m["mesh"]))
+                smooth_auto(o)
+            else:
+                o = empty("duck " + m["mesh"])
+            o.parent = self.root
+            o.rotation_mode = "QUATERNION"
+            self.objs[m["mesh"]] = (i, o)
+        for n in range(self.a, self.b + 1):
+            row = self.row(n)
+            for i, o in self.objs.values():
+                x, y, z, qw, qx, qy, qz = row[i]
+                o.location = (x, y, z)
+                o.rotation_quaternion = Quaternion((qw, qx, qy, qz))
+                o.keyframe_insert("location", frame=frame_no(n))
+                o.keyframe_insert("rotation_quaternion", frame=frame_no(n))
+        size = data["meshes"][self.objs["screen"][0]]["size"]
+        visible = [o for _, o in self.objs.values()] + [self.screen_plane(size)]
+        for o in visible:
+            key_visible(o, [(self.a, self.b)], total)
+
+    def row(self, n):
+        return self.frames[max(0, min(len(self.frames) - 1, n - self.a))]
+
+    def pose(self, name, n) -> tuple[Vector, Matrix]:
+        x, y, z, qw, qx, qy, qz = self.row(n)[self.objs[name][0]]
+        m = self.world @ Matrix.LocRotScale(Vector((x, y, z)), Quaternion((qw, qx, qy, qz)), None)
+        return m.translation, m.to_3x3()
+
+    def outward(self) -> float:
+        """+1 if the screen box's +z faces out of the phone, else -1."""
+        p, r = self.pose("screen", self.a)
+        rear, _ = self.pose("cam_rear", self.a)
+        return 1.0 if (r @ Vector((0, 0, 1))).dot(p - rear) > 0 else -1.0
+
+    def normal(self, n) -> Vector:
+        return self.pose("screen", n)[1] @ Vector((0, 0, self.outward()))
+
+    def phone(self, n) -> Vector:
+        return self.pose("screen", n)[0]
+
+    def screen_plane(self, size):
+        bpy.ops.mesh.primitive_plane_add(size=1)
+        scr = bpy.context.active_object
+        scr.name = "duck phone screen"
+        scr.parent = self.objs["screen"][1]
+        scr.scale = (size[0] * 2, size[1] * 2, 1)
+        s = self.outward()
+        scr.location = (0, 0, s * (size[2] + 0.0004))
+        if s < 0:
+            scr.rotation_euler = (math.radians(180), 0, 0)
+        scr.data.materials.append(bpy.data.materials["Phone screen"])
+        return scr
+
+    def rear_forward(self) -> Vector:
+        """The back camera's view direction in the cam_rear empty's own frame."""
+        _, r = self.pose("cam_rear", self.a)
+        return (r.transposed() @ -self.normal(self.a)).normalized()
+
+    def rear_up(self) -> Vector:
+        _, r = self.pose("cam_rear", self.a)
+        _, rs = self.pose("screen", self.a)
+        return (r.transposed() @ (rs @ Vector((0, 1, 0)))).normalized()
+
+
+def arkit_trail(duck: Duck, total):
+    """The path ARKit reports, drawn on the floor as the robot walks, and the world origin."""
+    cu = bpy.data.curves.new("arkit trail", "CURVE")
+    cu.dimensions = "3D"
+    cu.bevel_depth = 0.0045
+    cu.bevel_resolution = 3
+    sp = cu.splines.new("POLY")
+    raw = [duck.phone(n) for n in range(duck.a, duck.b + 1)]
+    # ARKit reports the phone, which sways with every step; the map shows the walk (a 0.5 s mean).
+    pts = [sum(raw[max(0, k - 7):k + 8], Vector()) / len(raw[max(0, k - 7):k + 8]) for k in range(len(raw))]
+    sp.points.add(len(pts) - 1)
+    for p, v in zip(sp.points, pts, strict=True):
+        p.co = (v.x, v.y, -0.757, 1)
+    trail = link(bpy.data.objects.new("arkit trail", cu))
+    assign(trail, glow("trail", story.GOLD, 2.2))  # brighter washes out to cream
+    with contextlib.suppress(*API_DRIFT):
+        cu.bevel_factor_mapping_end = "SEGMENTS"
+    cu.bevel_factor_end = 0.0
+    cu.keyframe_insert("bevel_factor_end", frame=frame_no(duck.a))
+    cu.bevel_factor_end = 1.0
+    cu.keyframe_insert("bevel_factor_end", frame=frame_no(duck.b))
+    for fc in _fcurves(cu.animation_data.action):
+        for k in fc.keyframe_points:
+            k.interpolation = "LINEAR"
+    objs = [trail]
+    start = Vector((pts[0].x, pts[0].y, -0.756))
+    heading = duck.normal(duck.a)
+    heading.z = 0
+    heading.normalize()
+    left = Vector((-heading.y, heading.x, 0))
+    for name, d, c in (("origin fwd", heading, story.CORAL), ("origin left", left, story.TEAL),
+                       ("origin up", Vector((0, 0, 1)), story.GOLD)):
+        objs += arrow(name, None, start, d, 0.12, c)
+    for o in objs:
+        key_visible(o, [(duck.a, duck.b)], total)
     return objs
 
 
@@ -671,6 +821,7 @@ def data_stream(phone_obj, total):
 SHOTS = {  # scene: [(t within scene 0..1, camera position, look at, lens)]
     "intro": [(0, (1.15, -1.05, 0.55), (0.04, 0.0, 0.25), 45), (1, (0.85, -0.42, 0.36), (0.06, 0.0, 0.27), 55)],
     "follow": [(0, (1.25, 0.6, 1.0), (0.06, 0.0, 0.27), 55), (1, (1.2, 0.3, 0.95), (0.06, 0.0, 0.27), 55)],
+    "listen": [(0, (0.40, -1.05, 0.52), (0.36, 0.02, 0.36), 35), (1, (0.30, -0.95, 0.48), (0.34, 0.02, 0.35), 38)],
     "talk": [(0, (0.95, -0.8, 0.42), (0.04, -0.12, 0.2), 45), (1, (0.85, -0.62, 0.38), (0.04, -0.1, 0.22), 50)],
     "sensing": [(0, (-0.25, -1.45, 1.0), (-0.1, 0.0, 0.25), 30), (1, (0.75, -1.45, 0.95), (-0.1, 0.0, 0.25), 30)],
     "camera": [(0, (0.52, -0.06, 0.31), (0.07, 0.0, 0.29), 55), (1, (0.44, 0.04, 0.30), (0.07, 0.0, 0.29), 55)],
@@ -679,7 +830,7 @@ SHOTS = {  # scene: [(t within scene 0..1, camera position, look at, lens)]
 }
 
 
-def build_camera(total):
+def build_camera(total, duck=None):
     cam_data = bpy.data.cameras.new("cam")
     cam = link(bpy.data.objects.new("camera", cam_data))
     target = empty("cam target")
@@ -703,7 +854,20 @@ def build_camera(total):
     head = Vector(story.HEAD)
     for s in story.SCENES:
         a, b = int(s.start * story.FPS), int(s.end * story.FPS) - 1
-        if s.key in FACING:
+        if s.key == "walk" and duck:
+            # Follow the walking robot from ahead and to its side, so the face and the trail show.
+            heading = 0.0
+            for n in list(range(a, b, 3)) + [b]:
+                p = duck.phone(n)
+                h = duck.normal(n)
+                # the heading, smoothed: the head looks around while the body walks on
+                want = math.atan2(h.y, h.x)
+                heading = want if n == a else heading + 0.08 * math.remainder(want - heading, math.tau)
+                u = (n - a) / max(1, b - a)
+                ang = heading + math.radians(48 - 18 * u)
+                pos = p + Vector((math.cos(ang) * 1.0, math.sin(ang) * 1.0, 0.16 - 0.04 * u))
+                key(n, pos, p + Vector((0, 0, -0.12)), 36)
+        elif s.key in FACING:
             # Shots that must see the screen: from the person's side, wherever they are.
             reach, side, up, lens, look = FACING[s.key]
             for n in list(range(a, b, 3)) + [b]:
@@ -774,6 +938,7 @@ def build_lights():
     area("fill", (1.0, 1.3, 0.7), (0.05, 0, 0.25), 25, 1.5, "#dfe9ff")
     area("rim", (-0.9, 0.5, 1.2), (0.05, 0, 0.3), 140, 0.5, "#ffe2c6")
     area("top", (0.0, 0.0, 2.2), (0.0, 0.0, 0.0), 30, 2.0, "#ffffff")
+    area("walk key", (2.7, -2.3, 0.8), (1.5, -1.3, -0.55), 160, 1.2, "#fff1dc")  # the duck's floor
 
 
 def setup_render(scale, samples):
@@ -817,6 +982,7 @@ def main():
     p.add_argument("--rig", type=Path, required=True)
     p.add_argument("--screen", type=Path, required=True)
     p.add_argument("--assets", type=Path, required=True)
+    p.add_argument("--duck", type=Path, required=True, help="the walk duck_walk.py recorded")
     p.add_argument("--out", type=Path)
     p.add_argument("--frames", default=None, help="a:b story frames, or a,b,c")
     p.add_argument("--scale", type=int, default=100)
@@ -854,18 +1020,23 @@ def main():
     for o in face_bracket(person):
         key_visible(o, scene_range("follow", "sensing"), total)
 
-    jabra = bpy.data.objects.get("m_jabra_speak_510")
-    if jabra:
-        bb = [jabra.matrix_world @ Vector(c) for c in jabra.bound_box]
-        center = sum(bb, Vector()) / 8
-        top = max(v.z for v in bb)
-        speaker_rings(Vector((center.x, center.y, top + 0.004)), total)
+    # The voice: in from the person's mouth while listening, out of the phone while talking.
+    sound_rings("mic", person, Vector((0.075, 0, -0.045)), "listen", story.TEAL, total, travel=0.22)
+    sound_rings("speaker", roll, SCREEN_POS + Vector((0.006, 0, 0)), "talk", story.CORAL, total, travel=0.18)
     compass_ring(total)
 
     back_cam = empty("back cam point", roll, BACK_CAM)
-    feature_points(back_cam, total)
+    feature_points(back_cam, Vector((-1, 0, 0)), "sensing", room_points(4, 320), total)
+
+    duck = Duck(args.duck, total)
+    rear = duck.objs["cam_rear"][1]
+    for o in frustum("duck back camera", rear, Vector(), duck.rear_forward(), duck.rear_up(), 66, 50, 0.3,
+                     story.GOLD, 0.05):
+        key_visible(o, scene_range("walk"), total)
+    arkit_trail(duck, total)
+    feature_points(rear, duck.rear_forward(), "walk", room_points(9, 420, ((0.5, 2.8), (-2.6, 1.0))), total)
     data_stream(scr, total)
-    build_camera(total)
+    build_camera(total, duck)
     build_lights()
 
     if args.save:

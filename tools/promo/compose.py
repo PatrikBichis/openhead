@@ -5,12 +5,15 @@
         ../build/promo/frames ../docs/media/desk-assistant.mp4
 
 Text and colours follow the website (docs/site.css). Every frame says it is a render: real
-footage of the bench head comes later.
+footage of the bench head comes later. The sound is voice.py's track; the walking scene's map
+is the phone's path from duck_walk.py, as ARKit's `pose` would report it.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
+import math
 import subprocess
 import sys
 from concurrent.futures import ProcessPoolExecutor
@@ -50,6 +53,162 @@ def icon(size: int) -> Image.Image:
 def badge() -> Image.Image | None:
     path = ROOT / "build" / "promo" / "assets" / "appstore-badge.png"
     return Image.open(path).convert("RGBA") if path.exists() else None
+
+
+PROMO = ROOT / "build" / "promo"
+
+
+@lru_cache
+def voice() -> dict:
+    path = PROMO / "voice.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"clips": []}
+
+
+@lru_cache
+def walk_path() -> list[tuple[float, float, float]]:
+    """The phone's path as ARKit reports it: metres right of and ahead of where tracking started, and yaw."""
+    path = PROMO / "duck.json"
+    if not path.exists():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    names = [m["mesh"] for m in data["meshes"]]
+    i, r = names.index("screen"), names.index("cam_rear")
+
+    def axes(row):
+        x, y, z, w, qx, qy, qz = row[i]
+        # the screen box's z axis, from its quaternion
+        n = (2 * (qx * qz + w * qy), 2 * (qy * qz - w * qx), 1 - 2 * (qx * qx + qy * qy))
+        return (x, y, z), n
+
+    p0, n0 = axes(data["frames"][0])
+    rear = data["frames"][0][r][:3]
+    sign = 1 if sum(n0[k] * (p0[k] - rear[k]) for k in range(3)) > 0 else -1
+    yaw0 = math.atan2(sign * n0[1], sign * n0[0])
+    out = []
+    rows = data["frames"]
+    for k, row in enumerate(rows):
+        p, n = axes(row)
+        # the walk, not the sway of every step (as the trail in the scene)
+        near = [axes(r)[0] for r in rows[max(0, k - 7):k + 8]]
+        p = tuple(sum(q[j] for q in near) / len(near) for j in range(3))
+        dx, dy = p[0] - p0[0], p[1] - p0[1]
+        ahead = dx * math.cos(yaw0) + dy * math.sin(yaw0)
+        left = -dx * math.sin(yaw0) + dy * math.cos(yaw0)
+        yaw = math.atan2(sign * n[1], sign * n[0]) - yaw0
+        out.append((-left, ahead, yaw))
+    return out
+
+
+@lru_cache
+def mono(size: int) -> ImageFont.FreeTypeFont:
+    try:
+        return ImageFont.truetype(str(FONTS / "consola.ttf"), size)
+    except OSError:
+        return font("regular", size)
+
+
+TOP_X = (W - 480) // 2 + 40  # centre of the space left of the sensor panel
+
+
+def pill(layer: Image.Image, parts: list[tuple[str, str, ImageFont.FreeTypeFont]], a: float,
+         dot: str | None = None):
+    """A rounded label of coloured runs of text at the top of the frame."""
+    if a <= 0:
+        return
+    d = ImageDraw.Draw(layer)
+    pad = 26
+    lead = 34 if dot else 0
+    tw = sum(d.textlength(t, font=f) for t, _, f in parts)
+    w, h = int(tw + pad * 2 + lead), 62
+    box = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    bd = ImageDraw.Draw(box)
+    bd.rounded_rectangle((0, 0, w - 1, h - 1), radius=31, fill=rgba(story.CREAM_2, 0.94),
+                         outline=rgba(story.INK, 0.10), width=1)
+    x = pad
+    if dot:
+        bd.ellipse((x, h / 2 - 9, x + 18, h / 2 + 9), fill=rgba(dot))
+        x += lead
+    for text, colour, f in parts:
+        bd.text((x, h / 2), text, font=f, fill=rgba(colour), anchor="lm")
+        x += bd.textlength(text, font=f)
+    layer.alpha_composite(_fade(box, a), (int(TOP_X - w / 2), 132))
+
+
+def heard(layer: Image.Image, t: float, a: float):
+    """What the microphone hears, word by word, then that it went to the agent."""
+    clip = next((c for c in voice()["clips"] if c["who"] == "person"), None)
+    start, end = (clip["start"], clip["end"]) if clip else (12.4, 13.4)
+    words = story.HEARD.split()
+    k = len(words) if t >= end else max(0, math.ceil((t - start) / (end - start) * len(words)))
+    if k == 0:
+        return
+    parts = [("heard  ", story.TEAL, font("bold", 22)),
+             (f"“{' '.join(words[:k])}”", story.INK, font("semibold", 28))]
+    if t > end + 0.4:
+        parts.append(("   → your agent", story.INK_2, font("regular", 24)))
+    pill(layer, parts, a, dot=story.TEAL)
+
+
+def markup(layer: Image.Image, a: float):
+    """The agent's say call, with the cues that drive the face in coral."""
+    f = mono(25)
+    parts = [('say("', story.INK_2, f)]
+    for tok in story.SAY.replace("[", "|[").replace("]", "]|").split("|"):
+        if tok:
+            parts.append((tok, story.CORAL if tok.startswith("[") else story.INK, f))
+    parts.append(('")', story.INK_2, f))
+    pill(layer, parts, a)
+
+
+def walk_map(layer: Image.Image, t: float, a: float):
+    """A map of the pose stream: the trail so far, the phone's heading and the numbers."""
+    path = walk_path()
+    if not path or a <= 0:
+        return
+    n = max(0, min(len(path) - 1, int((t - story.WALK.start) * story.FPS)))
+    w, h, pad = 440, 330, 24
+    box = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(box)
+    d.rounded_rectangle((0, 0, w - 1, h - 1), radius=18, fill=rgba(story.CREAM_2, 0.92),
+                        outline=rgba(story.INK, 0.10), width=1)
+    d.text((pad, pad - 4), "POSE · ARKIT WORLD TRACKING", font=font("bold", 17), fill=rgba(story.INK_2))
+    mx0, my0, mx1, my1 = pad, 56, w - pad, h - 70
+    xs = [p[0] for p in path] + [0]
+    ys = [p[1] for p in path] + [0]
+    span = max(max(xs) - min(xs), max(ys) - min(ys), 0.5) * 1.25
+    cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
+    scale = min(mx1 - mx0, my1 - my0) / span
+    ox, oy = (mx0 + mx1) / 2, (my0 + my1) / 2
+
+    def px(x, y):
+        return (ox + (x - cx) * scale, oy - (y - cy) * scale)
+
+    step = 0.25  # grid lines every 25 cm
+    for k in range(-20, 21):
+        x, y = px(k * step, k * step)
+        if mx0 <= x <= mx1:
+            d.line((x, my0, x, my1), fill=rgba(story.INK, 0.07), width=1)
+        if my0 <= y <= my1:
+            d.line((mx0, y, mx1, y), fill=rgba(story.INK, 0.07), width=1)
+    o = px(0, 0)  # where tracking started: x right, ahead up
+    d.line((o[0], o[1], o[0] + 26, o[1]), fill=rgba(story.TEAL), width=3)
+    d.line((o[0], o[1], o[0], o[1] - 26), fill=rgba(story.CORAL), width=3)
+    pts = [px(x, y) for x, y, _ in path[: n + 1]]
+    if len(pts) > 1:
+        d.line(pts, fill=rgba(story.GOLD), width=5, joint="curve")
+    x, y, yaw = path[n]
+    hx, hy = px(x, y)
+    ang = math.pi / 2 + yaw
+    tip = (hx + math.cos(ang) * 22, hy - math.sin(ang) * 22)
+    left = (hx + math.cos(ang + 2.5) * 11, hy - math.sin(ang + 2.5) * 11)
+    right = (hx + math.cos(ang - 2.5) * 11, hy - math.sin(ang - 2.5) * 11)
+    d.polygon([tip, left, right], fill=rgba(story.NAVY))
+    d.ellipse((hx - 6, hy - 6, hx + 6, hy + 6), fill=rgba(story.NAVY))
+    f = mono(20)
+    # ARKit: x right, y up, z towards the viewer, so ahead is -z
+    d.text((pad, h - 56), f"position  [{x:+.2f}, 0.00, {-y:+.2f}] m", font=f, fill=rgba(story.INK))
+    d.text((pad, h - 30), f"yaw {math.degrees(yaw):+5.0f}°   tracking normal", font=f, fill=rgba(story.INK_2))
+    layer.alpha_composite(_fade(box, a), (64, 130))
 
 
 def ease(x: float) -> float:
@@ -186,6 +345,12 @@ def compose(args: tuple[Path, Path]) -> None:
         end_card(layer, end_in)
     else:
         card(ImageDraw.Draw(layer), layer, s, idx, a, a_in)
+        if s.key == "listen":
+            heard(layer, t, a)
+        elif s.key == "talk":
+            markup(layer, a)
+        elif s.key == "walk":
+            walk_map(layer, t, a)
         if s.key != "intro":
             panel(layer, s, a)
     out = im.convert("RGBA")
@@ -238,7 +403,9 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     base = ["-y", "-loglevel", "error", "-framerate", str(story.FPS), "-start_number", "0",
             "-i", str(work / "%05d.jpg")]
-    subprocess.run([ff, *base, "-c:v", "libx264", "-profile:v", "high", "-crf", "21",
+    sound = PROMO / "voice.wav"
+    audio = ["-i", str(sound), "-c:a", "aac", "-b:a", "128k", "-shortest"] if sound.exists() else []
+    subprocess.run([ff, *base, *audio, "-c:v", "libx264", "-profile:v", "high", "-crf", "21",
                     "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
                     str(args.out)], check=True)
     # H.264 only: plays everywhere, and the VP9 WebM this ffmpeg made failed to decode in Chromium.
