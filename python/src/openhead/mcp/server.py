@@ -214,17 +214,36 @@ def build_server(link: HeadLink) -> MCPServer:
         """The people the head sees now: id, bearing and elevation in degrees (+ is the head's
         left / up), size (bigger is closer), box on screen. Needs mode capture or sensing."""
         head = await link.get()
+        try:
+            mode = await head.mode.get()
+        except HeadError as exc:
+            raise ToolError(f"{exc.code}: {exc.message}") from exc
+        if mode == "idle":
+            raise ToolError("the cameras are off: set_mode capture or sensing first")
+        source = {"capture": "vision", "sensing": "arkit"}.get(mode)
 
-        async def first() -> dict:
+        async def latest() -> dict | None:
+            # Right after a mode change the first samples may be empty or still carry the old
+            # camera's label: skip those from the wrong source, and give the camera a moment
+            # to find someone before answering "nobody".
+            seen = None
+            settle = time.monotonic() + min(1.0, timeout_s / 2)
             async with head.subscribe("faces", 15) as sub:
                 async for msg in sub:
-                    return msg.model_dump(exclude_none=True, exclude={"type", "seq"})
-            raise ToolError("subscription ended")
+                    if source and msg.source not in (source, "sim"):
+                        continue
+                    seen = msg.model_dump(exclude_none=True, exclude={"type", "seq"})
+                    if msg.faces or time.monotonic() > settle:
+                        return seen
+            return seen
 
         try:
-            return await asyncio.wait_for(first(), timeout_s)
+            result = await asyncio.wait_for(latest(), timeout_s)
         except TimeoutError as exc:
             raise ToolError("no faces data: is the mode capture or sensing? (set_mode)") from exc
+        if result is None:
+            raise ToolError("subscription ended")
+        return result
 
     @mcp.tool(annotations=READ_ONLY)
     async def get_pose(timeout_s: float = 3.0) -> dict:

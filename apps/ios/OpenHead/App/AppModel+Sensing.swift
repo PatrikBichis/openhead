@@ -23,6 +23,7 @@ extension AppModel {
         let old = mode
         mode = new
         faces = []
+        facesSource = new == "sensing" ? "arkit" : "vision"  // the old mode's label would mislead
         try? await face.setFaces([])
         if new != "capture", display == .camera {
             try? await show(.face, overlay: "none", durationMs: nil)

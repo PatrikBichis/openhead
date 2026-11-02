@@ -62,7 +62,13 @@ async def selftest() -> int:
                     await tool("tail_logs", {"n": 10})
                     await tool("get_status")
                     await tool("get_diagnostics")
-                    smoke = REPO / "scenarios" / "smoke.yaml"
+                    await tool("get_faces", expect_error=True)   # cameras off (idle)
+                    await tool("set_mode", {"mode": "capture"})
+                    result, _ = await tool("get_faces")          # right after the switch
+                    report("get_faces sees people after a mode change",
+                           '"bearing"' in " ".join(getattr(c, "text", "") for c in result.content))
+                    await tool("set_mode", {"mode": "idle"})
+                    smoke =REPO / "scenarios" / "smoke.yaml"
                     if smoke.exists():
                         _, kinds = await tool("run_scenario", {"path": str(smoke)})
                         report("run_scenario returns screenshots", "image" in kinds)
