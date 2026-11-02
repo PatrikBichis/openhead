@@ -2,7 +2,7 @@
 
     uv run --project python python tools/appstore_metadata.py [--dry-run] [--build N] [--testflight-only]
 
-metadata/<locale>/     App Store page per language (en-US is the primary, sv-SE Swedish):
+metadata/<locale>/     App Store page per language (en-US is the primary, sv Swedish; folder names are App Store Connect locale codes):
                        name, description, subtitle, promotional_text, keywords, support_url,
                        marketing_url, privacy_policy_url (the version being prepared and the
                        app info; a missing language is created; not submitted)

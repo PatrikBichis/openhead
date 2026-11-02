@@ -81,7 +81,7 @@ Upload them with `tools/appstore_media.py` (below). The 6.9" set is scaled down 
 
 ## Store texts
 
-The texts shown in TestFlight and on the App Store page live in `apps/ios/appstore/metadata/`: one folder per App Store language (`en-US/` is the primary, `sv-SE/` Swedish: name, description, subtitle, promotional text, keywords, URLs; a language missing in App Store Connect is created) and `testflight/` for the TestFlight description and "What to Test". Apple locks the page texts and app info while a version is in review; run the tool again once a version can be edited. Edit them there, then:
+The texts shown in TestFlight and on the App Store page live in `apps/ios/appstore/metadata/`: one folder per App Store language (`en-US/` is the primary, `sv/` Swedish (App Store Connect calls it `sv`, not `sv-SE`): name, description, subtitle, promotional text, keywords, URLs; a language missing in App Store Connect is created) and `testflight/` for the TestFlight description and "What to Test". Apple locks the page texts and app info while a version is in review; run the tool again once a version can be edited. Edit them there, then:
 
 ```bash
 uv run --project python python tools/appstore_metadata.py --dry-run   # what would change
