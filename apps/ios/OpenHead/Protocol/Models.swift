@@ -54,6 +54,15 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let poseFields: PoseFields?
     public let posePayload: PosePayload?
     public let protocolError: ProtocolError?
+    public let speech: Speech?
+    public let speechFields: SpeechFields?
+    public let speechListen: SpeechListen?
+    public let speechListenResult: SpeechListenResult?
+    public let speechPayload: SpeechPayload?
+    public let speechSay: SpeechSay?
+    public let speechSayResult: SpeechSayResult?
+    public let speechSaySegment: SpeechSaySegment?
+    public let speechStop: SpeechStop?
     public let status: Status?
     public let statusFields: StatusFields?
     public let statusPayload: StatusPayload?
@@ -119,6 +128,15 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case poseFields = "PoseFields"
         case posePayload = "PosePayload"
         case protocolError = "ProtocolError"
+        case speech = "Speech"
+        case speechFields = "SpeechFields"
+        case speechListen = "SpeechListen"
+        case speechListenResult = "SpeechListenResult"
+        case speechPayload = "SpeechPayload"
+        case speechSay = "SpeechSay"
+        case speechSayResult = "SpeechSayResult"
+        case speechSaySegment = "SpeechSaySegment"
+        case speechStop = "SpeechStop"
         case status = "Status"
         case statusFields = "StatusFields"
         case statusPayload = "StatusPayload"
@@ -140,7 +158,7 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, env: Env?, envFields: EnvFields?, envPayload: EnvPayload?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, gps: Gps?, gpsFields: GpsFields?, gpsPayload: GpsPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, env: Env?, envFields: EnvFields?, envPayload: EnvPayload?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, gps: Gps?, gpsFields: GpsFields?, gpsPayload: GpsPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, speech: Speech?, speechFields: SpeechFields?, speechListen: SpeechListen?, speechListenResult: SpeechListenResult?, speechPayload: SpeechPayload?, speechSay: SpeechSay?, speechSayResult: SpeechSayResult?, speechSaySegment: SpeechSaySegment?, speechStop: SpeechStop?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
         self.displayClear = displayClear
         self.displayHud = displayHud
@@ -185,6 +203,15 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.poseFields = poseFields
         self.posePayload = posePayload
         self.protocolError = protocolError
+        self.speech = speech
+        self.speechFields = speechFields
+        self.speechListen = speechListen
+        self.speechListenResult = speechListenResult
+        self.speechPayload = speechPayload
+        self.speechSay = speechSay
+        self.speechSayResult = speechSayResult
+        self.speechSaySegment = speechSaySegment
+        self.speechStop = speechStop
         self.status = status
         self.statusFields = statusFields
         self.statusPayload = statusPayload
@@ -2179,6 +2206,397 @@ public enum ProtocolErrorType: String, Codable, Equatable, Sendable {
 }
 
 
+/// Speaking and listening, as events (no rate). Speaking: `say_start` when an utterance
+/// begins, `cue` when a segment that is not text is reached (`cue_type` emotion, action or
+/// gesture, and `cue` its name), `say_end` when it is done (`interrupted` if stopped or
+/// replaced). Listening: `partial` with the words so far while someone talks, `heard` with
+/// the final text when they pause.
+// MARK: - Speech
+public struct Speech: Codable, Equatable, Sendable {
+    /// With `heard`, when the recogniser gives one.
+    public let confidence: Double?
+    /// With `cue`: the emotion, action or gesture name.
+    public let cue: String?
+    public let cueType: CueType?
+    public let event: Event?
+    /// With `say_end`.
+    public let interrupted: Bool?
+    /// Device clock, seconds.
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// With `partial` and `heard`: what was heard.
+    public let text: String?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: SpeechType
+    /// Speaking events: the id `speech.say` answered with.
+    public let utteranceID: String?
+
+    public enum CodingKeys: String, CodingKey {
+        case confidence = "confidence"
+        case cue = "cue"
+        case cueType = "cue_type"
+        case event = "event"
+        case interrupted = "interrupted"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case text = "text"
+        case ts = "ts"
+        case type = "type"
+        case utteranceID = "utterance_id"
+    }
+
+    public init(confidence: Double?, cue: String?, cueType: CueType?, event: Event?, interrupted: Bool?, sensorTimeS: Double?, seq: Int, text: String?, ts: Int, type: SpeechType, utteranceID: String?) {
+        self.confidence = confidence
+        self.cue = cue
+        self.cueType = cueType
+        self.event = event
+        self.interrupted = interrupted
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.text = text
+        self.ts = ts
+        self.type = type
+        self.utteranceID = utteranceID
+    }
+}
+
+public enum CueType: String, Codable, Equatable, Sendable {
+    case action = "action"
+    case emotion = "emotion"
+    case gesture = "gesture"
+}
+
+public enum Event: String, Codable, Equatable, Sendable {
+    case cue = "cue"
+    case heard = "heard"
+    case partial = "partial"
+    case sayEnd = "say_end"
+    case sayStart = "say_start"
+}
+
+public enum SpeechType: String, Codable, Equatable, Sendable {
+    case speech = "speech"
+}
+
+
+// MARK: - SpeechFields
+public struct SpeechFields: Codable, Equatable, Sendable {
+    /// With `heard`, when the recogniser gives one.
+    public let confidence: Double?
+    /// With `cue`: the emotion, action or gesture name.
+    public let cue: String?
+    public let cueType: CueType?
+    public let event: Event?
+    /// With `say_end`.
+    public let interrupted: Bool?
+    /// Device clock, seconds.
+    public let sensorTimeS: Double?
+    /// With `partial` and `heard`: what was heard.
+    public let text: String?
+    /// Speaking events: the id `speech.say` answered with.
+    public let utteranceID: String?
+
+    public enum CodingKeys: String, CodingKey {
+        case confidence = "confidence"
+        case cue = "cue"
+        case cueType = "cue_type"
+        case event = "event"
+        case interrupted = "interrupted"
+        case sensorTimeS = "sensor_time_s"
+        case text = "text"
+        case utteranceID = "utterance_id"
+    }
+
+    public init(confidence: Double?, cue: String?, cueType: CueType?, event: Event?, interrupted: Bool?, sensorTimeS: Double?, text: String?, utteranceID: String?) {
+        self.confidence = confidence
+        self.cue = cue
+        self.cueType = cueType
+        self.event = event
+        self.interrupted = interrupted
+        self.sensorTimeS = sensorTimeS
+        self.text = text
+        self.utteranceID = utteranceID
+    }
+}
+
+
+/// Listen with the head's microphone and turn speech into text, on the device when it can.
+/// What is heard comes on the `speech` topic: `partial` while someone talks, `heard` when
+/// they pause. Asks for microphone and speech recognition permission the first time
+/// (`unsupported` if refused). With `auto_expressions` (default true) the face looks
+/// attentive while someone talks and thoughtful after they finish, until the next
+/// `speech.say`.
+// MARK: - SpeechListen
+public struct SpeechListen: Codable, Equatable, Sendable {
+    /// Attentive while hearing, thinking after; default true.
+    public let autoExpressions: Bool?
+    /// Client-chosen id, echoed in the reply.
+    public let id: String
+    /// Language to recognise, e.g. `en-US` (default) or `sv-SE`.
+    public let locale: String?
+    public let on: Bool
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Silence that ends an utterance; default 1000.
+    public let silenceMS: Int?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: SpeechListenType
+
+    public enum CodingKeys: String, CodingKey {
+        case autoExpressions = "auto_expressions"
+        case id = "id"
+        case locale = "locale"
+        case on = "on"
+        case seq = "seq"
+        case silenceMS = "silence_ms"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(autoExpressions: Bool?, id: String, locale: String?, on: Bool, seq: Int, silenceMS: Int?, ts: Int, type: SpeechListenType) {
+        self.autoExpressions = autoExpressions
+        self.id = id
+        self.locale = locale
+        self.on = on
+        self.seq = seq
+        self.silenceMS = silenceMS
+        self.ts = ts
+        self.type = type
+    }
+}
+
+public enum SpeechListenType: String, Codable, Equatable, Sendable {
+    case speechListen = "speech.listen"
+}
+
+
+// MARK: - SpeechListenResult
+public struct SpeechListenResult: Codable, Equatable, Sendable {
+    public let listening: Bool
+    public let locale: String?
+    /// Recognition runs on the device (no audio leaves it).
+    public let onDevice: Bool?
+
+    public enum CodingKeys: String, CodingKey {
+        case listening = "listening"
+        case locale = "locale"
+        case onDevice = "on_device"
+    }
+
+    public init(listening: Bool, locale: String?, onDevice: Bool?) {
+        self.listening = listening
+        self.locale = locale
+        self.onDevice = onDevice
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
+// MARK: - SpeechPayload
+public struct SpeechPayload: Codable, Equatable, Sendable {
+    /// With `heard`, when the recogniser gives one.
+    public let confidence: Double?
+    /// With `cue`: the emotion, action or gesture name.
+    public let cue: String?
+    public let cueType: CueType?
+    public let event: Event
+    /// With `say_end`.
+    public let interrupted: Bool?
+    /// Device clock, seconds.
+    public let sensorTimeS: Double
+    /// With `partial` and `heard`: what was heard.
+    public let text: String?
+    /// Speaking events: the id `speech.say` answered with.
+    public let utteranceID: String?
+
+    public enum CodingKeys: String, CodingKey {
+        case confidence = "confidence"
+        case cue = "cue"
+        case cueType = "cue_type"
+        case event = "event"
+        case interrupted = "interrupted"
+        case sensorTimeS = "sensor_time_s"
+        case text = "text"
+        case utteranceID = "utterance_id"
+    }
+
+    public init(confidence: Double?, cue: String?, cueType: CueType?, event: Event, interrupted: Bool?, sensorTimeS: Double, text: String?, utteranceID: String?) {
+        self.confidence = confidence
+        self.cue = cue
+        self.cueType = cueType
+        self.event = event
+        self.interrupted = interrupted
+        self.sensorTimeS = sensorTimeS
+        self.text = text
+        self.utteranceID = utteranceID
+    }
+}
+
+
+/// Speak with the head's own voice (on-device text to speech), with the mouth moving to the
+/// audio and the words as a subtitle. `segments` run in order: `say` speaks text, `emotion`
+/// changes the expression right there (the voice follows: brighter for happy, calmer for sad
+/// or focused), `action` adds a laugh, a sigh, a pause or a blink, `gesture` is passed on as
+/// a cue (`speech` topic) for a body to nod, shake or tilt. Answered at once with the
+/// utterance id; progress comes on the `speech` topic (`say_start`, `cue`, `say_end`). By
+/// default a new utterance interrupts the one playing. While listening (`speech.listen`),
+/// recognition pauses while the head speaks, so it does not hear itself.
+// MARK: - SpeechSay
+public struct SpeechSay: Codable, Equatable, Sendable {
+    /// Client-chosen id, echoed in the reply.
+    public let id: String
+    /// Stop what is being said now (default true); false queues after it.
+    public let interrupt: Bool?
+    /// Pitch relative to normal (1).
+    public let pitch: Double?
+    /// Speaking rate relative to normal (1).
+    public let rate: Double?
+    public let segments: [SpeechSaySegment]
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Show the words on screen as they are spoken. Default true.
+    public let subtitle: Bool?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: SpeechSayType
+    /// A voice identifier, or a language such as `en-US` or `sv-SE` (the best installed voice
+    /// for it). Default `en-US`.
+    public let voice: String?
+
+    public enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case interrupt = "interrupt"
+        case pitch = "pitch"
+        case rate = "rate"
+        case segments = "segments"
+        case seq = "seq"
+        case subtitle = "subtitle"
+        case ts = "ts"
+        case type = "type"
+        case voice = "voice"
+    }
+
+    public init(id: String, interrupt: Bool?, pitch: Double?, rate: Double?, segments: [SpeechSaySegment], seq: Int, subtitle: Bool?, ts: Int, type: SpeechSayType, voice: String?) {
+        self.id = id
+        self.interrupt = interrupt
+        self.pitch = pitch
+        self.rate = rate
+        self.segments = segments
+        self.seq = seq
+        self.subtitle = subtitle
+        self.ts = ts
+        self.type = type
+        self.voice = voice
+    }
+}
+
+
+// MARK: - SpeechSaySegment
+public struct SpeechSaySegment: Codable, Equatable, Sendable {
+    /// `laugh`: a short laugh with the laughing expression, then back to the expression before.
+    /// `sigh`: a sigh. `pause`: silence for `seconds`. `blink`: blink once.
+    public let action: SpeechSaySegmentAction?
+    /// An expression from `face.list`; it holds until the next one.
+    public let emotion: String?
+    /// Sent as a `cue` on the `speech` topic at this point, for a body that moves the head.
+    public let gesture: Gesture?
+    /// With `emotion`; default 1.
+    public let intensity: Double?
+    /// Text to speak.
+    public let say: String?
+    /// With `action: pause`; default 0.5.
+    public let seconds: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case action = "action"
+        case emotion = "emotion"
+        case gesture = "gesture"
+        case intensity = "intensity"
+        case say = "say"
+        case seconds = "seconds"
+    }
+
+    public init(action: SpeechSaySegmentAction?, emotion: String?, gesture: Gesture?, intensity: Double?, say: String?, seconds: Double?) {
+        self.action = action
+        self.emotion = emotion
+        self.gesture = gesture
+        self.intensity = intensity
+        self.say = say
+        self.seconds = seconds
+    }
+}
+
+/// `laugh`: a short laugh with the laughing expression, then back to the expression before.
+/// `sigh`: a sigh. `pause`: silence for `seconds`. `blink`: blink once.
+public enum SpeechSaySegmentAction: String, Codable, Equatable, Sendable {
+    case blink = "blink"
+    case laugh = "laugh"
+    case pause = "pause"
+    case sigh = "sigh"
+}
+
+/// Sent as a `cue` on the `speech` topic at this point, for a body that moves the head.
+public enum Gesture: String, Codable, Equatable, Sendable {
+    case nod = "nod"
+    case shake = "shake"
+    case tilt = "tilt"
+}
+
+public enum SpeechSayType: String, Codable, Equatable, Sendable {
+    case speechSay = "speech.say"
+}
+
+
+// MARK: - SpeechSayResult
+public struct SpeechSayResult: Codable, Equatable, Sendable {
+    /// Matches `utterance_id` in the `speech` topic events for this utterance.
+    public let utteranceID: String
+
+    public enum CodingKeys: String, CodingKey {
+        case utteranceID = "utterance_id"
+    }
+
+    public init(utteranceID: String) {
+        self.utteranceID = utteranceID
+    }
+}
+
+
+/// Stop speaking now and drop anything queued. The utterance ends with `say_end` and
+/// `interrupted: true`.
+// MARK: - SpeechStop
+public struct SpeechStop: Codable, Equatable, Sendable {
+    /// Client-chosen id, echoed in the reply.
+    public let id: String
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: SpeechStopType
+
+    public enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case seq = "seq"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(id: String, seq: Int, ts: Int, type: SpeechStopType) {
+        self.id = id
+        self.seq = seq
+        self.ts = ts
+        self.type = type
+    }
+}
+
+public enum SpeechStopType: String, Codable, Equatable, Sendable {
+    case speechStop = "speech.stop"
+}
+
+
 /// Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is
 /// present unless the subscription named `fields`; then only those are.
 // MARK: - Status
@@ -2417,7 +2835,8 @@ public struct Subscribe: Codable, Equatable, Sendable {
 }
 
 /// Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`;
-/// `gps` asks for location access and `env` for Motion & Fitness access on first use.
+/// `gps` asks for location access and `env` for Motion & Fitness access on first use;
+/// `speech` carries speaking and listening events (0.4).
 public enum CommonTopic: String, Codable, Equatable, Sendable {
     case env = "env"
     case faces = "faces"
@@ -2425,6 +2844,7 @@ public enum CommonTopic: String, Codable, Equatable, Sendable {
     case imu = "imu"
     case log = "log"
     case pose = "pose"
+    case speech = "speech"
     case status = "status"
 }
 
@@ -2557,28 +2977,38 @@ public struct DiagnosticsPermissions: Codable, Equatable, Sendable {
     public let localNetwork: SystemDiagnosticsPermission
     /// For `gps` and true-north heading; absent from 0.2 devices.
     public let location: SystemDiagnosticsPermission?
+    /// For `speech.listen`; absent from devices before 0.4.
+    public let microphone: SystemDiagnosticsPermission?
     public let motion: SystemDiagnosticsPermission
     /// For the barometer in `env`; absent from 0.2 devices.
     public let motionFitness: SystemDiagnosticsPermission?
+    /// For `speech.listen`; absent from devices before 0.4.
+    public let speechRecognition: SystemDiagnosticsPermission?
 
     public enum CodingKeys: String, CodingKey {
         case camera = "camera"
         case localNetwork = "local_network"
         case location = "location"
+        case microphone = "microphone"
         case motion = "motion"
         case motionFitness = "motion_fitness"
+        case speechRecognition = "speech_recognition"
     }
 
-    public init(camera: SystemDiagnosticsPermission, localNetwork: SystemDiagnosticsPermission, location: SystemDiagnosticsPermission?, motion: SystemDiagnosticsPermission, motionFitness: SystemDiagnosticsPermission?) {
+    public init(camera: SystemDiagnosticsPermission, localNetwork: SystemDiagnosticsPermission, location: SystemDiagnosticsPermission?, microphone: SystemDiagnosticsPermission?, motion: SystemDiagnosticsPermission, motionFitness: SystemDiagnosticsPermission?, speechRecognition: SystemDiagnosticsPermission?) {
         self.camera = camera
         self.localNetwork = localNetwork
         self.location = location
+        self.microphone = microphone
         self.motion = motion
         self.motionFitness = motionFitness
+        self.speechRecognition = speechRecognition
     }
 }
 
 /// For `gps` and true-north heading; absent from 0.2 devices.
+///
+/// For `speech.listen`; absent from devices before 0.4.
 ///
 /// For the barometer in `env`; absent from 0.2 devices.
 public enum SystemDiagnosticsPermission: String, Codable, Equatable, Sendable {
@@ -2724,7 +3154,7 @@ public struct SystemScreenshotResult: Codable, Equatable, Sendable {
 /// face returns to this one when the last paired client disconnects).
 // MARK: - SystemSettings
 public struct SystemSettings: Codable, Equatable, Sendable {
-    public let action: Action
+    public let action: SystemSettingsAction
     /// Client-chosen id, echoed in the reply.
     public let id: String
     public let key: String?
@@ -2746,7 +3176,7 @@ public struct SystemSettings: Codable, Equatable, Sendable {
         case value = "value"
     }
 
-    public init(action: Action, id: String, key: String?, seq: Int, ts: Int, type: SystemSettingsType, value: JSONValue?) {
+    public init(action: SystemSettingsAction, id: String, key: String?, seq: Int, ts: Int, type: SystemSettingsType, value: JSONValue?) {
         self.action = action
         self.id = id
         self.key = key
@@ -2757,7 +3187,7 @@ public struct SystemSettings: Codable, Equatable, Sendable {
     }
 }
 
-public enum Action: String, Codable, Equatable, Sendable {
+public enum SystemSettingsAction: String, Codable, Equatable, Sendable {
     case actionGet = "get"
     case actionSet = "set"
 }
@@ -2853,7 +3283,8 @@ public enum UnsubscribeType: String, Codable, Equatable, Sendable {
 public struct Welcome: Codable, Equatable, Sendable {
     /// Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`,
     /// `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose`
-    /// (where the device supports them); 0.3 `gps`, `env`. Clients ignore unknown values.
+    /// (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`. Clients ignore unknown
+    /// values.
     public let capabilities: [String]
     public let devMode: Bool
     public let device: WelcomeDevice

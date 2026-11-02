@@ -1,0 +1,10 @@
+{
+  "type": "speech.listen",
+  "ts": 1793462400000,
+  "seq": 63,
+  "id": "c-43",
+  "on": true,
+  "locale": "en-US",
+  "auto_expressions": true,
+  "silence_ms": 1000
+}

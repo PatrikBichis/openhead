@@ -168,6 +168,22 @@ extension LinkServer {
         case "mode.get":
             return ["mode": model.mode]
 
+        case "speech.say":
+            let segments = (m["segments"] as? [JSONObject]) ?? []
+            let id = model.speech.say(segments, voice: m.string("voice"), rate: m.double("rate"),
+                                      pitch: m.double("pitch"), subtitle: m["subtitle"] as? Bool ?? true,
+                                      interrupt: m["interrupt"] as? Bool ?? true)
+            return ["utterance_id": id]
+
+        case "speech.stop":
+            model.speech.stop()
+            return nil
+
+        case "speech.listen":
+            return try await model.speech.listen(on: m["on"] as? Bool ?? false, locale: m.string("locale") ?? "en-US",
+                                                 auto: m["auto_expressions"] as? Bool ?? true,
+                                                 silenceMs: m.int("silence_ms") ?? 1000)
+
         default:
             throw LinkError("unsupported", "\(type) is not implemented")
         }
@@ -240,6 +256,12 @@ extension LinkServer {
             }
             session.subscriptions[topic] = (fields, timer)
             return ["topic": topic, "rate_hz": rate]
+        case "speech":  // event driven
+            model.speech.listeners[session.id] = { [weak session] event in
+                session?.send("speech", filtered(event))
+            }
+            session.subscriptions[topic] = (fields, nil)
+            return ["topic": topic, "rate_hz": 0]
         default:  // log: event driven
             model.logs.listeners[session.id] = { [weak session] entry in
                 session?.send("log", filtered(entry.json))

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from . import models
 
-PROTOCOL_VERSION = "0.3.1"
+PROTOCOL_VERSION = "0.4.0"
 
 MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "ack": models.Ack,
@@ -31,6 +31,10 @@ MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "pair": models.Pair,
     "pair_required": models.PairRequired,
     "pose": models.Pose,
+    "speech": models.Speech,
+    "speech.listen": models.SpeechListen,
+    "speech.say": models.SpeechSay,
+    "speech.stop": models.SpeechStop,
     "status": models.Status,
     "subscribe": models.Subscribe,
     "system.diagnostics": models.SystemDiagnostics,

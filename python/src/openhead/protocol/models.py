@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
 class OpenHeadProtocol(RootModel[Any]):
     root: Any = Field(..., title="OpenHeadProtocol")
     """
-    All OpenHead protocol 0.3.1 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
+    All OpenHead protocol 0.4.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
     """
 
 
@@ -598,6 +598,201 @@ class PosePayload(PoseFields):
     sensor_time_s: float = Field(..., ge=0.0)
 
 
+class SpeechFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    event: Literal["say_start", "cue", "say_end", "partial", "heard"] | None = None
+    utterance_id: str | None = Field(None, max_length=64, min_length=1)
+    """
+    Speaking events: the id `speech.say` answered with.
+    """
+    cue_type: Literal["emotion", "action", "gesture"] | None = None
+    cue: str | None = Field(None, max_length=64)
+    """
+    With `cue`: the emotion, action or gesture name.
+    """
+    interrupted: bool | None = None
+    """
+    With `say_end`.
+    """
+    text: str | None = Field(None, max_length=4000)
+    """
+    With `partial` and `heard`: what was heard.
+    """
+    confidence: float | None = Field(None, ge=0.0, le=1.0)
+    """
+    With `heard`, when the recogniser gives one.
+    """
+    sensor_time_s: float | None = Field(None, ge=0.0)
+    """
+    Device clock, seconds.
+    """
+
+
+class SpeechListenResult(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    listening: bool
+    locale: str | None = None
+    on_device: bool | None = None
+    """
+    Recognition runs on the device (no audio leaves it).
+    """
+
+
+class SpeechPayload(SpeechFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    event: Literal["say_start", "cue", "say_end", "partial", "heard"]
+    sensor_time_s: float = Field(..., ge=0.0)
+    """
+    Device clock, seconds.
+    """
+
+
+class SpeechSayResult(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    utterance_id: str = Field(..., max_length=64, min_length=1)
+    """
+    Matches `utterance_id` in the `speech` topic events for this utterance.
+    """
+
+
+class SpeechSaySegment1(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    say: str = Field(..., max_length=2000, min_length=1)
+    """
+    Text to speak.
+    """
+    emotion: str | None = Field(
+        None, pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName"
+    )
+    """
+    An expression from `face.list`; it holds until the next one.
+    """
+    intensity: float | None = Field(None, ge=0.0, le=1.0, title="CommonUnit")
+    """
+    With `emotion`; default 1.
+    """
+    action: Literal["laugh", "sigh", "pause", "blink"] | None = None
+    """
+    `laugh`: a short laugh with the laughing expression, then back to the expression before. `sigh`: a sigh. `pause`: silence for `seconds`. `blink`: blink once.
+    """
+    seconds: float | None = Field(None, ge=0.0, le=5.0)
+    """
+    With `action: pause`; default 0.5.
+    """
+    gesture: Literal["nod", "shake", "tilt"] | None = None
+    """
+    Sent as a `cue` on the `speech` topic at this point, for a body that moves the head.
+    """
+
+
+class SpeechSaySegment2(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    say: str | None = Field(None, max_length=2000, min_length=1)
+    """
+    Text to speak.
+    """
+    emotion: str = Field(..., pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName")
+    """
+    An expression from `face.list`; it holds until the next one.
+    """
+    intensity: float | None = Field(None, ge=0.0, le=1.0, title="CommonUnit")
+    """
+    With `emotion`; default 1.
+    """
+    action: Literal["laugh", "sigh", "pause", "blink"] | None = None
+    """
+    `laugh`: a short laugh with the laughing expression, then back to the expression before. `sigh`: a sigh. `pause`: silence for `seconds`. `blink`: blink once.
+    """
+    seconds: float | None = Field(None, ge=0.0, le=5.0)
+    """
+    With `action: pause`; default 0.5.
+    """
+    gesture: Literal["nod", "shake", "tilt"] | None = None
+    """
+    Sent as a `cue` on the `speech` topic at this point, for a body that moves the head.
+    """
+
+
+class SpeechSaySegment3(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    say: str | None = Field(None, max_length=2000, min_length=1)
+    """
+    Text to speak.
+    """
+    emotion: str | None = Field(
+        None, pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName"
+    )
+    """
+    An expression from `face.list`; it holds until the next one.
+    """
+    intensity: float | None = Field(None, ge=0.0, le=1.0, title="CommonUnit")
+    """
+    With `emotion`; default 1.
+    """
+    action: Literal["laugh", "sigh", "pause", "blink"]
+    """
+    `laugh`: a short laugh with the laughing expression, then back to the expression before. `sigh`: a sigh. `pause`: silence for `seconds`. `blink`: blink once.
+    """
+    seconds: float | None = Field(None, ge=0.0, le=5.0)
+    """
+    With `action: pause`; default 0.5.
+    """
+    gesture: Literal["nod", "shake", "tilt"] | None = None
+    """
+    Sent as a `cue` on the `speech` topic at this point, for a body that moves the head.
+    """
+
+
+class SpeechSaySegment4(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    say: str | None = Field(None, max_length=2000, min_length=1)
+    """
+    Text to speak.
+    """
+    emotion: str | None = Field(
+        None, pattern="^[a-z][a-z0-9_-]{0,31}$", title="CommonName"
+    )
+    """
+    An expression from `face.list`; it holds until the next one.
+    """
+    intensity: float | None = Field(None, ge=0.0, le=1.0, title="CommonUnit")
+    """
+    With `emotion`; default 1.
+    """
+    action: Literal["laugh", "sigh", "pause", "blink"] | None = None
+    """
+    `laugh`: a short laugh with the laughing expression, then back to the expression before. `sigh`: a sigh. `pause`: silence for `seconds`. `blink`: blink once.
+    """
+    seconds: float | None = Field(None, ge=0.0, le=5.0)
+    """
+    With `action: pause`; default 0.5.
+    """
+    gesture: Literal["nod", "shake", "tilt"]
+    """
+    Sent as a `cue` on the `speech` topic at this point, for a body that moves the head.
+    """
+
+
 class StatusFields(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
@@ -696,11 +891,11 @@ class SubscribeResult(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env"] = Field(
-        ..., title="CommonTopic"
+    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env", "speech"] = (
+        Field(..., title="CommonTopic")
     )
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
     """
     rate_hz: float = Field(..., ge=0.0)
     """
@@ -732,6 +927,18 @@ class DiagnosticsPermissions(BaseModel):
     ) = Field(None, title="SystemDiagnosticsPermission")
     """
     For the barometer in `env`; absent from 0.2 devices.
+    """
+    microphone: (
+        Literal["granted", "denied", "not_determined", "not_required"] | None
+    ) = Field(None, title="SystemDiagnosticsPermission")
+    """
+    For `speech.listen`; absent from devices before 0.4.
+    """
+    speech_recognition: (
+        Literal["granted", "denied", "not_determined", "not_required"] | None
+    ) = Field(None, title="SystemDiagnosticsPermission")
+    """
+    For `speech.listen`; absent from devices before 0.4.
     """
 
 
@@ -1445,6 +1652,102 @@ class Pose(Envelope, PoseFields):
     """
 
 
+class Speech(Envelope, SpeechFields):
+    """
+    Speaking and listening, as events (no rate). Speaking: `say_start` when an utterance begins, `cue` when a segment that is not text is reached (`cue_type` emotion, action or gesture, and `cue` its name), `say_end` when it is done (`interrupted` if stopped or replaced). Listening: `partial` with the words so far while someone talks, `heard` with the final text when they pause.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["speech"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
+class SpeechListen(Command):
+    """
+    Listen with the head's microphone and turn speech into text, on the device when it can. What is heard comes on the `speech` topic: `partial` while someone talks, `heard` when they pause. Asks for microphone and speech recognition permission the first time (`unsupported` if refused). With `auto_expressions` (default true) the face looks attentive while someone talks and thoughtful after they finish, until the next `speech.say`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["speech.listen"] = Field(
+        ..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$"
+    )
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+    on: bool
+    locale: str | None = Field(None, pattern="^[a-z]{2}(-[A-Z]{2})?$")
+    """
+    Language to recognise, e.g. `en-US` (default) or `sv-SE`.
+    """
+    auto_expressions: bool | None = None
+    """
+    Attentive while hearing, thinking after; default true.
+    """
+    silence_ms: int | None = Field(None, ge=300, le=5000)
+    """
+    Silence that ends an utterance; default 1000.
+    """
+
+
+class SpeechSay(Command):
+    """
+    Speak with the head's own voice (on-device text to speech), with the mouth moving to the audio and the words as a subtitle. `segments` run in order: `say` speaks text, `emotion` changes the expression right there (the voice follows: brighter for happy, calmer for sad or focused), `action` adds a laugh, a sigh, a pause or a blink, `gesture` is passed on as a cue (`speech` topic) for a body to nod, shake or tilt. Answered at once with the utterance id; progress comes on the `speech` topic (`say_start`, `cue`, `say_end`). By default a new utterance interrupts the one playing. While listening (`speech.listen`), recognition pauses while the head speaks, so it does not hear itself.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["speech.say"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+    segments: list[
+        SpeechSaySegment1 | SpeechSaySegment2 | SpeechSaySegment3 | SpeechSaySegment4
+    ] = Field(..., max_length=200, min_length=1)
+    voice: str | None = Field(None, max_length=128, min_length=2)
+    """
+    A voice identifier, or a language such as `en-US` or `sv-SE` (the best installed voice for it). Default `en-US`.
+    """
+    rate: float | None = Field(None, ge=0.5, le=2.0)
+    """
+    Speaking rate relative to normal (1).
+    """
+    pitch: float | None = Field(None, ge=0.5, le=2.0)
+    """
+    Pitch relative to normal (1).
+    """
+    subtitle: bool | None = None
+    """
+    Show the words on screen as they are spoken. Default true.
+    """
+    interrupt: bool | None = None
+    """
+    Stop what is being said now (default true); false queues after it.
+    """
+
+
+class SpeechStop(Command):
+    """
+    Stop speaking now and drop anything queued. The utterance ends with `say_end` and `interrupted: true`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["speech.stop"] = Field(
+        ..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$"
+    )
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
 class Status(Envelope, StatusFields):
     """
     Device status, up to 1 Hz. Also the result of `system.status`. Every payload field is present unless the subscription named `fields`; then only those are.
@@ -1471,11 +1774,11 @@ class Subscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env"] = Field(
-        ..., title="CommonTopic"
+    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env", "speech"] = (
+        Field(..., title="CommonTopic")
     )
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
     """
     rate_hz: float | None = Field(None, gt=0.0, le=1000.0)
     """
@@ -1735,11 +2038,11 @@ class Unsubscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env"] = Field(
-        ..., title="CommonTopic"
+    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env", "speech"] = (
+        Field(..., title="CommonTopic")
     )
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
     """
 
 
@@ -1880,7 +2183,7 @@ class Welcome(Envelope):
     device: WelcomeDevice
     capabilities: list[str]
     """
-    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`. Clients ignore unknown values.
+    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`. Clients ignore unknown values.
     """
     themes: list[str]
     dev_mode: bool

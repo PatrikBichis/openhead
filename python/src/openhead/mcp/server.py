@@ -39,6 +39,13 @@ Controls an OpenHead robot head: a phone showing an expressive face.
 - Sense people and place: set_mode capture (camera, several faces) or sensing (ARKit pose and
   one face); get_faces, get_pose; look_at_face makes the eyes follow someone. get_location
   (GPS) and get_environment (air pressure, magnetic field, compass) work in any mode. subtitle writes text on screen (append to stream an answer; mouth=True to "speak").
+- Talk (0.4): say speaks with the head's own voice, the mouth moving and the words as a subtitle.
+  Put cues in square brackets where they belong, so the face acts as it speaks: an expression
+  ([happy], [sad 0.5], [surprised], [focused] for serious ...), an action ([laugh], [sigh],
+  [pause 0.5], [blink]) or a gesture for a body ([nod], [shake], [tilt]). E.g. "[happy] Why did
+  the robot go on holiday? [pause 0.5] It needed to recharge! [laugh]". Then call listen to hear
+  the answer: it returns what the person said (the face looks attentive, then thoughtful).
+  A conversation is a loop: say, listen, say, listen.
 - Check your work: take_screenshot shows what is on screen; tail_logs and get_status explain
   what happened; wait_for blocks until a status or log condition holds.
 - Screenshots, logs and diagnostics need dev mode on the device.
@@ -66,6 +73,9 @@ class HeadLink:
         self._lock = asyncio.Lock()
         self._tasks: list[asyncio.Task] = []
         self.media: MediaServer | None = None
+        self.heard: deque[str] = deque(maxlen=5)   # what was said and not yet returned by listen
+        self.heard_event = asyncio.Event()
+        self.listening = False
 
     async def connect(self) -> Head:
         async with self._lock:
@@ -95,11 +105,17 @@ class HeadLink:
                     data = msg.model_dump(exclude_none=True, exclude={"type", "seq"})
                     if topic == "status":
                         self.status = data
+                    elif topic == "speech":
+                        if data.get("event") == "heard" and data.get("text"):
+                            self.heard.append(data["text"])
+                            self.heard_event.set()
                     else:
                         self.logs.append(data)
 
+        # speech: kept open so nothing said between two listen calls is lost (absent before 0.4)
         self._tasks = [asyncio.create_task(follow("status", 1)),
-                       asyncio.create_task(follow("log", None))]
+                       asyncio.create_task(follow("log", None)),
+                       asyncio.create_task(follow("speech", None))]
 
     async def close(self) -> None:
         for task in self._tasks:
@@ -332,6 +348,78 @@ def build_server(link: HeadLink) -> MCPServer:
         await call(lambda h: h.display.subtitle(text, mode=mode, position=position,
                                                 duration_ms=duration_ms, mouth=mouth))
         return "subtitle cleared" if mode == "clear" else f"subtitle ({mode}): {text}"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def say(text: str, wait: bool = True, voice: str | None = None, rate: float | None = None) -> str:
+        """Speak with the head's own voice: the mouth moves with the audio and the words show as
+        a subtitle. Cues in square brackets act at that point: an expression from list_themes
+        ([happy], [sad 0.5], [surprised], [focused] for serious), an action ([laugh], [sigh],
+        [pause 0.5], [blink]) or a body gesture ([nod], [shake], [tilt]). wait=True returns when it
+        has finished speaking. voice: a language such as en-US (default) or a voice identifier;
+        rate: 0.5-2 relative to normal."""
+        from ..speech import parse, spoken_text
+        try:
+            segments = parse(text)
+        except ValueError as exc:
+            raise ToolError(str(exc)) from exc
+        head = await link.get()
+        words = spoken_text(segments)
+        try:
+            if not wait:
+                uid = await head.speech.say(segments, voice=voice, rate=rate)
+                return f"speaking ({uid}): {words}"
+            async with head.subscribe("speech") as sub:
+                uid = await head.speech.say(segments, voice=voice, rate=rate)
+
+                async def done() -> bool:
+                    async for msg in sub:
+                        if msg.event == "say_end" and msg.utterance_id == uid:
+                            return bool(msg.interrupted)
+                    return True
+
+                interrupted = await asyncio.wait_for(done(), len(words) / 6 + 15)
+        except HeadError as exc:
+            raise ToolError(f"{exc.code}: {exc.message}") from exc
+        except TimeoutError:
+            return f"still speaking ({uid}): {words}"
+        return f"{'interrupted' if interrupted else 'said'}: {words}"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def listen(timeout_s: float = 30.0, locale: str = "en-US") -> str:
+        """What the person says next, as text (speech to text on the head). Starts listening the
+        first time (the device asks for microphone permission once). Returns what was said
+        since the last call if anything is waiting, else waits up to timeout_s for someone to
+        speak and pause. Returns an empty string if nobody spoke."""
+        head = await link.get()
+        if not link.listening:
+            try:
+                await head.speech.listen(True, locale=locale)
+            except HeadError as exc:
+                raise ToolError(f"{exc.code}: {exc.message}") from exc
+            link.listening = True
+        if not link.heard:
+            link.heard_event.clear()
+            try:
+                await asyncio.wait_for(link.heard_event.wait(), timeout_s)
+            except TimeoutError:
+                return ""
+        text = " ".join(link.heard)
+        link.heard.clear()
+        return text
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def stop_speaking() -> str:
+        """Stop speaking now (drops anything queued)."""
+        await call(lambda h: h.speech.stop())
+        return "stopped"
+
+    @mcp.tool(annotations=CHANGES_FACE)
+    async def stop_listening() -> str:
+        """Switch the microphone off."""
+        await call(lambda h: h.speech.listen(False))
+        link.listening = False
+        link.heard.clear()
+        return "not listening"
 
     @mcp.tool(annotations=CHANGES_FACE)
     async def show_web(url: str, overlay: Literal["none", "face-corner"] = "none",

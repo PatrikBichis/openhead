@@ -89,9 +89,11 @@ An iPhone 12 already carries every sensor a robot head needs. OpenHead reads the
 | Magnetometer | magnetic field and compass heading (true north with location access) | `env` |
 | Barometer | air pressure and altitude change | `env` |
 | GNSS: GPS, GLONASS, Galileo, QZSS, BeiDou | latitude, longitude, altitude, accuracy, speed and course | `gps` |
+| Microphone (from 0.4) | speech to text, on the device when it can; the head looks attentive while you talk | `speech` |
+| Speaker (from 0.4) | the head's own voice, the mouth moving to the sound, expressions where the text says | `speech.say` |
 | Battery and temperature | battery level, charging and thermal state | `status` |
 
-Not used: the microphone (the robot's computer handles audio), the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none.
+From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text (`speech.say`, `speech.listen`). Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none.
 
 ---
 
@@ -192,6 +194,7 @@ Without `--token` the HTTP server only listens on `127.0.0.1`; anyone who reache
 - "Show the camera with the hunter HUD. How many people do you see, and where?"
 - "Where is the head, which way is it facing, and what is the air pressure?"
 - "Take a screenshot and check that the face looks happy." (needs dev mode on the phone)
+- "Have a conversation with me through the head: say something, then listen for my answer, and keep going until I say goodbye. Use cues like [happy] and [laugh] so the face acts as you talk." (0.4: `say` and `listen`)
 
 No phone yet? Clone the repo and run `uv run --project python openhead sim`, then use `--device localhost` (pairing code `0000`). The tools are listed under [MCP server](#mcp-server).
 

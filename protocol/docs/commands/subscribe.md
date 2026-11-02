@@ -11,15 +11,15 @@
 
 **Description:** Open a stream. The device clamps `rate_hz` to what it supports and returns the actual rate. Subscribing again to the same topic replaces the earlier subscription.
 
-| Property               | Pattern | Type             | Deprecated | Definition                     | Title/Description                                                                                                                                                                        |
-| ---------------------- | ------- | ---------------- | ---------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| + [type](#type )       | No      | string           | No         | -                              | Message type, e.g. \`hello\`, \`face.set_emotion\`, \`imu\`.                                                                                                                             |
-| + [ts](#ts )           | No      | integer          | No         | -                              | Sender clock in milliseconds since the Unix epoch.                                                                                                                                       |
-| + [seq](#seq )         | No      | integer          | No         | -                              | Per-connection, per-direction counter, starting at 0.                                                                                                                                    |
-| + [id](#id )           | No      | string           | No         | -                              | Client-chosen id, echoed in the reply.                                                                                                                                                   |
-| + [topic](#topic )     | No      | enum (of string) | No         | In ../common.json#/$defs/topic | Subscribable stream. \`faces\` needs mode \`capture\` or \`sensing\`, \`pose\` needs \`sensing\`; \`gps\` asks for location access and \`env\` for Motion & Fitness access on first use. |
-| - [rate_hz](#rate_hz ) | No      | number           | No         | -                              | Requested rate. Ignored for event-driven topics such as \`log\`.                                                                                                                         |
-| - [fields](#fields )   | No      | array of string  | No         | -                              | Only send these payload fields. Omit for all.                                                                                                                                            |
+| Property               | Pattern | Type             | Deprecated | Definition                     | Title/Description                                                                                                                                                                                                                                |
+| ---------------------- | ------- | ---------------- | ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| + [type](#type )       | No      | string           | No         | -                              | Message type, e.g. \`hello\`, \`face.set_emotion\`, \`imu\`.                                                                                                                                                                                     |
+| + [ts](#ts )           | No      | integer          | No         | -                              | Sender clock in milliseconds since the Unix epoch.                                                                                                                                                                                               |
+| + [seq](#seq )         | No      | integer          | No         | -                              | Per-connection, per-direction counter, starting at 0.                                                                                                                                                                                            |
+| + [id](#id )           | No      | string           | No         | -                              | Client-chosen id, echoed in the reply.                                                                                                                                                                                                           |
+| + [topic](#topic )     | No      | enum (of string) | No         | In ../common.json#/$defs/topic | Subscribable stream. \`faces\` needs mode \`capture\` or \`sensing\`, \`pose\` needs \`sensing\`; \`gps\` asks for location access and \`env\` for Motion & Fitness access on first use; \`speech\` carries speaking and listening events (0.4). |
+| - [rate_hz](#rate_hz ) | No      | number           | No         | -                              | Requested rate. Ignored for event-driven topics such as \`log\`.                                                                                                                                                                                 |
+| - [fields](#fields )   | No      | array of string  | No         | -                              | Only send these payload fields. Omit for all.                                                                                                                                                                                                    |
 
 ## <a name="type"></a>1. Property `Envelope > type`
 
@@ -82,7 +82,7 @@
 | **Required**   | Yes                         |
 | **Defined in** | ../common.json#/$defs/topic |
 
-**Description:** Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
+**Description:** Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
 
 Must be one of:
 * "imu"
@@ -92,6 +92,7 @@ Must be one of:
 * "pose"
 * "gps"
 * "env"
+* "speech"
 
 ## <a name="rate_hz"></a>6. Property `Subscribe > rate_hz`
 

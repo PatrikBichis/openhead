@@ -27,7 +27,7 @@
   <main class="page">
     <div class="wrap">
       <h1>Privacy Policy</h1>
-      <p class="updated">OpenHead Robot Face for iOS and iPadOS · Effective 1 November 2026 (location and barometer added)</p>
+      <p class="updated">OpenHead Robot Face for iOS and iPadOS · Effective 2 November 2026 (speaking and listening added)</p>
 
       <div class="box">
         <p><strong>In short:</strong> the app collects no personal data. It has no accounts, analytics, advertising or tracking, and it sends nothing to us or to any third party. It only talks to devices on your own local network that you have paired with it.</p>
@@ -50,7 +50,8 @@
         <li><strong>Camera.</strong> The camera is only used when a paired controller switches on a camera mode, and iOS asks for your permission the first time. In <em>capture</em> mode the front camera shows what the head sees on its own screen and finds faces; in <em>sensing</em> mode ARKit uses the cameras to track where the head is in the room and to follow one face. Camera images are processed on the device and are never stored or sent anywhere. What paired controllers receive are positions and angles: where faces are (direction, size, distance) and where the head is. Faces are not recognised or identified, and no face data is kept. With dev mode switched on, a paired controller can take a screenshot of the screen, which then includes the camera view.</li>
         <li><strong>Location.</strong> Only when a paired controller subscribes to the <code>gps</code> stream does the app ask iOS for your location ("While Using the App"), and iOS asks for your permission the first time. The location is sent only to the paired controllers on your local network that asked for it, while they are connected. It is not stored, not sent to us and not used for anything else. With location allowed, the compass also reports true north.</li>
         <li><strong>Compass, magnetometer and barometer.</strong> The heading on the camera view comes from the compass. If a paired controller subscribes to the <code>env</code> stream, the app sends it the compass heading, the magnetic field and the air pressure and altitude change from the barometer, on your local network only. The barometer needs Motion &amp; Fitness permission, which iOS asks for the first time. None of this is stored.</li>
-        <li><strong>Microphone.</strong> The app does not use the microphone.</li>
+        <li><strong>Speaking.</strong> When a paired controller asks the head to speak (<code>speech.say</code>), the app turns the text into speech with Apple's voices on the device and plays it on the phone's speaker or a connected speaker. The text is not stored.</li>
+        <li><strong>Microphone and speech recognition.</strong> Only when a paired controller asks the head to listen (<code>speech.listen</code>) does the app use the microphone, and iOS asks for your permission the first time, for the microphone and for speech recognition. What you say is turned into text with Apple's speech recognition, on the device when the language supports it; otherwise Apple processes the audio under <a href="https://www.apple.com/legal/privacy/">Apple's privacy policy</a>. Audio is not recorded or stored. The text goes only to the paired controllers on your local network that asked for it. The app stops listening when it is told to, and when the last controller disconnects; while it listens, iOS shows the microphone indicator. The controller decides what to do with the text, for example send it to an AI service of your choice.</li>
       </ul>
 
       <h2>Children</h2>

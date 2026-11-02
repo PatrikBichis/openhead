@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Speech",
+  "description": "Speaking and listening, as events (no rate). Speaking: `say_start` when an utterance begins, `cue` when a segment that is not text is reached (`cue_type` emotion, action or gesture, and `cue` its name), `say_end` when it is done (`interrupted` if stopped or replaced). Listening: `partial` with the words so far while someone talks, `heard` with the final text when they pause.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "speech"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "fields": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": [
+            "say_start",
+            "cue",
+            "say_end",
+            "partial",
+            "heard"
+          ]
+        },
+        "utterance_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Speaking events: the id `speech.say` answered with."
+        },
+        "cue_type": {
+          "type": "string",
+          "enum": [
+            "emotion",
+            "action",
+            "gesture"
+          ]
+        },
+        "cue": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "With `cue`: the emotion, action or gesture name."
+        },
+        "interrupted": {
+          "type": "boolean",
+          "description": "With `say_end`."
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "With `partial` and `heard`: what was heard."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "With `heard`, when the recogniser gives one."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Device clock, seconds."
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
+      "required": [
+        "event",
+        "sensor_time_s"
+      ]
+    }
+  }
+}

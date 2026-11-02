@@ -21,6 +21,8 @@ EPILOG = """examples:
   openhead emotion curious --device localhost
   openhead show clip.mp4 --overlay face-corner      play a local video (served from here)
   openhead subtitle "Hello there" --mouth           text on screen, mouth moving
+  openhead say "[happy] Hi! [laugh] [sad 0.5] Bye."  speak with the head's voice (0.4), cues in brackets
+  openhead listen -n 3                              print what the head hears (speech to text)
   openhead camera hunter --follow                   camera view with HUD; the eyes follow a face
   openhead watch faces -n 5                         print the faces stream
   openhead hud --set speed=0.4 --line "SPEED {speed} M/S" --widget compass
@@ -112,6 +114,17 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--position", choices=["bottom", "top"])
     p.add_argument("--duration-ms", type=int)
     p.add_argument("--mouth", action="store_true", help="move the mouth with the text")
+
+    p = sub.add_parser("say", parents=[common], help="speak with the head's voice; cues like [happy] [laugh]")
+    p.add_argument("text", nargs="+")
+    p.add_argument("--voice", help="language (en-US, sv-SE) or voice identifier")
+    p.add_argument("--rate", type=float, help="0.5-2, relative to normal")
+    p.add_argument("--no-subtitle", action="store_true")
+
+    p = sub.add_parser("listen", parents=[common], help="print what the head hears (speech to text)")
+    p.add_argument("--locale", default="en-US")
+    p.add_argument("-n", type=int, default=0, help="stop after n utterances (0: until Ctrl+C)")
+    p.add_argument("--partial", action="store_true", help="also print the words as they come")
 
     p = sub.add_parser("run", parents=[common], help="run YAML scenarios")
     p.add_argument("scenarios", nargs="+", type=Path)
@@ -278,6 +291,34 @@ async def _command(head: Head, args: argparse.Namespace) -> int:
         case "subtitle":
             await head.display.subtitle(" ".join(args.text), mode=args.mode, position=args.position,
                                         duration_ms=args.duration_ms, mouth=args.mouth)
+        case "say":
+            async with head.subscribe("speech") as sub:
+                uid = await head.speech.say(" ".join(args.text), voice=args.voice, rate=args.rate,
+                                            subtitle=False if args.no_subtitle else None)
+                async for msg in sub:
+                    if msg.event == "cue" and msg.utterance_id == uid:
+                        print(f"  [{msg.cue}]")
+                    if msg.event == "say_end" and msg.utterance_id == uid:
+                        print("interrupted" if msg.interrupted else "done")
+                        break
+        case "listen":
+            result = await head.speech.listen(True, locale=args.locale)
+            where = "on the device" if result.get("on_device") else "with Apple's server"
+            print(f"listening ({result.get('locale', args.locale)}, {where}); Ctrl+C stops", flush=True)
+            count = 0
+            try:
+                async with head.subscribe("speech") as sub:
+                    async for msg in sub:
+                        if msg.event == "partial" and args.partial:
+                            print(f"  … {msg.text}", flush=True)
+                        elif msg.event == "heard":
+                            conf = f" ({msg.confidence:.2f})" if msg.confidence is not None else ""
+                            print(f"> {msg.text}{conf}", flush=True)
+                            count += 1
+                            if args.n and count >= args.n:
+                                break
+            finally:
+                await head.speech.listen(False)
         case "run":
             from ..scenario import run_scenario
 

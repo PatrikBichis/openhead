@@ -11,13 +11,13 @@
 
 **Description:** Close a stream. Acknowledged even if the topic was not subscribed.
 
-| Property           | Pattern | Type             | Deprecated | Definition                     | Title/Description                                                                                                                                                                        |
-| ------------------ | ------- | ---------------- | ---------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| + [type](#type )   | No      | string           | No         | -                              | Message type, e.g. \`hello\`, \`face.set_emotion\`, \`imu\`.                                                                                                                             |
-| + [ts](#ts )       | No      | integer          | No         | -                              | Sender clock in milliseconds since the Unix epoch.                                                                                                                                       |
-| + [seq](#seq )     | No      | integer          | No         | -                              | Per-connection, per-direction counter, starting at 0.                                                                                                                                    |
-| + [id](#id )       | No      | string           | No         | -                              | Client-chosen id, echoed in the reply.                                                                                                                                                   |
-| + [topic](#topic ) | No      | enum (of string) | No         | In ../common.json#/$defs/topic | Subscribable stream. \`faces\` needs mode \`capture\` or \`sensing\`, \`pose\` needs \`sensing\`; \`gps\` asks for location access and \`env\` for Motion & Fitness access on first use. |
+| Property           | Pattern | Type             | Deprecated | Definition                     | Title/Description                                                                                                                                                                                                                                |
+| ------------------ | ------- | ---------------- | ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| + [type](#type )   | No      | string           | No         | -                              | Message type, e.g. \`hello\`, \`face.set_emotion\`, \`imu\`.                                                                                                                                                                                     |
+| + [ts](#ts )       | No      | integer          | No         | -                              | Sender clock in milliseconds since the Unix epoch.                                                                                                                                                                                               |
+| + [seq](#seq )     | No      | integer          | No         | -                              | Per-connection, per-direction counter, starting at 0.                                                                                                                                                                                            |
+| + [id](#id )       | No      | string           | No         | -                              | Client-chosen id, echoed in the reply.                                                                                                                                                                                                           |
+| + [topic](#topic ) | No      | enum (of string) | No         | In ../common.json#/$defs/topic | Subscribable stream. \`faces\` needs mode \`capture\` or \`sensing\`, \`pose\` needs \`sensing\`; \`gps\` asks for location access and \`env\` for Motion & Fitness access on first use; \`speech\` carries speaking and listening events (0.4). |
 
 ## <a name="type"></a>1. Property `Envelope > type`
 
@@ -80,7 +80,7 @@
 | **Required**   | Yes                         |
 | **Defined in** | ../common.json#/$defs/topic |
 
-**Description:** Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use.
+**Description:** Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
 
 Must be one of:
 * "imu"
@@ -90,5 +90,6 @@ Must be one of:
 * "pose"
 * "gps"
 * "env"
+* "speech"
 
 ----------------------------------------------------------------------------------------------------------------------------

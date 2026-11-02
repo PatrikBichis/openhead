@@ -1,0 +1,10 @@
+{
+  "type": "speech.say",
+  "ts": 1793462400000,
+  "seq": 61,
+  "id": "c-41",
+  "segments": [{ "say": "Hello! I can talk now." }],
+  "rate": 1.1,
+  "subtitle": false,
+  "interrupt": false
+}

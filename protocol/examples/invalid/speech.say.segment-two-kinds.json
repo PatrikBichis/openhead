@@ -1,0 +1,7 @@
+{
+  "type": "speech.say",
+  "ts": 1793462400000,
+  "seq": 64,
+  "id": "c-44",
+  "segments": [{ "say": "Hello", "emotion": "happy" }]
+}

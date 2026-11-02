@@ -1,0 +1,9 @@
+{
+  "type": "speech",
+  "ts": 1793462400000,
+  "seq": 70,
+  "event": "heard",
+  "text": "Tell me a joke.",
+  "confidence": 0.92,
+  "sensor_time_s": 81250.7
+}

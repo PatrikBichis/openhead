@@ -1,6 +1,6 @@
 # OpenHead protocol reference
 
-Protocol version 0.3.1. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
+Protocol version 0.4.0. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
 
 | Type | Schema | Description |
 | --- | --- | --- |
@@ -27,6 +27,10 @@ Protocol version 0.3.1. Generated from `protocol/schema` by `tools/protocol.py`;
 | `pair` | [Pair](messages/pair.md) | Pairing attempt with the code shown on the device. |
 | `pair_required` | [PairRequired](messages/pair_required.md) | Sent by the device when `hello` has no valid token. |
 | `pose` | [Pose](topics/pose.md) | Where the head is, up to 60 Hz while mode is `sensing` (ARKit world tracking). |
+| `speech` | [Speech](topics/speech.md) | Speaking and listening, as events (no rate). |
+| `speech.listen` | [SpeechListen](commands/speech.listen.md) | Listen with the head's microphone and turn speech into text, on the device when it can. |
+| `speech.say` | [SpeechSay](commands/speech.say.md) | Speak with the head's own voice (on-device text to speech), with the mouth moving to the audio and the words as a subtitle. |
+| `speech.stop` | [SpeechStop](commands/speech.stop.md) | Stop speaking now and drop anything queued. |
 | `status` | [Status](topics/status.md) | Device status, up to 1 Hz. |
 | `subscribe` | [Subscribe](commands/subscribe.md) | Open a stream. |
 | `system.diagnostics` | [SystemDiagnostics](commands/system.diagnostics.md) | Health snapshot for debugging. |

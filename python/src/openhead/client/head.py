@@ -25,7 +25,7 @@ log = logging.getLogger("openhead.client")
 TOPIC_MODELS: dict[str, type[BaseModel]] = {
     "imu": models.Imu, "status": models.Status, "log": models.Log,
     "faces": models.Faces, "pose": models.Pose, "gps": models.Gps,
-    "env": models.Env,
+    "env": models.Env, "speech": models.Speech,
 }
 
 
@@ -81,6 +81,7 @@ class Head:
         self.display = _Display(self)
         self.system = _System(self)
         self.mode = _Mode(self)
+        self.speech = _Speech(self)
         self._ws: ClientConnection | None = None
         self._seq = itertools.count()
         self._ids = itertools.count(1)
@@ -469,6 +470,32 @@ class _Mode:
 
     async def set(self, mode: str) -> None:
         await self._h.command("mode.set", mode=mode)
+
+
+class _Speech:
+    """The head's voice and ears (protocol 0.4)."""
+
+    def __init__(self, head: Head):
+        self._h = head
+
+    async def say(self, text_or_segments: str | list[dict], *, voice: str | None = None,
+                  rate: float | None = None, pitch: float | None = None, subtitle: bool | None = None,
+                  interrupt: bool | None = None) -> str:
+        """Speak; text may carry cues such as `[happy]`, `[laugh]`, `[pause 0.5]`, `[nod]`
+        (see `openhead.speech`). Returns the utterance id; progress comes on topic `speech`."""
+        from ..speech import parse
+        segments = parse(text_or_segments) if isinstance(text_or_segments, str) else text_or_segments
+        result = await self._h.command("speech.say", segments=segments, voice=voice, rate=rate,
+                                       pitch=pitch, subtitle=subtitle, interrupt=interrupt)
+        return result["utterance_id"]
+
+    async def stop(self) -> None:
+        await self._h.command("speech.stop")
+
+    async def listen(self, on: bool = True, *, locale: str | None = None,
+                     auto_expressions: bool | None = None, silence_ms: int | None = None) -> dict:
+        return await self._h.command("speech.listen", on=on, locale=locale,
+                                     auto_expressions=auto_expressions, silence_ms=silence_ms)
 
 
 def _drop_none(params: dict) -> dict:

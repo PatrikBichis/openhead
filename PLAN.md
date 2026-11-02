@@ -320,7 +320,12 @@ Varje steg har ett acceptanskriterium som agenten verifierar innan nästa påbö
     3. *Simulator och klient:* syntetiska ansikten som rör sig, syntetisk pose, `faces`/`pose`-prenumeration, CLI och MCP (`wait_for` på ansikten). *Klart när `scenarios/camera.yaml` är grön mot sim.*
     4. *iOS:* frontkamera med `AVCaptureMetadataOutput` (ansikten med id), förhandsbild under webblagret, senaste bildruta till skärmdumpar; ARKit-session för `sensing` med pose 60 Hz och ett ansikte; kamerabehörighet. *Klart när `camera.yaml` är grön mot enheten och pose rör sig rimligt när telefonen flyttas.*
     5. *Dokumentation:* README, webbplatsen (kamera/HUD, ARKit, sensordata med plottar från riktiga inspelningar), integritetspolicyn uppdaterad för kameran före släpp.
-13. **Senare:** GPS, `env`, teman vid körning, Streamable HTTP, TLS.
+13. **Senare:** GPS, `env`, teman vid körning, Streamable HTTP, TLS. (GPS, `env` och Streamable HTTP kom i 0.3.)
+14. **v0.4: tal och lyssning** (beslut 2026-11-02, Patrik: telefonens mikrofon och högtalare används; hjärnan är en extern LLM via MCP).
+    1. *Protokoll 0.4:* `speech.say` med segment (text, `emotion`, `action` laugh/sigh/pause/blink, `gesture` nod/shake/tilt som cue till en kropp), `speech.stop`, `speech.listen`, topic `speech` med `say_start`, `cue`, `say_end`, `partial`, `heard`; kapabilitet `speech`; behörigheter `microphone` och `speech_recognition`. *Klart när exempel validerar och modeller är genererade.*
+    2. *Python:* markeringar i text (`[happy]`, `[laugh]`, `[pause 0.5]`, `[nod]`) till segment; klient `head.speech`; simulatorn med samma händelser och tidsordning och `hear()` för tester; CLI `say`/`listen`; MCP-verktygen `say`, `listen`, `stop_speaking`, `stop_listening` (en öppen `speech`-prenumeration så att inget som sägs mellan två `listen` försvinner). *Klart när testerna är gröna mot sim.*
+    3. *iOS:* `AVSpeechSynthesizer.write` till `AVAudioEngine` med munnen från ljudets envelope, rösten följer uttrycket; `SFSpeechRecognizer` på enheten när språket stöds, röstbehandling (ekosläckning), lyssningen pausas medan huvudet talar, uppmärksamt/tänkande uttryck automatiskt; mikrofonen av när sista klienten går. *Klart när en dialog via MCP fungerar på iPhone 12 (TestFlight) och talet och igenkänningen är bedömda där.*
+    4. *Dokumentation:* integritetspolicyn (mikrofon, taligenkänning), README, webbplatsen, App Store-texterna före släpp.
 
 Steg 3–5 kan drivas parallellt av flera agentinstanser; steg 7 beror på 2–4 och 6.
 

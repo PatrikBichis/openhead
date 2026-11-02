@@ -67,6 +67,14 @@
             "motion_fitness": {
               "$ref": "#/$defs/permission",
               "description": "For the barometer in `env`; absent from 0.2 devices."
+            },
+            "microphone": {
+              "$ref": "#/$defs/permission",
+              "description": "For `speech.listen`; absent from devices before 0.4."
+            },
+            "speech_recognition": {
+              "$ref": "#/$defs/permission",
+              "description": "For `speech.listen`; absent from devices before 0.4."
             }
           },
           "required": [

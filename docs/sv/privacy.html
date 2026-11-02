@@ -27,7 +27,7 @@
   <main class="page">
     <div class="wrap">
       <h1>Integritetspolicy</h1>
-      <p class="updated">OpenHead Robot Face för iOS och iPadOS · Gäller från 1 november 2026 (plats och barometer tillagda)</p>
+      <p class="updated">OpenHead Robot Face för iOS och iPadOS · Gäller från 2 november 2026 (tal och lyssning tillagda)</p>
 
       <div class="box">
         <p><strong>Kort sagt:</strong> appen samlar inte in några personuppgifter. Den har inga konton, ingen analys, ingen reklam och ingen spårning, och den skickar ingenting till oss eller till någon tredje part. Den pratar bara med enheter i ditt eget lokala nätverk som du har parat med den.</p>
@@ -51,7 +51,8 @@
         <li><strong>Kamera.</strong> Kameran används bara när en parad styrenhet slår på ett kameraläge, och iOS frågar om din tillåtelse första gången. I läget <em>capture</em> visar frontkameran det huvudet ser på sin egen skärm och hittar ansikten; i läget <em>sensing</em> använder ARKit kamerorna för att följa var huvudet är i rummet och för att följa ett ansikte. Kamerabilder behandlas på enheten och sparas eller skickas aldrig någonstans. Det parade styrenheter får är positioner och vinklar: var ansikten är (riktning, storlek, avstånd) och var huvudet är. Ansikten känns inte igen och identifieras inte, och ingen ansiktsdata sparas. Med utvecklarläget påslaget kan en parad styrenhet ta en skärmdump, som då innehåller kameravyn.</li>
         <li><strong>Plats.</strong> Först när en parad styrenhet prenumererar på strömmen <code>gps</code> ber appen iOS om din plats ("När appen används"), och iOS frågar om din tillåtelse första gången. Platsen skickas bara till de parade styrenheter i ditt lokala nätverk som bad om den, medan de är anslutna. Den sparas inte, skickas inte till oss och används inte till något annat. När platsåtkomst är tillåten anger kompassen också geografisk nord.</li>
         <li><strong>Kompass, magnetometer och barometer.</strong> Kompassriktningen i kameravyn kommer från kompassen. Om en parad styrenhet prenumererar på strömmen <code>env</code> skickar appen kompassriktningen, magnetfältet samt lufttrycket och höjdförändringen från barometern till den, bara i ditt lokala nätverk. Barometern kräver behörigheten Rörelse &amp; fitness, som iOS frågar om första gången. Inget av detta sparas.</li>
-        <li><strong>Mikrofon.</strong> Appen använder inte mikrofonen.</li>
+        <li><strong>Tal.</strong> När en parad styrenhet ber huvudet tala (<code>speech.say</code>) gör appen om texten till tal med Apples röster på enheten och spelar upp den i telefonens högtalare eller en ansluten högtalare. Texten sparas inte.</li>
+        <li><strong>Mikrofon och taligenkänning.</strong> Appen använder mikrofonen bara när en parad styrenhet ber huvudet lyssna (<code>speech.listen</code>), och iOS frågar om din tillåtelse första gången, för mikrofonen och för taligenkänning. Det du säger görs om till text med Apples taligenkänning, på enheten när språket stöds; annars behandlar Apple ljudet enligt <a href="https://www.apple.com/legal/privacy/">Apples integritetspolicy</a>. Ljud spelas inte in och sparas inte. Texten går bara till de parade styrenheter i ditt lokala nätverk som bad om den. Appen slutar lyssna när den blir ombedd och när den sista styrenheten kopplar ner; medan den lyssnar visar iOS mikrofonindikatorn. Styrenheten bestämmer vad som görs med texten, till exempel att skicka den till en AI-tjänst du väljer.</li>
       </ul>
 
       <h2>Barn</h2>

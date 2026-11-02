@@ -2,6 +2,16 @@
 
 All changes to `protocol/schema` are recorded here, in the same commit as the change. The protocol follows [semver](https://semver.org) from 0.1.0; until 0.1.0 is tagged anything may change.
 
+## 0.4.0 (2026-11-02)
+
+### Added
+
+- `speech.say`: the head speaks with its own voice (on-device text to speech), the mouth moving to the audio and the words as a subtitle. `segments` mix text with `emotion` changes (the voice follows), `action` (`laugh`, `sigh`, `pause`, `blink`) and `gesture` cues (`nod`, `shake`, `tilt`) for a body. Answered at once with an `utterance_id`; `interrupt` (default true) replaces what is being said.
+- `speech.stop`: stop speaking and drop the queue.
+- `speech.listen`: speech to text with the head's microphone, on the device when it can, in `locale` (default `en-US`); `auto_expressions` (default true) looks attentive while someone talks and thoughtful after; `silence_ms` ends an utterance. Asks for microphone and speech recognition permission.
+- Topic `speech` (events): `say_start`, `cue`, `say_end` while speaking; `partial` and `heard` while listening.
+- Capability `speech` in `welcome`; `microphone` and `speech_recognition` in `system.diagnostics` permissions (optional, absent from older devices).
+
 ## 0.3.1 (2026-11-01)
 
 ### Changed

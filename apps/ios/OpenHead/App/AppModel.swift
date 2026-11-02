@@ -14,6 +14,7 @@ final class AppModel: ObservableObject {
     let heading = HeadingService()
     let location = LocationService()
     let env = EnvService()
+    private(set) lazy var speech = SpeechService(model: self)
     private(set) lazy var link = LinkServer(model: self)
 
     @Published var display: DisplayContent = .face
@@ -79,7 +80,11 @@ final class AppModel: ObservableObject {
         linkReady = ready
         let lastLeft = self.clients > 0 && clients == 0
         self.clients = clients
-        if lastLeft { applyOwnTheme(settings.offlineTheme, why: "no clients") }
+        if lastLeft {
+            applyOwnTheme(settings.offlineTheme, why: "no clients")
+            speech.stop()              // nobody to talk to: stop speaking and switch the microphone off
+            speech.stopListening()
+        }
     }
 
     /// Back to the theme chosen in the app's settings, unless it is already on.
@@ -189,6 +194,8 @@ final class AppModel: ObservableObject {
                 "camera": CameraService.permission,
                 "location": location.permission,
                 "motion_fitness": EnvService.permission,
+                "microphone": SpeechService.microphonePermission,
+                "speech_recognition": SpeechService.recognitionPermission,
             ],
             "arkit": [
                 "world_tracking": ARWorldTrackingConfiguration.isSupported,

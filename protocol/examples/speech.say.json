@@ -1,0 +1,17 @@
+{
+  "type": "speech.say",
+  "ts": 1793462400000,
+  "seq": 60,
+  "id": "c-40",
+  "segments": [
+    { "emotion": "happy" },
+    { "say": "Why did the robot go on holiday?" },
+    { "action": "pause", "seconds": 0.5 },
+    { "say": "It needed to recharge!" },
+    { "action": "laugh" },
+    { "emotion": "focused", "intensity": 0.8 },
+    { "gesture": "nod" },
+    { "say": "But seriously: your meeting starts in five minutes." }
+  ],
+  "voice": "en-US"
+}

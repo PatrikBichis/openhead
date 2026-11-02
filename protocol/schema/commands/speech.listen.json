@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SpeechListen",
+  "description": "Listen with the head's microphone and turn speech into text, on the device when it can. What is heard comes on the `speech` topic: `partial` while someone talks, `heard` when they pause. Asks for microphone and speech recognition permission the first time (`unsupported` if refused). With `auto_expressions` (default true) the face looks attentive while someone talks and thoughtful after they finish, until the next `speech.say`.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "speech.listen"
+    },
+    "on": {
+      "type": "boolean"
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "description": "Language to recognise, e.g. `en-US` (default) or `sv-SE`."
+    },
+    "auto_expressions": {
+      "type": "boolean",
+      "description": "Attentive while hearing, thinking after; default true."
+    },
+    "silence_ms": {
+      "type": "integer",
+      "minimum": 300,
+      "maximum": 5000,
+      "description": "Silence that ends an utterance; default 1000."
+    }
+  },
+  "required": [
+    "type",
+    "on"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "listening": {
+          "type": "boolean"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "on_device": {
+          "type": "boolean",
+          "description": "Recognition runs on the device (no audio leaves it)."
+        }
+      },
+      "required": [
+        "listening"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

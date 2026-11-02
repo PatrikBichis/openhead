@@ -58,6 +58,8 @@ targets:
         NSLocationWhenInUseUsageDescription: OpenHead tells the robot where the head is when the robot asks for it (the gps stream). The location goes only to robot controllers paired on your network.
         NSMotionUsageDescription: OpenHead reads the barometer (air pressure and altitude change) when the robot asks for it. The data goes only to robot controllers paired on your network.
         NSLocalNetworkUsageDescription: OpenHead lets robot controllers on your network connect to this head.
+        NSMicrophoneUsageDescription: OpenHead listens when the robot asks it to (speech.listen) and turns what you say into text. Audio stays on this device; only the text goes to robot controllers paired on your network.
+        NSSpeechRecognitionUsageDescription: OpenHead turns what you say into text, on this device when it can, and sends the text only to robot controllers paired on your network.
         NSBonjourServices:
           - _openhead._tcp
         # Images, video and web pages come from the robot's computer on the LAN, often over

@@ -216,11 +216,13 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
               <tr><td>Magnetometer</td><td>magnetfält och kompassriktning (geografisk nord med platsåtkomst)</td><td><code>env</code></td></tr>
               <tr><td>Barometer</td><td>lufttryck och höjdförändring</td><td><code>env</code></td></tr>
               <tr><td>GNSS: GPS, GLONASS, Galileo, QZSS, BeiDou</td><td>latitud, longitud, höjd, noggrannhet, hastighet och färdriktning</td><td><code>gps</code></td></tr>
+              <tr><td>Mikrofon (från 0.4)</td><td>tal till text, på enheten när det går; huvudet ser uppmärksamt ut medan du pratar</td><td><code>speech</code></td></tr>
+              <tr><td>Högtalare (från 0.4)</td><td>huvudets egen röst, med munnen i takt med ljudet och uttryck på rätt ställen</td><td><code>speech.say</code></td></tr>
               <tr><td>Batteri och temperatur</td><td>batterinivå, laddning och temperaturläge</td><td><code>status</code></td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note">Används inte: mikrofonen (robotens dator sköter ljudet), närhetssensorn (den släcker skärmen och skulle dölja ansiktet) och ljussensorn (inget öppet API). iPhone 12 har ingen LiDAR, och OpenHead behöver ingen.</p>
+        <p class="note">Från 0.4 även mikrofonen och högtalaren: huvudet talar med egen röst och gör om det du säger till text. Används inte: närhetssensorn (den släcker skärmen och skulle dölja ansiktet) och ljussensorn (inget öppet API). iPhone 12 har ingen LiDAR, och OpenHead behöver ingen.</p>
         <div style="overflow-x:auto; margin-top: 32px">
           <table class="data streams">
             <thead><tr><th>Ström</th><th>Takt</th><th>Fält</th><th>När</th></tr></thead>

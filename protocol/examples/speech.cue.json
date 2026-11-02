@@ -1,0 +1,10 @@
+{
+  "type": "speech",
+  "ts": 1793462400000,
+  "seq": 71,
+  "event": "cue",
+  "utterance_id": "u-7",
+  "cue_type": "gesture",
+  "cue": "nod",
+  "sensor_time_s": 81252.1
+}

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import json
 import logging
 import platform
@@ -36,11 +37,13 @@ from .shots import ShotServer
 log = logging.getLogger("openhead.sim")
 
 DEVICE_MESSAGES = {"ack", "error", "welcome", "pair_required", "imu", "status", "log", "faces",
-                   "pose", "gps", "env"}
+                   "pose", "gps", "env", "speech"}
 CAPABILITIES = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
-                "status", "log", "screenshot", "camera", "faces", "pose", "gps", "env"]
+                "status", "log", "screenshot", "camera", "faces", "pose", "gps", "env", "speech"]
 TOPIC_RATES = {"imu": (50.0, 100.0), "status": (1.0, 1.0), "log": (0.0, 0.0),  # default, max
-               "faces": (15.0, 15.0), "pose": (30.0, 60.0), "gps": (1.0, 1.0), "env": (10.0, 10.0)}
+               "faces": (15.0, 15.0), "pose": (30.0, 60.0), "gps": (1.0, 1.0), "env": (10.0, 10.0),
+               "speech": (0.0, 0.0)}
+CHARS_PER_S = 15     # the simulated voice speaks at about the face engine's text-mouth pace
 LOG_LEVELS = ["debug", "info", "notice", "warning", "error", "fault"]
 PAIR_MAX_FAILURES = 5
 PAIR_LOCK_S = 300
@@ -118,6 +121,10 @@ class SimServer:
         self.mode_started = 0.0
         self.faces: list[dict] = []  # latest synthetic faces while a camera mode runs
         self._scene: asyncio.Task | None = None
+        self._speaking: asyncio.Task | None = None     # the utterance playing (speech.say)
+        self._utterances = 0
+        self.listening: dict | None = None             # speech.listen options while listening
+        self._thinking = False                         # auto expression after something was heard
         self.settings: dict[str, Any] = {
             "name": c.name, "port": c.port, "mount_offset": [0, 0, 0, 1], "offline_theme": c.theme,
         }
@@ -443,7 +450,8 @@ class SimServer:
                         "thermal_state": "nominal", "memory_mb": 0, "frame_rate": 60,
                         "permissions": {"local_network": "not_required",
                                         "motion": "not_required", "camera": "not_required",
-                                        "location": "not_required", "motion_fitness": "not_required"},
+                                        "location": "not_required", "motion_fitness": "not_required",
+                                        "microphone": "not_required", "speech_recognition": "not_required"},
                         "arkit": {"world_tracking": False, "face_tracking": False},
                     }
                 case "system.settings":
@@ -453,6 +461,15 @@ class SimServer:
                         if d["key"] == "offline_theme":
                             await self._own_theme("settings")
                     return {"settings": self.settings}
+                case "speech.say":
+                    return self._say(d)
+                case "speech.stop":
+                    await self._stop_speaking()
+                case "speech.listen":
+                    self.listening = ({"auto": d.get("auto_expressions", True), "locale": d.get("locale", "en-US")}
+                                      if d["on"] else None)
+                    self.log("info", "speech", f"listening {'on' if d['on'] else 'off'}")
+                    return {"listening": d["on"], "locale": d.get("locale", "en-US"), "on_device": True}
                 case "mode.set":
                     await self._set_mode(d["mode"])
                 case "mode.get":
@@ -462,6 +479,95 @@ class SimServer:
         except FaceError as exc:
             raise SimError("invalid_params", str(exc)) from exc
         return None
+
+    # --- speech (0.4): a silent voice that keeps the device's timing and events ---
+
+    def _say(self, d: dict) -> dict:
+        self._utterances += 1
+        uid = f"u-{self._utterances}"
+        previous = self._speaking
+        if d.get("interrupt", True) and previous and not previous.done():
+            previous.cancel()
+            previous = None
+        self._speaking = asyncio.create_task(self._speak(uid, d, previous))
+        return {"utterance_id": uid}
+
+    async def _stop_speaking(self) -> None:
+        if self._speaking and not self._speaking.done():
+            self._speaking.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self._speaking
+
+    async def _speak(self, uid: str, d: dict, after: asyncio.Task | None) -> None:
+        if after:
+            with contextlib.suppress(asyncio.CancelledError):
+                await after
+        face = self.face
+        subtitle = d.get("subtitle", True)
+        segments = d["segments"]
+        said = False
+        self._speech_event("say_start", utterance_id=uid)
+        try:
+            if self._thinking and "emotion" not in segments[0]:
+                await face.set_emotion("neutral", 1.0, "replace", None)
+            self._thinking = False
+            for seg in segments:
+                if "say" in seg:
+                    text = seg["say"]
+                    if subtitle:
+                        await face.subtitle(text if not said else " " + text, mode="append" if said else "replace",
+                                            position=None, duration_ms=None, mouth=True)
+                    said = True
+                    await asyncio.sleep(len(text) / CHARS_PER_S)
+                elif "emotion" in seg:
+                    self._speech_event("cue", utterance_id=uid, cue_type="emotion", cue=seg["emotion"])
+                    await face.set_emotion(seg["emotion"], seg.get("intensity", 1.0), "replace", None)
+                elif "action" in seg:
+                    action = seg["action"]
+                    self._speech_event("cue", utterance_id=uid, cue_type="action", cue=action)
+                    if action == "laugh":
+                        before = (await face.state())["emotion"]
+                        await face.set_emotion("laughing", 1.0, "replace", None)
+                        await asyncio.sleep(1.0)
+                        await face.set_emotion(before, 1.0, "replace", None)
+                    elif action == "sigh":
+                        await asyncio.sleep(0.8)
+                    elif action == "pause":
+                        await asyncio.sleep(seg.get("seconds", 0.5))
+                    else:
+                        await face.blink()
+                else:
+                    self._speech_event("cue", utterance_id=uid, cue_type="gesture", cue=seg["gesture"])
+            self._speech_event("say_end", utterance_id=uid, interrupted=False)
+            if said and subtitle:
+                await face.subtitle("", mode="replace", position=None, duration_ms=None, mouth=False)
+        except asyncio.CancelledError:
+            self._speech_event("say_end", utterance_id=uid, interrupted=True)
+            if said and subtitle:
+                with contextlib.suppress(Exception):
+                    await face.subtitle("", mode="clear", position=None, duration_ms=None, mouth=False)
+            raise
+
+    async def hear(self, text: str) -> None:
+        """What a person says to the simulator (tests, and the windowed sim's input)."""
+        if not self.listening:
+            return
+        words = text.split()
+        if self.listening["auto"]:
+            await self.face.set_emotion("curious", 0.6, "replace", None)
+        self._speech_event("partial", text=" ".join(words[:max(1, len(words) // 2)]))
+        await asyncio.sleep(0.05)
+        self._speech_event("heard", text=text, confidence=0.9)
+        self.log("info", "speech", f"heard {len(text)} chars")
+        if self.listening["auto"]:
+            await self.face.set_emotion("thinking", 0.8, "replace", None)
+            self._thinking = True
+
+    def _speech_event(self, event: str, **fields: Any) -> None:
+        payload = {"event": event, **fields, "sensor_time_s": round(time.monotonic() - self.started, 4)}
+        for session in list(self.sessions):
+            if "speech" in session.subs:
+                asyncio.create_task(self._send_quietly(session, "speech", payload))
 
     def _subscribe(self, s: Session, d: dict) -> dict:
         topic = d["topic"]

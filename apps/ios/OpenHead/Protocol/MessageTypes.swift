@@ -1,6 +1,6 @@
 // Generated from protocol/schema by tools/protocol.py (quicktype). Do not edit.
 
-public let protocolVersion = "0.3.1"
+public let protocolVersion = "0.4.0"
 
 /// Message `type` to its generated model.
 public let messageTypes: [String: any Codable.Type] = [
@@ -27,6 +27,10 @@ public let messageTypes: [String: any Codable.Type] = [
     "pair": Pair.self,
     "pair_required": PairRequired.self,
     "pose": Pose.self,
+    "speech": Speech.self,
+    "speech.listen": SpeechListen.self,
+    "speech.say": SpeechSay.self,
+    "speech.stop": SpeechStop.self,
     "status": Status.self,
     "subscribe": Subscribe.self,
     "system.diagnostics": SystemDiagnostics.self,
