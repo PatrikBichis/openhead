@@ -1,6 +1,6 @@
 OpenHead turns an iPhone or iPad into the face of a robot.
 
-Mount the phone in landscape on your robot, connect it to the same Wi-Fi as the robot's computer, and the robot can make the face smile, frown, look around, talk and show things. Anything that can open a WebSocket can drive it: a Python script, a robot's onboard computer, or an AI agent.
+Mount the phone in landscape on your robot, connect it to the same Wi-Fi as the robot's computer, and the robot can make the face smile, frown, look around, speak with its own voice, listen and show things. Anything that can open a WebSocket can drive it: a Python script, a robot's onboard computer, or an AI agent.
 
 The phone also gives the robot its cameras and sensors. Instead of wiring up a camera, an IMU and a tracking system, a robot builder gets face tracking, motion data, GPS, a barometer, a compass and the head's position in the room from one device they already own, over the same connection.
 
@@ -9,11 +9,12 @@ FACE
 • Blend expressions, hold them for a moment, or layer a short reaction on top of a mood.
 • Three themes: Cartoon, Minimal (light bars, low power) and Halloween.
 • The eyes follow a point on the screen or a direction from the head; blinking, breathing and small eye movements keep the face alive when nothing happens.
-• The mouth moves with the robot's voice: the robot streams how loud it speaks, 25 times a second.
 
-SUBTITLES
-• Show text on top of anything: for a robot without a speaker, or to show an answer as it streams in from an AI, word by word. The newest lines stay on screen.
-• The mouth can move with the text as if speaking.
+VOICE, LISTENING AND SUBTITLES
+• The head speaks with its own voice (Apple's voices, on the phone); the mouth follows the sound and the words show as subtitles.
+• Cues in the text act at the right moment: a smile, a laugh after a joke, a serious face for news.
+• Speech to text with the microphone, on the device where the language allows; the face looks attentive while you talk. The text goes to the robot or AI agent.
+• Or the robot streams its own voice level and the mouth follows. Subtitles show an AI answer word by word.
 
 PICTURES, VIDEO AND WEB PAGES
 • Show an image (PNG, JPEG, GIF including animated, WebP, SVG), a video or a web page full screen, or keep the face running in a corner while it shows.
@@ -30,7 +31,7 @@ POSITION AND SENSORS
 • GPS: latitude, longitude, altitude, accuracy, speed and course once a second, after you allow location access.
 • Barometer (air pressure, altitude change), magnetometer and compass heading up to 10 times a second.
 • Battery, temperature state and connected clients.
-• Camera images are processed on the phone and never stored or sent anywhere. Location and sensor readings go only to the robot controllers you paired, on your network.
+• Camera images and audio are never stored. Location, sensor readings and recognised speech go only to the robot controllers you paired, on your network.
 
 SAFE ON YOUR NETWORK
 • A controller must be paired with a 6-digit code shown on the screen; each one gets its own token, which you can revoke in settings.

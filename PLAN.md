@@ -326,6 +326,11 @@ Varje steg har ett acceptanskriterium som agenten verifierar innan nästa påbö
     2. *Python:* markeringar i text (`[happy]`, `[laugh]`, `[pause 0.5]`, `[nod]`) till segment; klient `head.speech`; simulatorn med samma händelser och tidsordning och `hear()` för tester; CLI `say`/`listen`; MCP-verktygen `say`, `listen`, `stop_speaking`, `stop_listening` (en öppen `speech`-prenumeration så att inget som sägs mellan två `listen` försvinner). *Klart när testerna är gröna mot sim.*
     3. *iOS:* `AVSpeechSynthesizer.write` till `AVAudioEngine` med munnen från ljudets envelope, rösten följer uttrycket; `SFSpeechRecognizer` på enheten när språket stöds, röstbehandling (ekosläckning), lyssningen pausas medan huvudet talar, uppmärksamt/tänkande uttryck automatiskt; mikrofonen av när sista klienten går. *Klart när en dialog via MCP fungerar på iPhone 12 (TestFlight) och talet och igenkänningen är bedömda där.*
     4. *Dokumentation:* integritetspolicyn (mikrofon, taligenkänning), README, webbplatsen, App Store-texterna före släpp.
+15. **v0.5: tillval för Pro-modeller** (beslut 2026-11-02, Patrik: Pro-sensorer som tillval, aldrig krav; iPhone 12 är fortfarande baslinjen och allt annat ska fungera där).
+    1. *Protokoll:* kapabiliteter som säger vad enheten kan (`lidar`, `scene_mesh`); LiDAR-djup till ansikten och punkter (avstånd i `faces`, djup vid en punkt); rumsnät från ARKit scenrekonstruktion som en egen ström med låg takt. Allt valfritt: en klient ska fungera lika bra utan.
+    2. *iOS:* `ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth)` och `supportsSceneReconstruction` styr vad som slås på; inget ändras på en iPhone 12.
+    3. *Test:* iPhone 12 (inget nytt får synas eller gå sönder) och en Pro-modell (iPhone 18 Pro) för verifiering.
+    4. *Dokumentation:* README, webbplats och filmen säger "Pro, tillval" tills det finns.
 
 Steg 3–5 kan drivas parallellt av flera agentinstanser; steg 7 beror på 2–4 och 6.
 

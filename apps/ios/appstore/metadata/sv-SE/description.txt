@@ -1,6 +1,6 @@
 OpenHead gör en iPhone eller iPad till ansiktet på en robot.
 
-Sätt telefonen liggande på roboten, anslut den till samma wifi som robotens dator, och roboten kan få ansiktet att le, rynka pannan, se sig omkring, prata och visa saker. Allt som kan öppna en WebSocket kan styra det: ett Python-skript, robotens egen dator eller en AI-agent.
+Sätt telefonen liggande på roboten, anslut den till samma wifi som robotens dator, och roboten kan få ansiktet att le, rynka pannan, se sig omkring, tala med egen röst, lyssna och visa saker. Allt som kan öppna en WebSocket kan styra det: ett Python-skript, robotens egen dator eller en AI-agent.
 
 Telefonen ger också roboten dess kameror och sensorer. I stället för att koppla in en kamera, en IMU och ett positioneringssystem får en robotbyggare ansiktsspårning, rörelsedata, GPS, barometer, kompass och huvudets position i rummet från en enhet de redan har, över samma anslutning.
 
@@ -9,11 +9,12 @@ ANSIKTE
 • Blanda uttryck, håll dem en stund eller lägg en kort reaktion ovanpå ett humör.
 • Tre teman: Cartoon, Minimal (ljusstreck, låg ström) och Halloween.
 • Ögonen följer en punkt på skärmen, en riktning från huvudet eller personen framför roboten; blinkningar, andning och små ögonrörelser håller ansiktet levande när inget händer.
-• Munnen rör sig med robotens röst: roboten skickar hur högt den talar 25 gånger i sekunden.
 
-UNDERTEXTER
-• Visa text ovanpå allt: för en robot utan högtalare, eller för att visa ett AI-svar ord för ord medan det strömmar in. De senaste raderna stannar kvar.
-• Munnen kan röra sig med texten som om den talade.
+RÖST, LYSSNING OCH UNDERTEXTER
+• Huvudet talar med egen röst (Apples röster, i telefonen); munnen följer ljudet och orden visas som undertext.
+• Markeringar i texten spelas upp i rätt ögonblick: ett leende, ett skratt efter ett skämt, ett allvarligt ansikte för nyheter.
+• Tal till text med mikrofonen, i telefonen när språket tillåter; ansiktet ser uppmärksamt ut medan du pratar. Texten går till roboten eller AI-agenten.
+• Eller så skickar roboten sin egen röstnivå och munnen följer. Undertexter visar ett AI-svar ord för ord.
 
 BILDER, VIDEO OCH WEBBSIDOR
 • Visa en bild (PNG, JPEG, GIF även animerad, WebP, SVG), en video eller en webbsida i helskärm, eller låt ansiktet fortsätta i ett hörn medan den visas.
@@ -30,14 +31,14 @@ POSITION OCH SENSORER
 • GPS: latitud, longitud, höjd, noggrannhet, hastighet och färdriktning en gång i sekunden, när du har tillåtit platsåtkomst.
 • Barometer (lufttryck, höjdförändring), magnetometer och kompassriktning upp till 10 gånger i sekunden.
 • Batteri, temperaturläge och anslutna klienter.
-• Kamerabilder behandlas i telefonen och sparas eller skickas aldrig någonstans. Plats och sensorvärden går bara till de robotstyrenheter du har parat, i ditt nätverk.
+• Kamerabilder och ljud sparas aldrig. Plats, sensorvärden och igenkänt tal går bara till de robotstyrenheter du har parat, i ditt nätverk.
 
 SÄKERT I DITT NÄTVERK
 • En styrenhet måste paras med en sexsiffrig kod som visas på skärmen; var och en får en egen token som du kan återkalla i inställningarna.
 • Allt stannar i ditt lokala nätverk. Inga konton, inget moln, ingen spårning.
 
 FÖR UTVECKLARE
-• Öppet protokoll (JSON över WebSocket) med publicerat schema, ett Python-bibliotek och kommandoradsverktyg, en simulator för datorn och en MCP-server så att AI-agenter som Claude, Codex och Copilot kan styra huvudet och kontrollera sitt arbete med skärmdumpar och loggar.
+• Öppet protokoll (JSON över WebSocket) med publicerat schema, ett Python-bibliotek och kommandoradsverktyg, en simulator för datorn och en MCP-server så att AI-agenter kan styra huvudet och kontrollera sitt arbete med skärmdumpar och loggar.
 • Öppen källkod under Apache 2.0-licensen: github.com/PatrikBichis/openhead
 
 Appen visar ansiktet på egen hand; för att styra det kör du OpenHead-verktygen (eller din egen kod) på en dator i samma nätverk. Håll fingret på ansiktet i 1,5 sekunder för att öppna inställningarna (på engelska).

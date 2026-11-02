@@ -1,1 +1,1 @@
-Skip the sensor wiring: your robot gets a face plus the phone's camera, face tracking, GPS, compass, barometer and ARKit world pose (SLAM) over Wi-Fi. Open source.
+New in 0.4: the head talks with its own voice and listens. Plus the phone's camera, face tracking, GPS, compass and ARKit pose (SLAM) for your robot. Open source.

@@ -23,9 +23,9 @@ OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone 
 <p align="center"><a href="docs/media/openhead-preview.mp4">Watch with sound (mp4, 28 s)</a>: speech drives the mouth, emotions are separate commands.</p>
 
 <p align="center">
-  <a href="docs/media/desk-assistant.mp4"><img src="docs/media/desk-assistant-poster.jpg" alt="3D render: the OpenHead bench rig on a desk, an iPhone 12 on a four-servo neck following a person" width="640"></a>
+  <a href="docs/media/desk-assistant.mp4"><img src="docs/media/desk-assistant-poster.jpg" alt="3D render: the OpenHead bench rig on a desk, an iPhone 12 on a four-servo neck following a person and talking" width="640"></a>
 </p>
-<p align="center"><a href="docs/media/desk-assistant.mp4">A desk AI assistant (3D render, 41 s)</a>: the bench rig follows a face, talks, uses both cameras at once and streams its sensors to an agent. Real footage comes next.<br>Build it: printed parts, parts list, firmware and an MCP server for the neck in <a href="https://github.com/PatrikBichis/openhead-desktop-body">OpenHead desk body</a>.</p>
+<p align="center"><a href="docs/media/desk-assistant.mp4">A desk AI assistant (3D render with sound, 55 s)</a>: the bench rig follows a face, hears a question and answers in its own voice with a laugh in the right place, uses both cameras at once, walks on Open Duck Mini knowing where it is with ARKit, and streams its sensors to an agent. Real footage comes next.<br>Build it: printed parts, parts list, firmware and an MCP server for the neck in <a href="https://github.com/PatrikBichis/openhead-desktop-body">OpenHead desk body</a>.</p>
 
 | Cartoon | Minimal | Halloween |
 | --- | --- | --- |
@@ -36,12 +36,13 @@ OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone 
 - **Expressive face.** 28 expressions shared by every theme (happy, curious, confused, shocked, laughing, smug, ...), blended, timed or layered; three themes: Cartoon, Minimal and Halloween.
 - **Eyes and mouth that live.** Gaze on the screen or from the head's frame; idle blinking, breathing and small eye movements; a mouth driven by the robot's voice (loudness streamed at 25 Hz).
 - **Subtitles.** Text on top of anything, for a robot without a speaker or an AI answer streaming in word by word; the newest three lines stay on screen, and the mouth can move with the text.
+- **Talks and listens** *(0.4)*. Its own voice (Apple's on-device voices) with the mouth on the sound and cues in the text: `[happy] Why did the robot go on holiday? [pause] It needed to recharge! [laugh]`. Speech to text with the microphone, on the device where the language allows, with echo cancellation; the face looks attentive while you talk. An AI agent holds a conversation with MCP `say` and `listen`.
 - **Pictures, video and web pages.** PNG, JPEG, animated GIF, WebP and SVG; H.264 video (loop, mute, back to the face when it ends); web pages; the face can keep running in a corner. Local files are served to the head from the host.
 - **Camera view with a HUD** *(0.2)*. The front camera with a sci-fi heads-up display: boxes around faces, a locked target, compass tape, artificial horizon, battery, temperature and the robot's own lines (`display.hud`). HUD themes are JSON: `hunter`, `camcorder`, `boot`, `flight`.
 - **Face tracking** *(0.2)*. Several faces at once (`faces`: bearing, elevation, size, box) at 15 Hz, with distance under ARKit; the robot's eyes follow the person in front of it and keep eye contact (`look_at {frame: face}`).
 - **Knows where it is** *(0.2)*. ARKit world tracking gives the head's position and orientation in the room (`pose`, 60 Hz) and follows one face with distance.
 - **Knows where on Earth** *(0.3)*. GPS (`gps`, 1 Hz): latitude, longitude, altitude, accuracy, speed and course.
-- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; barometer, magnetometer and compass (`env`, 10 Hz, *0.3*); battery, thermal state, clients, what is on screen. Only sensors an iPhone 12 has: no LiDAR.
+- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; barometer, magnetometer and compass (`env`, 10 Hz, *0.3*); battery, thermal state, clients, what is on screen. Everything works on an iPhone 12; optional extras for Pro models (LiDAR) are planned for 0.5.
 - **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
 - **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
 
@@ -93,7 +94,7 @@ An iPhone 12 already carries every sensor a robot head needs. OpenHead reads the
 | Speaker (from 0.4) | the head's own voice, the mouth moving to the sound, expressions where the text says | `speech.say` |
 | Battery and temperature | battery level, charging and thermal state | `status` |
 
-From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text (`speech.say`, `speech.listen`). Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none.
+From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text (`speech.say`, `speech.listen`). Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none. Planned for 0.5, as options on Pro models only: LiDAR depth for exact distances to faces and objects, and a 3D mesh of the room from ARKit scene reconstruction (`capabilities` says what a head can do).
 
 ---
 
@@ -125,13 +126,13 @@ OpenHead includes an MCP server, so an AI agent can drive the head and check its
 You need [uv](https://docs.astral.sh/uv/) and the head's address (shown in the app's settings; `auto` finds it with mDNS). Every agent starts the same command, straight from the release tag:
 
 ```bash
-uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python" openhead mcp --device 192.168.1.20
 ```
 
 **Claude Code**
 
 ```bash
-claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python" openhead mcp --device 192.168.1.20
 ```
 
 **Claude Desktop**: Settings → Developer → Edit Config (`claude_desktop_config.json`), then restart Claude Desktop:
@@ -141,7 +142,7 @@ claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://
   "mcpServers": {
     "openhead": {
       "command": "uvx",
-      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
     }
   }
 }
@@ -152,7 +153,7 @@ If Claude Desktop cannot find `uvx`, put its full path in `command` (`where uvx`
 **Codex CLI**
 
 ```bash
-codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python" openhead mcp --device 192.168.1.20
 ```
 
 or in `~/.codex/config.toml`:
@@ -160,7 +161,7 @@ or in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.openhead]
 command = "uvx"
-args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
 ```
 
 **Cursor** (`~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project) and **Gemini CLI** (`~/.gemini/settings.json`): the same `mcpServers` block as Claude Desktop.
@@ -173,7 +174,7 @@ args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@
     "openhead": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
     }
   }
 }
@@ -195,6 +196,8 @@ Without `--token` the HTTP server only listens on `127.0.0.1`; anyone who reache
 - "Where is the head, which way is it facing, and what is the air pressure?"
 - "Take a screenshot and check that the face looks happy." (needs dev mode on the phone)
 - "Have a conversation with me through the head: say something, then listen for my answer, and keep going until I say goodbye. Use cues like [happy] and [laugh] so the face acts as you talk." (0.4: `say` and `listen`)
+
+For conversations, give your agent the skill in [`.claude/skills/openhead-conversation`](.claude/skills/openhead-conversation/SKILL.md): the loop, the cues and when to use them. Claude Code picks it up in a clone of this repo; copy the folder to use it elsewhere.
 
 No phone yet? Clone the repo and run `uv run --project python openhead sim`, then use `--device localhost` (pairing code `0000`). The tools are listed under [MCP server](#mcp-server).
 
@@ -503,10 +506,10 @@ Python and Swift models are generated from the schemas by `tools/protocol.py` an
 
 ## Status
 
-Protocol `0.3.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.3.0)): GPS and environment sensors (`gps`, `env`) on top of 0.2's camera view with HUD, faces and ARKit pose. Robot integrations pin a tag:
+Protocol `0.4.0` is tagged ([release](https://github.com/PatrikBichis/openhead/releases/tag/v0.4.0)): the head talks and listens (`speech.say`, `speech.listen`) on top of 0.3's GPS and environment sensors and 0.2's camera view with HUD, faces and ARKit pose. Robot integrations pin a tag:
 
 ```bash
-uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python"
+uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python"
 ```
 
 - [x] 1. Repo skeleton, local schema validation
@@ -522,6 +525,8 @@ uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirect
 - [x] 11. Tag `0.1.0` (iPhone 12 and iPad checks still open, see release notes)
 - [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
 - [x] 13. v0.3: `gps` and `env` streams (green on the simulator and on an iPhone 12, TestFlight build 11, with `camera.yaml`); tagged `0.3.0`
+- [x] 14. v0.4: the head talks and listens (`speech.say` with cues, `speech.listen`, MCP `say`/`listen`); voice and recognition tried on an iPhone 12 (TestFlight build 13)
+- [ ] 15. v0.5: optional Pro features (LiDAR depth, room mesh), never required
 
 ---
 

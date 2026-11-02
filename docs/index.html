@@ -61,10 +61,10 @@
     <section id="desk" class="film">
       <div class="wrap">
         <h2>A desk AI assistant</h2>
-        <p class="sub">A 3D render of the bench rig: an iPhone 12 on the four-servo neck from Open Duck Mini. It follows your face, talks, maps the room with the back camera while the front camera watches you, and streams every sensor to your agent. Video of the real rig comes next.</p>
+        <p class="sub">A 3D render of the bench rig: an iPhone 12 on the four-servo neck from Open Duck Mini. It follows your face, hears your question and answers in its own voice (turn the sound on), maps the room with the back camera while the front camera watches you, walks on Open Duck Mini knowing where it is, and streams every sensor to your agent. Video of the real rig comes next.</p>
         <p class="note" style="margin:-24px 0 24px">Build it yourself: printed parts, parts list, firmware and an MCP server for the neck are in <a href="https://patrikbichis.github.io/openhead-desktop-body/">OpenHead desk body</a> (<a href="https://github.com/PatrikBichis/openhead-desktop-body">GitHub</a>).</p>
         <video controls muted loop playsinline preload="metadata" poster="media/desk-assistant-poster.jpg"
-               aria-label="3D render: the OpenHead bench rig on a desk following a person, talking, using both cameras and streaming its sensors to an AI agent on a laptop">
+               aria-label="3D render with sound: the OpenHead bench rig on a desk following a person, listening and answering with a joke, using both cameras, Open Duck Mini walking with the same head while ARKit tracks it, and the sensors streaming to an AI agent on a laptop">
           <source src="media/desk-assistant.mp4" type="video/mp4">
         </video>
       </div>
@@ -89,6 +89,11 @@
             <div class="icon" aria-hidden="true">🗣️</div>
             <h3>A mouth that talks</h3>
             <p>The robot streams how loud it speaks, 25 times a second, and the mouth follows within about 70 ms. Emotions are separate, so mood can change mid-sentence.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🎙️</div>
+            <h3>Talks and listens</h3>
+            <p>From 0.4 the head speaks with its own voice, the mouth on the sound, and acts out cues in the text: <code>[happy]</code>, <code>[laugh]</code>, <code>[pause]</code>. The microphone turns what you say into text for your agent, on the device where it can.</p>
           </div>
           <div class="card">
             <div class="icon" aria-hidden="true">💬</div>
@@ -222,7 +227,7 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
             </tbody>
           </table>
         </div>
-        <p class="note">From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text. Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none.</p>
+        <p class="note">From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text. Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none. Planned for 0.5, as options on Pro models only: LiDAR depth for exact distances, and a 3D mesh of the room.</p>
         <div style="overflow-x:auto; margin-top: 32px">
           <table class="data streams">
             <thead><tr><th>Stream</th><th>Rate</th><th>Fields</th><th>When</th></tr></thead>
@@ -285,7 +290,7 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
           </ul>
         </div>
         <pre><span class="c"># install the tools from the Git tag</span>
-uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python"
+uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python"
 
 <span class="c"># find the head and pair (type the code on screen)</span>
 openhead discover
@@ -307,7 +312,7 @@ openhead watch faces -n 5</pre>
         <details class="agent">
           <summary>Claude Code</summary>
           <p>In a terminal:</p>
-          <pre>claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20</pre>
+          <pre>claude mcp add openhead --scope user -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python" openhead mcp --device 192.168.1.20</pre>
         </details>
         <details class="agent">
           <summary>Claude Desktop</summary>
@@ -316,7 +321,7 @@ openhead watch faces -n 5</pre>
   "mcpServers": {
     "openhead": {
       "command": "uvx",
-      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
     }
   }
 }</pre>
@@ -324,12 +329,12 @@ openhead watch faces -n 5</pre>
         <details class="agent">
           <summary>Codex CLI</summary>
           <p>In a terminal, or in <code>~/.codex/config.toml</code>:</p>
-          <pre>codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python" openhead mcp --device 192.168.1.20
+          <pre>codex mcp add openhead -- uvx --from "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python" openhead mcp --device 192.168.1.20
 
 # or ~/.codex/config.toml
 [mcp_servers.openhead]
 command = "uvx"
-args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]</pre>
+args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]</pre>
         </details>
         <details class="agent">
           <summary>Cursor and Gemini CLI</summary>
@@ -338,7 +343,7 @@ args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@
   "mcpServers": {
     "openhead": {
       "command": "uvx",
-      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
     }
   }
 }</pre>
@@ -351,7 +356,7 @@ args = ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@
     "openhead": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.3.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
+      "args": ["--from", "openhead[mcp] @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirectory=python", "openhead", "mcp", "--device", "192.168.1.20"]
     }
   }
 }</pre>

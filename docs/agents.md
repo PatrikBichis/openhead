@@ -14,6 +14,12 @@ Skills are stored in the repo so every clone and every agent gets the same set. 
 | `vite` | `antfu/skills` | Face engine build |
 | `verification-before-completion` | `obra/superpowers` | Evidence before claiming work is done |
 
+Written for this repo (not from skills.sh, so not in `skills-lock.json`):
+
+| Skill | Used for |
+| --- | --- |
+| `openhead-conversation` | Talking through the head with the MCP tools: the `say`/`listen` loop, cues such as `[happy]`, `[serious]` and `[laugh]`, and the limits (0.4) |
+
 Not found on skills.sh in a quality worth adding: fastlane/TestFlight, XcodeGen, JSON Schema, ARKit (v0.2). Use DeepWiki for those.
 
 ## Managing skills
