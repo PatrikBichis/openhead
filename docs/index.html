@@ -23,6 +23,7 @@
         <a href="#themes">Themes</a>
         <a href="#camera">Camera &amp; HUD</a>
         <a href="#sensors">Sensors</a>
+        <a href="#cockpit">Cockpit</a>
         <a href="#how">How it works</a>
         <a href="#developers">Developers</a>
         <a href="#agents">AI agents</a>
@@ -61,10 +62,10 @@
     <section id="desk" class="film">
       <div class="wrap">
         <h2>A desk AI assistant</h2>
-        <p class="sub">A 3D render of the bench rig: an iPhone 12 on the four-servo neck from Open Duck Mini. It follows your face, hears your question and answers in its own voice (turn the sound on), maps the room with the back camera while the front camera watches you, walks on Open Duck Mini knowing where it is, and streams every sensor to your agent. Video of the real rig comes next.</p>
+        <p class="sub">A 3D render of the bench rig: an iPhone 12 on the four-servo neck from Open Duck Mini. It follows your face, hears your question and answers in its own voice (turn the sound on), maps the room with the back camera while the front camera watches you, walks on Open Duck Mini knowing where it is, streams every sensor to your agent and shows it all in the cockpit in your browser. Video of the real rig comes next.</p>
         <p class="note" style="margin:-24px 0 24px">Build it yourself: printed parts, parts list, firmware and an MCP server for the neck are in <a href="https://patrikbichis.github.io/openhead-desktop-body/">OpenHead desk body</a> (<a href="https://github.com/PatrikBichis/openhead-desktop-body">GitHub</a>).</p>
         <video controls muted loop playsinline preload="metadata" poster="media/desk-assistant-poster.jpg"
-               aria-label="3D render with sound: the OpenHead bench rig on a desk following a person, listening and answering with a joke, using both cameras, Open Duck Mini walking with the same head while ARKit tracks it, and the sensors streaming to an AI agent on a laptop">
+               aria-label="3D render with sound: the OpenHead bench rig on a desk following a person, listening and answering with a joke, using both cameras, Open Duck Mini walking with the same head while ARKit tracks it, the sensors streaming to an AI agent on a laptop, and the cockpit in a browser with the camera and a spoken greeting">
           <source src="media/desk-assistant.mp4" type="video/mp4">
         </video>
       </div>
@@ -244,10 +245,36 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
               <tr><td><code>env</code></td><td>up to 10 Hz</td><td>air pressure, altitude change, magnetic field, compass heading and accuracy</td><td>from 0.3; the barometer after Motion &amp; Fitness access</td></tr>
               <tr><td><code>status</code></td><td>1 Hz</td><td>battery, charging, thermal state, view, theme, emotion, mode, faces, clients</td><td>always</td></tr>
               <tr><td><code>log</code></td><td>as it happens</td><td>level, subsystem, message</td><td>always (dev mode to read history)</td></tr>
+              <tr><td><code>camera</code></td><td>up to 10 Hz</td><td>small JPEG frame, width, height, front or back camera</td><td>from 0.5; modes capture and sensing, “Camera shared” on the phone</td></tr>
+              <tr><td><code>mesh</code></td><td>up to 1 Hz</td><td>room mesh anchors that changed (LiDAR)</td><td>from 0.5; Pro models only, optional</td></tr>
             </tbody>
           </table>
         </div>
         <p class="note">Two camera modes, because ARKit owns the cameras: <strong>capture</strong> shows the front camera and finds several faces; <strong>sensing</strong> runs ARKit for the head's position in the room and follows one face with the depth camera.</p>
+      </div>
+    </section>
+
+    <section id="cockpit" class="alt">
+      <div class="wrap">
+        <h2>Cockpit</h2>
+        <p class="sub">From 0.5, one command opens a dashboard for the head in your browser: what its cameras see, every sensor, what it should say, its theme and its mood. Nothing to install beyond the Python tools; the page runs on your computer and talks only to your head.</p>
+        <img class="shot" src="media/cockpit.png" alt="OpenHead cockpit in a browser: the camera as video with two people, a Speak card with the joke from the film and example buttons, expression and theme, listen, status, mode and ARKit position" loading="lazy">
+        <div class="grid" style="margin-top: 28px">
+          <div class="card">
+            <h3>Both cameras</h3>
+            <p>Low-resolution video, 160 to 640 pixels, 1 to 10 frames a second. Mode <em>capture</em> shows the front camera with the faces it finds; mode <em>sensing</em> shows the back camera that ARKit tracks the room with. The phone shows “Camera shared” the whole time anyone watches, and no frame is stored.</p>
+          </div>
+          <div class="card">
+            <h3>Talk through it</h3>
+            <p>Type what the head should say, with cues such as <code>[happy]</code> and <code>[laugh]</code>, or start from an example: the joke from the film, a greeting, a meeting reminder. Listen shows what the microphone hears, word by word.</p>
+          </div>
+          <div class="card">
+            <h3>Your own layout</h3>
+            <p>Every function is a card: camera, speak, listen, expression and theme, status, ARKit map, IMU, compass and air pressure, GPS, faces, log, LiDAR on Pro models. Drag them, add and remove them; the browser remembers your layout, and Reset layout brings back the default.</p>
+          </div>
+        </div>
+        <pre style="margin-top: 24px">openhead cockpit --device 192.168.1.20      <span class="c"># or: openhead viewer</span>
+openhead sim --pro                          <span class="c"># try it without a phone</span></pre>
       </div>
     </section>
 

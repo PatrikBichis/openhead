@@ -6,7 +6,8 @@
 
 Text and colours follow the website (docs/site.css). Every frame says it is a render: real
 footage of the bench head comes later. The sound is voice.py's track; the walking scene's map
-is the phone's path from duck_walk.py, as ARKit's `pose` would report it.
+is the phone's path from duck_walk.py, as ARKit's `pose` would report it. The cockpit scene
+shows cockpit_rec.py's recording of `openhead cockpit` in a browser window over the desk.
 """
 
 from __future__ import annotations
@@ -211,6 +212,48 @@ def walk_map(layer: Image.Image, t: float, a: float):
     layer.alpha_composite(_fade(box, a), (64, 130))
 
 
+@lru_cache
+def cockpit_times() -> list[float]:
+    path = PROMO / "cockpit" / "times.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+
+
+def browser(im: Image.Image, t: float, s: story.Scene, a: float) -> Image.Image:
+    """The desk blurred behind a browser window that plays the cockpit recording."""
+    times = cockpit_times()
+    back = im.filter(ImageFilter.GaussianBlur(14))
+    back = Image.blend(back, Image.new("RGB", (W, H), (246, 230, 204)), 0.35)
+    k = ease((t - s.start) / 0.5) * ease((s.end - t) / 0.5)
+    out = Image.blend(im, back, k)
+    if not times:
+        return out
+    u = t - s.start
+    i = max((j for j, v in enumerate(times) if v <= u), default=0)
+    shot = Image.open(PROMO / "cockpit" / f"{i:04d}.jpg").convert("RGB")
+    cw = 1056  # ends above the title card
+    ch = round(cw * shot.height / shot.width)
+    bar = 46
+    x0, y0 = W - 72 - cw, 118 + round((1 - a) * 24)
+    win = Image.new("RGBA", (cw, ch + bar), (0, 0, 0, 0))
+    mask = Image.new("L", win.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, cw - 1, ch + bar - 1), radius=16, fill=255)
+    d = ImageDraw.Draw(win)
+    d.rectangle((0, 0, cw, bar), fill=rgba("#ece3d4"))
+    for n, c in enumerate(("#e76f51", "#ffc857", "#2a9d8f")):
+        d.ellipse((20 + n * 24, bar // 2 - 7, 34 + n * 24, bar // 2 + 7), fill=rgba(c))
+    d.rounded_rectangle((110, 9, cw - 110, bar - 9), radius=14, fill=rgba("#ffffff"))
+    d.text((128, 12), "127.0.0.1:8770 · openhead cockpit", font=font("regular", 19), fill=rgba(story.INK_2))
+    win.paste(shot.resize((cw, ch), Image.LANCZOS), (0, bar))
+    win.putalpha(mask.point(lambda v: int(v * a)))
+    shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rounded_rectangle((x0 + 6, y0 + 14, x0 + cw + 6, y0 + ch + bar + 14), radius=18,
+                                             fill=(40, 30, 20, int(70 * a)))
+    out = out.convert("RGBA")
+    out.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(16)))
+    out.alpha_composite(win, (x0, y0))
+    return out.convert("RGB")
+
+
 def ease(x: float) -> float:
     x = min(1.0, max(0.0, x))
     return x * x * (3 - 2 * x)
@@ -340,6 +383,8 @@ def compose(args: tuple[Path, Path]) -> None:
     a_in = ease((t - s.start - 0.25) / 0.45)
     a_out = ease((s.end - t - 0.05) / 0.3) if s.key != "end" else 1.0
     a = a_in * a_out
+    if s.key == "cockpit":
+        im = browser(im, t, s, a)
     brand(layer, (1 - end_in) * ease(t / 0.6))
     if s.key == "end":
         end_card(layer, end_in)
@@ -351,7 +396,7 @@ def compose(args: tuple[Path, Path]) -> None:
             markup(layer, a)
         elif s.key == "walk":
             walk_map(layer, t, a)
-        if s.key != "intro":
+        if s.key not in ("intro", "cockpit"):
             panel(layer, s, a)
     out = im.convert("RGBA")
     out.alpha_composite(layer)

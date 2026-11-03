@@ -67,7 +67,11 @@ SCENES = [
     Scene("sensors", 45.5, 51.5, "Every sensor, streamed to your agent",
           "IMU, compass, barometer, GPS, microphone and speaker, to Python or any MCP agent.",
           ("imu", "compass", "barometer", "gps", "wifi"), emotion="excited"),
-    Scene("end", 51.5, 55.5, "OpenHead", "Free on the App Store · open source on GitHub", (), emotion="happy"),
+    Scene("cockpit", 51.5, 59.5, "Cockpit",
+          "openhead cockpit: both cameras, every sensor and its voice, in your browser.",
+          ("front", "back", "speaker", "wifi"), emotion="happy",
+          cues=((1.4, "say", "Hello! I'm OpenHead. What can I do for you?"),)),
+    Scene("end", 59.5, 63.5, "OpenHead", "Free on the App Store · open source on GitHub", (), emotion="happy"),
 ]
 LENGTH = SCENES[-1].end
 FRAMES = int(LENGTH * FPS)

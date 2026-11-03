@@ -23,6 +23,7 @@
         <a href="#themes">Teman</a>
         <a href="#camera">Kamera &amp; HUD</a>
         <a href="#sensors">Sensorer</a>
+        <a href="#cockpit">Cockpit</a>
         <a href="#how">Så fungerar det</a>
         <a href="#developers">Utvecklare</a>
         <a href="#agents">AI-agenter</a>
@@ -61,10 +62,10 @@
     <section id="desk" class="film">
       <div class="wrap">
         <h2>En AI-assistent på skrivbordet</h2>
-        <p class="sub">En 3D-rendering av testriggen: en iPhone 12 på den fyraxliga halsen från Open Duck Mini. Den följer ditt ansikte, hör din fråga och svarar med egen röst (slå på ljudet), kartlägger rummet med bakkameran medan frontkameran ser dig, går på Open Duck Mini och vet var den är, och skickar alla sensorer till din agent. Video på den riktiga riggen kommer härnäst.</p>
+        <p class="sub">En 3D-rendering av testriggen: en iPhone 12 på den fyraxliga halsen från Open Duck Mini. Den följer ditt ansikte, hör din fråga och svarar med egen röst (slå på ljudet), kartlägger rummet med bakkameran medan frontkameran ser dig, går på Open Duck Mini och vet var den är, skickar alla sensorer till din agent och visar allt i cockpiten i webbläsaren. Video på den riktiga riggen kommer härnäst.</p>
         <p class="note" style="margin:-24px 0 24px">Bygg den själv: utskriftsfiler, dellista, firmware och en MCP-server för halsen finns i <a href="https://patrikbichis.github.io/openhead-desktop-body/sv/">OpenHead desk body</a> (<a href="https://github.com/PatrikBichis/openhead-desktop-body">GitHub</a>).</p>
         <video controls muted loop playsinline preload="metadata" poster="../media/desk-assistant-poster.jpg"
-               aria-label="3D-rendering med ljud: OpenHead-riggen på ett skrivbord som följer en person, lyssnar och svarar med ett skämt, använder båda kamerorna, Open Duck Mini som går med samma huvud medan ARKit följer den, och sensordata till en AI-agent på en laptop">
+               aria-label="3D-rendering med ljud: OpenHead-riggen på ett skrivbord som följer en person, lyssnar och svarar med ett skämt, använder båda kamerorna, Open Duck Mini som går med samma huvud medan ARKit följer den, sensordata till en AI-agent på en laptop, och cockpiten i en webbläsare med kameran och en hälsning">
           <source src="../media/desk-assistant.mp4" type="video/mp4">
         </video>
       </div>
@@ -244,10 +245,36 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
               <tr><td><code>env</code></td><td>upp till 10 Hz</td><td>lufttryck, höjdförändring, magnetfält, kompassriktning och noggrannhet</td><td>från 0.3; barometern efter åtkomst till Rörelse &amp; fitness</td></tr>
               <tr><td><code>status</code></td><td>1 Hz</td><td>batteri, laddning, temperaturläge, vy, tema, känsla, läge, ansikten, klienter</td><td>alltid</td></tr>
               <tr><td><code>log</code></td><td>när det händer</td><td>nivå, delsystem, meddelande</td><td>alltid (utvecklarläge för att läsa historiken)</td></tr>
+              <tr><td><code>camera</code></td><td>upp till 10 Hz</td><td>liten JPEG-bild, bredd, höjd, front- eller bakkamera</td><td>från 0.5; lägena capture och sensing, ”Camera shared” på telefonen</td></tr>
+              <tr><td><code>mesh</code></td><td>upp till 1 Hz</td><td>ändrade delar av rummets nät (LiDAR)</td><td>från 0.5; bara Pro-modeller, tillval</td></tr>
             </tbody>
           </table>
         </div>
         <p class="note">Två kameralägen, eftersom ARKit äger kamerorna: <strong>capture</strong> visar frontkameran och hittar flera ansikten; <strong>sensing</strong> kör ARKit för huvudets position i rummet och följer ett ansikte med djupkameran.</p>
+      </div>
+    </section>
+
+    <section id="cockpit" class="alt">
+      <div class="wrap">
+        <h2>Cockpit</h2>
+        <p class="sub">Från 0.5 öppnar ett kommando en panel för huvudet i webbläsaren: vad kamerorna ser, alla sensorer, vad det ska säga, tema och humör. Inget att installera utöver Python-verktygen; sidan körs på din dator och pratar bara med ditt huvud.</p>
+        <img class="shot" src="../media/cockpit.png" alt="OpenHead cockpit i en webbläsare: kameran som video med två personer, ett Speak-kort med skämtet från filmen och exempelknappar, uttryck och tema, lyssna, status, läge och ARKit-position" loading="lazy">
+        <div class="grid" style="margin-top: 28px">
+          <div class="card">
+            <h3>Båda kamerorna</h3>
+            <p>Video med låg upplösning, 160 till 640 pixlar, 1 till 10 bilder i sekunden. Läget <em>capture</em> visar frontkameran med ansiktena den hittar; läget <em>sensing</em> visar bakkameran som ARKit följer rummet med. Telefonen visar ”Camera shared” hela tiden någon tittar, och ingen bild sparas.</p>
+          </div>
+          <div class="card">
+            <h3>Prata genom den</h3>
+            <p>Skriv vad huvudet ska säga, med markeringar som <code>[happy]</code> och <code>[laugh]</code>, eller utgå från ett exempel: skämtet från filmen, en hälsning, en mötespåminnelse. Lyssna visar vad mikrofonen hör, ord för ord.</p>
+          </div>
+          <div class="card">
+            <h3>Din egen layout</h3>
+            <p>Varje funktion är ett kort: kamera, tala, lyssna, uttryck och tema, status, ARKit-karta, IMU, kompass och lufttryck, GPS, ansikten, logg, LiDAR på Pro-modeller. Dra dem, lägg till och ta bort; webbläsaren minns din layout, och Reset layout tar tillbaka standardläget.</p>
+          </div>
+        </div>
+        <pre style="margin-top: 24px">openhead cockpit --device 192.168.1.20      <span class="c"># eller: openhead viewer</span>
+openhead sim --pro                          <span class="c"># prova utan telefon</span></pre>
       </div>
     </section>
 
