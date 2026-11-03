@@ -31,7 +31,7 @@ POSITION AND SENSORS
 • GPS: latitude, longitude, altitude, accuracy, speed and course once a second, after you allow location access.
 • Barometer (air pressure, altitude change), magnetometer and compass heading up to 10 times a second.
 • Battery, temperature state and connected clients.
-• Camera images and audio are never stored. Location, sensor readings and recognised speech go only to the robot controllers you paired, on your network.
+• Camera images and audio are never stored. Location, sensor readings, recognised speech and a small camera stream (only when a paired viewer asks; the face shows "Camera shared") go only to the robot controllers you paired, on your network.
 
 SAFE ON YOUR NETWORK
 • A controller must be paired with a 6-digit code shown on the screen; each one gets its own token, which you can revoke in settings.

@@ -31,7 +31,7 @@ POSITION OCH SENSORER
 • GPS: latitud, longitud, höjd, noggrannhet, hastighet och färdriktning en gång i sekunden, när du har tillåtit platsåtkomst.
 • Barometer (lufttryck, höjdförändring), magnetometer och kompassriktning upp till 10 gånger i sekunden.
 • Batteri, temperaturläge och anslutna klienter.
-• Kamerabilder och ljud sparas aldrig. Plats, sensorvärden och igenkänt tal går bara till de robotstyrenheter du har parat, i ditt nätverk.
+• Kamerabilder och ljud sparas aldrig. Plats, sensorvärden, igenkänt tal och en liten kameraström (på begäran, med "Camera shared" på skärmen) går bara till de robotstyrenheter du har parat, i ditt nätverk.
 
 SÄKERT I DITT NÄTVERK
 • En styrenhet måste paras med en sexsiffrig kod som visas på skärmen; var och en får en egen token som du kan återkalla i inställningarna.

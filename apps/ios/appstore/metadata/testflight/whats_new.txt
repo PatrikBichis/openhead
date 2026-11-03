@@ -1,10 +1,8 @@
-New in this build (0.4): the head talks and listens.
-• Speaking: the head speaks with its own voice (Apple's on-device voices). The mouth moves with the sound, the words show as subtitles, and cues in the text change the expression in the right place: "[happy] Why did the robot go on holiday? [pause 0.5] It needed to recharge! [laugh]".
-• Listening: speech to text with the microphone, on the device for English. iOS asks for microphone and speech recognition permission the first time. The face looks attentive while you talk and thoughtful after.
-• The head does not hear itself: listening pauses while it speaks, with echo cancellation.
-• get_faces right after a mode change returns real faces.
+New in this build (0.5): a cockpit to watch and drive the head from your computer.
+• Camera stream: a paired controller can ask for a small, low-frame-rate video of what the camera sees (front camera in capture mode, back camera in sensing). Frames are never stored. The face shows "Camera shared" in the top corner as long as anyone watches.
+• On Pro models with LiDAR (optional; nothing changes on an iPhone 12): distance at points of the back camera's view, and a 3D mesh of the room while a controller asks for it.
+• Status reports how many clients watch the camera.
 
 Please try on an iPhone 12:
-openhead say "[happy] Hello! [laugh] [sad 0.5] Goodbye." --device <address>
-openhead listen --partial --device <address>   (talk, pause, see the text)
-Or with an AI agent through MCP: say and listen in a loop. Tell us how natural the voice sounds, how well it understands you, and how fast it answers.
+openhead cockpit --device <address>   (opens a dashboard in the browser)
+Switch the mode to capture or sensing in the Mode card and check that the Camera card shows video and the phone shows "Camera shared"; close the page and check that the marker goes away. Try the Speak card's examples, the Expression card, and the sensor cards. Tell us how smooth the video is and whether the phone gets warm.

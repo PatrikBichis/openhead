@@ -23,6 +23,7 @@ EPILOG = """examples:
   openhead subtitle "Hello there" --mouth           text on screen, mouth moving
   openhead say "[happy] Hi! [laugh] [sad 0.5] Bye."  speak with the head's voice (0.4), cues in brackets
   openhead listen -n 3                              print what the head hears (speech to text)
+  openhead cockpit                                  dashboard in the browser: camera, sensors, voice (0.5)
   openhead camera hunter --follow                   camera view with HUD; the eyes follow a face
   openhead watch faces -n 5                         print the faces stream
   openhead hud --set speed=0.4 --line "SPEED {speed} M/S" --widget compass
@@ -104,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("mode", nargs="?", choices=["idle", "capture", "sensing"])
 
     p = sub.add_parser("watch", parents=[common], help="print a stream: faces, pose, gps, env, imu or status")
-    p.add_argument("topic", choices=["faces", "pose", "gps", "env", "imu", "status"])
+    p.add_argument("topic", choices=["faces", "pose", "gps", "env", "imu", "status", "mesh"])
     p.add_argument("--rate", type=float)
     p.add_argument("-n", type=int, default=0, help="stop after n messages (0: until Ctrl+C)")
 
@@ -143,10 +144,18 @@ def main(argv: list[str] | None = None) -> int:
                    help="viewport WxH in points (default iPhone 12 landscape)")
     p.add_argument("--no-dev", action="store_true", help="dev mode off (random pairing code)")
     p.add_argument("--no-mdns", action="store_true")
+    p.add_argument("--pro", action="store_true", help="act as a Pro model: LiDAR depth and room mesh (0.5)")
     p.add_argument("--tokens", type=Path, default=Path.home() / ".openhead" / "sim-device-tokens.json",
                    help="where the simulator keeps paired clients")
     p.add_argument("--idle", action=argparse.BooleanOptionalAction, default=None,
                    help="idle motion (default: on with a window, off headless)")
+
+    p = sub.add_parser("cockpit", aliases=["viewer"], parents=[common],
+                       help="dashboard in the browser: camera, sensors, voice, expressions (0.5)")
+    p.add_argument("--port", type=int, default=8770, help="local web port (default 8770)")
+    p.add_argument("--bind", default="127.0.0.1",
+                   help="address to serve on (default 127.0.0.1, this computer only)")
+    p.add_argument("--no-browser", action="store_true", help="do not open the browser")
 
     p = sub.add_parser("mcp", parents=[common], help="MCP server (stdio, or HTTP) exposing the head to agents")
     p.add_argument("--selftest", action="store_true",
@@ -198,6 +207,9 @@ async def _dispatch(args: argparse.Namespace) -> int:
         else:
             await serve_stdio(args.device, client)
         return 0
+
+    if args.cmd in ("cockpit", "viewer"):
+        return await _cockpit(args)
 
     host, port = await resolve_device(args.device)
     head = await Head.connect(host, port, client=args.client, auto_reconnect=False)
@@ -334,6 +346,36 @@ async def _command(head: Head, args: argparse.Namespace) -> int:
     return 0
 
 
+async def _cockpit(args: argparse.Namespace) -> int:
+    from ..cockpit import Cockpit
+
+    host, port = await resolve_device(args.device)
+    client = args.client.replace("openhead-cli", "openhead-cockpit")
+    head = await Head.connect(host, port, client=client, auto_reconnect=True)
+    async with head:
+        if not head.paired:
+            hint = head.pairing.code_hint if head.pairing else ""
+            print(f"not paired with {head.key}: run `openhead pair --device {args.device}`"
+                  f" ({hint})", file=sys.stderr)
+            return 1
+        cockpit = Cockpit(head, host=args.bind, port=args.port)
+        await cockpit.start()
+        if args.bind not in ("127.0.0.1", "localhost", "::1"):
+            print(f"warning: serving on {args.bind}; anyone with the link below can drive the head",
+                  file=sys.stderr)
+        print(f"cockpit for {head.welcome.device.name} ({head.key}): {cockpit.url}", flush=True)
+        print("Ctrl+C stops", flush=True)
+        if not args.no_browser:
+            import webbrowser
+
+            webbrowser.open(cockpit.url)
+        try:
+            await asyncio.Future()
+        finally:
+            await cockpit.stop()
+    return 0
+
+
 async def _sim(args: argparse.Namespace) -> int:
     try:
         from ..sim import SimConfig, SimServer
@@ -344,7 +386,7 @@ async def _sim(args: argparse.Namespace) -> int:
     config = SimConfig(
         host=args.host, port=args.port, name=args.name, dev_mode=not args.no_dev,
         headless=args.headless, idle=args.idle, size=(int(w), int(h)), theme=args.theme,
-        token_path=args.tokens, mdns=not args.no_mdns,
+        token_path=args.tokens, mdns=not args.no_mdns, pro=args.pro,
     )
     if config.dev_mode:
         print("dev mode: pairing code 0000", flush=True)

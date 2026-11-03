@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenHead cockpit</title>
+    <link rel="icon" href="icon.png" />
+    <link rel="stylesheet" href="cockpit.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <img src="icon.png" alt="" width="34" height="34" />
+        <span>OpenHead <em>cockpit</em></span>
+      </div>
+      <div class="device" id="device" data-state="connecting">
+        <span class="dot" aria-hidden="true"></span><span id="device-name">Connecting…</span>
+      </div>
+      <div class="actions">
+        <div class="add">
+          <button type="button" id="add-card" class="btn" aria-haspopup="menu" aria-expanded="false">+ Add card</button>
+          <div id="add-menu" class="menu" role="menu" hidden></div>
+        </div>
+        <button type="button" id="reset-layout" class="btn ghost">Reset layout</button>
+      </div>
+    </header>
+    <main>
+      <p id="banner" class="banner" hidden></p>
+      <div id="board" class="board" aria-label="Cards. Drag a card's title to move it."></div>
+      <p class="hint">Drag a card by its title to move it, or focus the title and press Alt+← / Alt+→. Your layout is saved in this browser.</p>
+    </main>
+    <template id="card-template">
+      <section class="card">
+        <header class="card-head" draggable="true" tabindex="0">
+          <h2></h2>
+          <button type="button" class="icon-btn size" title="Wider / narrower" aria-label="Change width">⇔</button>
+          <button type="button" class="icon-btn close" title="Remove card" aria-label="Remove card">×</button>
+        </header>
+        <div class="card-body"></div>
+      </section>
+    </template>
+    <script type="module" src="cockpit.js"></script>
+  </body>
+</html>

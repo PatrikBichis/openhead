@@ -38,15 +38,29 @@ OpenHead turns an iPhone or iPad into an expressive robot head. Mount the phone 
 - **Subtitles.** Text on top of anything, for a robot without a speaker or an AI answer streaming in word by word; the newest three lines stay on screen, and the mouth can move with the text.
 - **Talks and listens** *(0.4)*. Its own voice (Apple's on-device voices) with the mouth on the sound and cues in the text: `[happy] Why did the robot go on holiday? [pause] It needed to recharge! [laugh]`. Speech to text with the microphone, on the device where the language allows, with echo cancellation; the face looks attentive while you talk. An AI agent holds a conversation with MCP `say` and `listen`.
 - **Pictures, video and web pages.** PNG, JPEG, animated GIF, WebP and SVG; H.264 video (loop, mute, back to the face when it ends); web pages; the face can keep running in a corner. Local files are served to the head from the host.
+- **Cockpit** *(0.5)*. `openhead cockpit` opens a dashboard in your browser: the head's camera as low-resolution video, every sensor, a box for what the head should say (with ready-made examples such as the joke from the film), listening, theme and emotion. Cards can be moved, added and removed; your layout is kept in the browser. The phone shows "Camera shared" while anyone watches.
 - **Camera view with a HUD** *(0.2)*. The front camera with a sci-fi heads-up display: boxes around faces, a locked target, compass tape, artificial horizon, battery, temperature and the robot's own lines (`display.hud`). HUD themes are JSON: `hunter`, `camcorder`, `boot`, `flight`.
 - **Face tracking** *(0.2)*. Several faces at once (`faces`: bearing, elevation, size, box) at 15 Hz, with distance under ARKit; the robot's eyes follow the person in front of it and keep eye contact (`look_at {frame: face}`).
 - **Knows where it is** *(0.2)*. ARKit world tracking gives the head's position and orientation in the room (`pose`, 60 Hz) and follows one face with distance.
 - **Knows where on Earth** *(0.3)*. GPS (`gps`, 1 Hz): latitude, longitude, altitude, accuracy, speed and course.
-- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; barometer, magnetometer and compass (`env`, 10 Hz, *0.3*); battery, thermal state, clients, what is on screen. Everything works on an iPhone 12; optional extras for Pro models (LiDAR) are planned for 0.5.
+- **Sensors and status.** IMU up to 100 Hz in ROS conventions with a mounting offset; barometer, magnetometer and compass (`env`, 10 Hz, *0.3*); battery, thermal state, clients, what is on screen. Everything works on an iPhone 12; Pro models with LiDAR add depth and a room mesh as options (0.5).
 - **Safe on your network.** Pairing with a code shown on the screen, a token per client (revocable on the device), mDNS for discovery only, no cloud.
 - **Tools.** Python client, `openhead` CLI, a desktop simulator that speaks the same protocol, YAML scenarios with golden screenshots, and an MCP server for AI agents.
 
 ---
+
+## Cockpit
+
+![OpenHead cockpit: camera, speak with examples, expression and theme, status, mode and ARKit position as cards](docs/media/cockpit.png)
+
+```bash
+openhead cockpit --device 192.168.1.20     # or: openhead viewer; opens http://127.0.0.1:8770 in the browser
+openhead sim --pro                         # try it without a phone; --pro also simulates LiDAR
+```
+
+A dashboard for one head, served from your computer (the Python package; nothing to build). Cards: camera (160-640 px, 1-10 frames a second), speak (cues in brackets and examples to start from), listen, expression and theme, mode, status, ARKit position on a map, IMU plots, compass and air pressure, GPS track, faces, log, LiDAR depth and room mesh (Pro models; the card says so on other phones) and the camera light (coming in a later release). Drag a card by its title to move it (or Alt+arrow keys), add and remove cards, widen them; the layout is stored in the browser's local storage and "Reset layout" brings back the default set.
+
+The page talks only to the local server, which holds the pairing; the server listens on 127.0.0.1, checks that requests come from its own page and needs a key that is new every run (in the link it opens). The camera frames (topic `camera`) go only to paired clients that ask for them and are never stored, and the phone shows "Camera shared" on its screen as long as anyone watches.
 
 ## Camera view and HUD
 
@@ -94,7 +108,7 @@ An iPhone 12 already carries every sensor a robot head needs. OpenHead reads the
 | Speaker (from 0.4) | the head's own voice, the mouth moving to the sound, expressions where the text says | `speech.say` |
 | Battery and temperature | battery level, charging and thermal state | `status` |
 
-From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text (`speech.say`, `speech.listen`). Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none. Planned for 0.5, as options on Pro models only: LiDAR depth for exact distances to faces and objects, and a 3D mesh of the room from ARKit scene reconstruction (`capabilities` says what a head can do).
+From 0.4 the microphone and the speaker too: the head speaks with its own voice and turns what you say into text (`speech.say`, `speech.listen`). Not used: the proximity sensor (it turns the screen off and would hide the face) and the ambient light sensor (no public API). The iPhone 12 has no LiDAR, and OpenHead needs none. From 0.5, as options on Pro models only: LiDAR depth at points of the back camera's view (`depth.sample`) and a 3D mesh of the room from ARKit scene reconstruction (topic `mesh`); `capabilities` (`lidar`, `scene_mesh`) says what a head can do.
 
 ---
 
@@ -205,7 +219,7 @@ No phone yet? Clone the repo and run `uv run --project python openhead sim`, the
 
 ## Privacy
 
-The app collects no data: no accounts, analytics or ads, and nothing leaves your local network. Camera images are processed on the phone and never stored or sent; location and sensor readings go only to the controllers you paired, when they ask. See the [privacy policy](https://patrikbichis.github.io/openhead/privacy.html).
+The app collects no data: no accounts, analytics or ads, and nothing leaves your local network. Camera images are processed on the phone and never stored; they leave it only as a small video stream to a paired controller that asks for one (the cockpit, 0.5), and the phone shows "Camera shared" meanwhile. Location and sensor readings go only to the controllers you paired, when they ask. See the [privacy policy](https://patrikbichis.github.io/openhead/privacy.html).
 
 ---
 
@@ -301,6 +315,9 @@ The device is the server. Hosts discover it over mDNS (`_openhead._tcp`), pair o
 | Camera view: front camera with a HUD on the head's screen | host → head | command (`display.show`, `display.hud`) | 0.2 |
 | GPS: latitude, longitude, altitude, accuracy, speed, course | head → host | subscription, 1 Hz | 0.3 |
 | Environment: air pressure, altitude change, magnetic field, compass heading | head → host | subscription, ≤ 10 Hz | 0.3 |
+| Speech: the head's voice with cues, speech to text | both | commands + `speech` events | 0.4 |
+| Camera stream: small JPEG frames for a viewer, "Camera shared" on the phone | head → host | subscription, ≤ 10 Hz | 0.5 |
+| LiDAR depth at points, room mesh (Pro models, optional) | head → host | command `depth.sample`, subscription `mesh` ≤ 1 Hz | 0.5 |
 
 Minimum iOS/iPadOS 17. Universal app, full screen on iPad.
 
@@ -349,7 +366,7 @@ sequenceDiagram
 | `system.*` | `status`, `screenshot`, `logs`, `diagnostics`, `settings` | 0.1 |
 | `mode.*` | `set` (`idle`, `sensing`, `capture`), `get` | 0.1 (`idle` only), 0.2 |
 | `pose.*` | `reset`, `save_map`, `load_map` | planned |
-| `camera.*` | `capture` (still or clip from front or back camera, fetched over HTTP), `stream` | planned |
+| `camera.*` | `capture` (still or clip from front or back camera, fetched over HTTP); `light` (the torch, with brightness) | planned |
 
 Streams: `imu`, `status`, `log` (0.1); `faces`, `pose` (0.2); `gps`, `env` (0.3).
 
@@ -492,7 +509,7 @@ openhead/
 │       ├── client/         # asyncio client
 │       ├── sim/            # simulator: server + window running face/dist
 │       ├── mcp/            # MCP server
-│       └── cli/            # openhead discover|pair|status|emotion|theme|show|subtitle|camera|hud|mode|watch|screenshot|logs|run|sim|mcp
+│       └── cli/            # openhead discover|pair|status|emotion|theme|show|subtitle|camera|hud|mode|watch|say|listen|screenshot|logs|run|sim|mcp|cockpit
 ├── scenarios/              # YAML scenarios, run against simulator and device
 ├── examples/
 ├── docs/                   # website (GitHub Pages) · ios.md · dev-loop.md · themes.md · agents.md
@@ -526,7 +543,7 @@ uv add "openhead @ git+https://github.com/PatrikBichis/openhead@v0.4.0#subdirect
 - [x] 12. v0.2: camera view with HUD themes, faces, ARKit pose, modes (`camera.yaml` green on simulator and iPhone)
 - [x] 13. v0.3: `gps` and `env` streams (green on the simulator and on an iPhone 12, TestFlight build 11, with `camera.yaml`); tagged `0.3.0`
 - [x] 14. v0.4: the head talks and listens (`speech.say` with cues, `speech.listen`, MCP `say`/`listen`); voice and recognition tried on an iPhone 12 (TestFlight build 13)
-- [ ] 15. v0.5: optional Pro features (LiDAR depth, room mesh), never required
+- [ ] 15. v0.5: `openhead cockpit` with the camera stream, and optional Pro features (LiDAR depth, room mesh), never required. Green on the simulator (with `--pro`); the device check on an iPhone 12 comes next
 
 ---
 

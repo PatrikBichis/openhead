@@ -96,6 +96,11 @@
             <p>Från 0.4 talar huvudet med egen röst, med munnen i takt med ljudet, och spelar upp markeringar i texten: <code>[happy]</code>, <code>[laugh]</code>, <code>[pause]</code>. Mikrofonen gör om det du säger till text åt din agent, på enheten när det går.</p>
           </div>
           <div class="card">
+            <div class="icon" aria-hidden="true">🎛️</div>
+            <h3>Cockpit</h3>
+            <p>Från 0.5 öppnar <code>openhead cockpit</code> en panel i webbläsaren: huvudets kamera som liten video, alla sensorer, vad det ska säga (med exempel att utgå från), tema och känsla. Flytta, lägg till och ta bort kort; din layout sparas. Telefonen visar ”Camera shared” medan du tittar.</p>
+          </div>
+          <div class="card">
             <div class="icon" aria-hidden="true">💬</div>
             <h3>Undertexter</h3>
             <p>Text ovanpå allt, för en robot utan högtalare eller ett AI-svar som strömmar in ord för ord. Munnen kan röra sig med texten.</p>
@@ -227,7 +232,7 @@ openhead hud --set task="DELIVER CUP" --set speed=0.4 \
             </tbody>
           </table>
         </div>
-        <p class="note">Från 0.4 även mikrofonen och högtalaren: huvudet talar med egen röst och gör om det du säger till text. Används inte: närhetssensorn (den släcker skärmen och skulle dölja ansiktet) och ljussensorn (inget öppet API). iPhone 12 har ingen LiDAR, och OpenHead behöver ingen. Planerat till 0.5, som tillval bara på Pro-modeller: LiDAR-djup för exakta avstånd och en 3D-karta av rummet.</p>
+        <p class="note">Från 0.4 även mikrofonen och högtalaren: huvudet talar med egen röst och gör om det du säger till text. Används inte: närhetssensorn (den släcker skärmen och skulle dölja ansiktet) och ljussensorn (inget öppet API). iPhone 12 har ingen LiDAR, och OpenHead behöver ingen. Från 0.5, som tillval bara på Pro-modeller: LiDAR-djup för exakta avstånd och en 3D-karta av rummet.</p>
         <div style="overflow-x:auto; margin-top: 32px">
           <table class="data streams">
             <thead><tr><th>Ström</th><th>Takt</th><th>Fält</th><th>När</th></tr></thead>
