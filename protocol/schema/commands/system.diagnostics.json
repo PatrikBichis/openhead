@@ -94,6 +94,14 @@
             "face_tracking": {
               "type": "boolean",
               "description": "Front-camera face tracking concurrent with world tracking."
+            },
+            "scene_depth": {
+              "type": "boolean",
+              "description": "LiDAR depth (capability `lidar`, 0.5). Omitted by older devices."
+            },
+            "scene_mesh": {
+              "type": "boolean",
+              "description": "Scene reconstruction (capability `scene_mesh`, 0.5). Omitted by older devices."
             }
           },
           "required": [

@@ -122,6 +122,33 @@
         white-space: pre-wrap;
         overflow-wrap: anywhere;
       }
+      /* topic camera (0.5): someone sees what the camera sees */
+      #watching {
+        position: fixed;
+        top: max(10px, env(safe-area-inset-top));
+        right: max(12px, env(safe-area-inset-right));
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 0.45em;
+        padding: 0.3em 0.75em 0.3em 0.6em;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        font: 600 clamp(11px, 3.4vh, 18px) / 1 "Inter Variable", system-ui, sans-serif;
+        pointer-events: none;
+      }
+      #watching[hidden] {
+        display: none;
+      }
+      #watching::before {
+        content: "";
+        width: 0.65em;
+        height: 0.65em;
+        border-radius: 50%;
+        background: #ff453a;
+        box-shadow: 0 0 0.5em #ff453a;
+      }
     </style>
   </head>
   <body>
@@ -129,6 +156,7 @@
     <div id="display" hidden></div>
     <canvas id="hud" hidden></canvas>
     <div id="subtitles" hidden><div><p></p></div></div>
+    <div id="watching" role="status" hidden></div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

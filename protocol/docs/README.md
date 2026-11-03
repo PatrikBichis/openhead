@@ -1,10 +1,12 @@
 # OpenHead protocol reference
 
-Protocol version 0.4.0. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
+Protocol version 0.5.0. Generated from `protocol/schema` by `tools/protocol.py`; do not edit. Examples are in `protocol/examples`.
 
 | Type | Schema | Description |
 | --- | --- | --- |
 | `ack` | [Ack](messages/ack.md) | Successful reply to a command. |
+| `camera` | [Camera](topics/camera.md) | What the head's camera sees, as small JPEG frames for a viewer (0.5): the front camera in mode `capture`, the back camera in `sensing`, nothing in `idle`. |
+| `depth.sample` | [DepthSample](commands/depth.sample.md) | Distance from the back camera to what is at given points of its view, from the LiDAR depth map (0.5, optional). |
 | `display.clear` | [DisplayClear](commands/display.clear.md) | Remove any image or web page and show the face full screen. |
 | `display.hud` | [DisplayHud](commands/display.hud.md) | Put your own information on the camera view's HUD, on top of the theme. |
 | `display.show` | [DisplayShow](commands/display.show.md) | Change what fills the screen. |
@@ -22,6 +24,7 @@ Protocol version 0.4.0. Generated from `protocol/schema` by `tools/protocol.py`;
 | `hello` | [Hello](messages/hello.md) | First message on a new connection. |
 | `imu` | [Imu](topics/imu.md) | Inertial sample, up to 100 Hz. |
 | `log` | [Log](topics/log.md) | One structured log line, sent as it happens. |
+| `mesh` | [Mesh](topics/mesh.md) | The room as triangle meshes from ARKit scene reconstruction (0.5, optional): only on devices with capability `scene_mesh` (LiDAR, Pro models) and only in mode `sensing`. |
 | `mode.get` | [ModeGet](commands/mode.get.md) | Current camera ownership mode. |
 | `mode.set` | [ModeSet](commands/mode.set.md) | Choose who owns the cameras. |
 | `pair` | [Pair](messages/pair.md) | Pairing attempt with the code shown on the device. |

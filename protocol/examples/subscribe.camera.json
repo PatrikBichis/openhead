@@ -1,0 +1,9 @@
+{
+  "type": "subscribe",
+  "ts": 1793462400000,
+  "seq": 11,
+  "id": "s-3",
+  "topic": "camera",
+  "rate_hz": 4,
+  "max_px": 320
+}

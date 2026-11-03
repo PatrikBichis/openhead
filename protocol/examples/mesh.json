@@ -1,0 +1,25 @@
+{
+  "type": "mesh",
+  "ts": 1793462400000,
+  "seq": 5,
+  "anchors": [
+    {
+      "id": "6F1C2A40-1B3D-4E8A-9C77-2D1F0E5B9A10",
+      "position": [
+        0.4,
+        -0.7,
+        -1.2
+      ],
+      "q": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "vertices": "AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/",
+      "faces": "AAAAAAEAAAACAAAA"
+    }
+  ],
+  "removed": [],
+  "sensor_time_s": 81241.0
+}

@@ -67,9 +67,11 @@
         "pose",
         "gps",
         "env",
-        "speech"
+        "speech",
+        "camera",
+        "mesh"
       ],
-      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4)."
+      "description": "Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4); `camera` sends small JPEG frames in `capture` and `sensing` and `mesh` the room's mesh on LiDAR devices in `sensing` (0.5)."
     },
     "log_level": {
       "type": "string",

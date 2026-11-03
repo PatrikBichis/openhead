@@ -2,6 +2,15 @@
 
 All changes to `protocol/schema` are recorded here, in the same commit as the change. The protocol follows [semver](https://semver.org) from 0.1.0; until 0.1.0 is tagged anything may change.
 
+## 0.5.0 (2026-11-03)
+
+### Added
+
+- Topic `camera`: small JPEG frames of what the head sees (front camera in `capture`, back camera in `sensing`), up to 10 Hz, for a viewer such as `openhead cockpit`. `subscribe.max_px` sets the longest side (80-640, default 320). Frames go only to paired clients that subscribe and are never stored; the phone shows a marker while anyone watches, and `status.camera_viewers` says how many.
+- Capability `camera.stream` in `welcome`.
+- Optional, for devices with LiDAR (Pro models; nothing requires them, an iPhone 12 simply lacks the capabilities): capability `lidar` with `depth.sample` (distance at points of the back camera's view) and face `distance_m` from the depth map; capability `scene_mesh` with topic `mesh` (ARKit scene reconstruction, changed anchors up to 1 Hz).
+- `system.diagnostics` `arkit.scene_depth` and `arkit.scene_mesh` (optional).
+
 ## 0.4.0 (2026-11-02)
 
 ### Added

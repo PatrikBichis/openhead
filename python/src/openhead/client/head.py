@@ -25,7 +25,7 @@ log = logging.getLogger("openhead.client")
 TOPIC_MODELS: dict[str, type[BaseModel]] = {
     "imu": models.Imu, "status": models.Status, "log": models.Log,
     "faces": models.Faces, "pose": models.Pose, "gps": models.Gps,
-    "env": models.Env, "speech": models.Speech,
+    "env": models.Env, "speech": models.Speech, "camera": models.Camera, "mesh": models.Mesh,
 }
 
 
@@ -82,6 +82,7 @@ class Head:
         self.system = _System(self)
         self.mode = _Mode(self)
         self.speech = _Speech(self)
+        self.depth = _Depth(self)
         self._ws: ClientConnection | None = None
         self._seq = itertools.count()
         self._ids = itertools.count(1)
@@ -259,24 +260,27 @@ class Head:
         await self._send(type_, fields)
 
     def subscribe(self, topic: str, rate_hz: float | None = None,
-                  fields: list[str] | None = None) -> Subscription:
-        """Async iterator (and async context manager) over a topic's messages."""
-        return Subscription(self, topic, rate_hz, fields)
+                  fields: list[str] | None = None, *, max_px: int | None = None) -> Subscription:
+        """Async iterator (and async context manager) over a topic's messages; `max_px` sizes
+        `camera` frames (0.5)."""
+        return Subscription(self, topic, rate_hz, fields, max_px=max_px)
 
 
 class Subscription:
-    def __init__(self, head: Head, topic: str, rate_hz: float | None, fields: list[str] | None):
+    def __init__(self, head: Head, topic: str, rate_hz: float | None, fields: list[str] | None, *,
+                 max_px: int | None = None):
         self.head = head
         self.topic = topic
         self.requested = rate_hz
         self.fields = fields
+        self.max_px = max_px
         self.rate_hz: float | None = None
         self._queue: asyncio.Queue = asyncio.Queue(maxsize=1000)
         self._started = False
 
     async def _request(self) -> None:
         result = await self.head.command("subscribe", topic=self.topic, rate_hz=self.requested,
-                                         fields=self.fields)
+                                         fields=self.fields, max_px=self.max_px)
         self.rate_hz = result.get("rate_hz")
 
     async def start(self) -> Subscription:
@@ -496,6 +500,18 @@ class _Speech:
                      auto_expressions: bool | None = None, silence_ms: int | None = None) -> dict:
         return await self._h.command("speech.listen", on=on, locale=locale,
                                      auto_expressions=auto_expressions, silence_ms=silence_ms)
+
+
+class _Depth:
+    """LiDAR depth on Pro models (protocol 0.5, optional: `"lidar" in head.welcome.capabilities`)."""
+
+    def __init__(self, head: Head):
+        self._h = head
+
+    async def sample(self, points: list[tuple[float, float]]) -> list[float | None]:
+        """Metres at normalised (x, y) points of the back camera's view, in mode `sensing`."""
+        result = await self._h.command("depth.sample", points=[{"x": x, "y": y} for x, y in points])
+        return result["depths_m"]
 
 
 def _drop_none(params: dict) -> dict:

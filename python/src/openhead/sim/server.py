@@ -37,12 +37,14 @@ from .shots import ShotServer
 log = logging.getLogger("openhead.sim")
 
 DEVICE_MESSAGES = {"ack", "error", "welcome", "pair_required", "imu", "status", "log", "faces",
-                   "pose", "gps", "env", "speech"}
+                   "pose", "gps", "env", "speech", "camera", "mesh"}
 CAPABILITIES = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
-                "status", "log", "screenshot", "camera", "faces", "pose", "gps", "env", "speech"]
+                "status", "log", "screenshot", "camera", "faces", "pose", "gps", "env", "speech",
+                "camera.stream"]
+PRO_CAPABILITIES = ["lidar", "scene_mesh"]  # a simulated Pro model (SimConfig.pro)
 TOPIC_RATES = {"imu": (50.0, 100.0), "status": (1.0, 1.0), "log": (0.0, 0.0),  # default, max
                "faces": (15.0, 15.0), "pose": (30.0, 60.0), "gps": (1.0, 1.0), "env": (10.0, 10.0),
-               "speech": (0.0, 0.0)}
+               "speech": (0.0, 0.0), "camera": (4.0, 10.0), "mesh": (1.0, 1.0)}
 CHARS_PER_S = 15     # the simulated voice speaks at about the face engine's text-mouth pace
 LOG_LEVELS = ["debug", "info", "notice", "warning", "error", "fault"]
 PAIR_MAX_FAILURES = 5
@@ -74,6 +76,7 @@ class SimConfig:
     validate_outgoing: bool = False  # tests: record outgoing messages the schema rejects
     record_video_dir: Path | None = None  # record the screen with Playwright (demos)
     pixel_ratio: float = 1  # device pixels per point (2-3 for sharp marketing renders)
+    pro: bool = False  # a Pro model: LiDAR depth and the room mesh (0.5, optional)
 
 
 class Session:
@@ -84,6 +87,8 @@ class Session:
         self.client: str | None = None
         self.token: str | None = None
         self.subs: dict[str, tuple[asyncio.Task | None, list[str] | None]] = {}
+        self.camera_px = 320  # subscribe.max_px of the camera subscription
+        self.camera_frame = 0
         self._lock = asyncio.Lock()
 
     async def send(self, type_: str, **fields: Any) -> None:
@@ -232,8 +237,11 @@ class SimServer:
         except ConnectionClosed:
             pass
         finally:
+            watched = "camera" in session.subs
             session.stop_subs()
             self.sessions.discard(session)
+            if watched:
+                await self._watching()
             self.log("info", "link", f"{session.client or peer} disconnected")
             if session.token and not any(x.token for x in self.sessions):
                 await self._own_theme("no clients")
@@ -354,7 +362,7 @@ class SimServer:
                 "screen": {"width": w, "height": h, "scale": 1,
                            "safe_area": {"top": 0, "left": 0, "bottom": 0, "right": 0}},
             },
-            capabilities=CAPABILITIES, themes=themes, dev_mode=self.config.dev_mode,
+            capabilities=CAPABILITIES + (PRO_CAPABILITIES if self.config.pro else []), themes=themes, dev_mode=self.config.dev_mode,
         )
 
     def _load_tokens(self) -> dict[str, str]:
@@ -394,6 +402,8 @@ class SimServer:
                 case "unsubscribe":
                     if (entry := s.subs.pop(d["topic"], None)) and entry[0]:
                         entry[0].cancel()
+                    if d["topic"] == "camera":
+                        await self._watching()
                     return None
                 case "face.set_theme":
                     await face.set_theme(d["name"], d.get("transition_ms", 300))
@@ -452,7 +462,8 @@ class SimServer:
                                         "motion": "not_required", "camera": "not_required",
                                         "location": "not_required", "motion_fitness": "not_required",
                                         "microphone": "not_required", "speech_recognition": "not_required"},
-                        "arkit": {"world_tracking": False, "face_tracking": False},
+                        "arkit": {"world_tracking": False, "face_tracking": False,
+                                  "scene_depth": self.config.pro, "scene_mesh": self.config.pro},
                     }
                 case "system.settings":
                     if d["action"] == "set":
@@ -470,6 +481,8 @@ class SimServer:
                                       if d["on"] else None)
                     self.log("info", "speech", f"listening {'on' if d['on'] else 'off'}")
                     return {"listening": d["on"], "locale": d.get("locale", "en-US"), "on_device": True}
+                case "depth.sample":
+                    return self._depth(d)
                 case "mode.set":
                     await self._set_mode(d["mode"])
                 case "mode.get":
@@ -571,6 +584,8 @@ class SimServer:
 
     def _subscribe(self, s: Session, d: dict) -> dict:
         topic = d["topic"]
+        if topic == "mesh" and not self.config.pro:
+            raise SimError("unsupported", "mesh needs a device with LiDAR (capability scene_mesh)")
         default, maximum = TOPIC_RATES[topic]
         rate = min(d.get("rate_hz", default), maximum) if maximum else 0.0
         fields = d.get("fields")
@@ -589,8 +604,60 @@ class SimServer:
             sample = scene.gps_at if topic == "gps" else scene.env_at
             task = asyncio.create_task(self._stream(
                 s, topic, rate, fields, lambda _s, f=sample: self._sensor(f)))
+        elif topic == "camera":
+            s.camera_px, s.camera_frame = d.get("max_px", 320), 0
+            task = asyncio.create_task(self._stream(s, "camera", rate, fields, self._camera))
+        elif topic == "mesh":
+            task = asyncio.create_task(self._stream(s, "mesh", rate, fields, self._mesh()))
         s.subs[topic] = (task, fields)
+        if topic == "camera":
+            asyncio.create_task(self._watching())
         return {"topic": topic, "rate_hz": rate}
+
+    # --- 0.5: camera frames for viewers, LiDAR on a simulated Pro model ---------
+
+    def camera_viewers(self) -> int:
+        return sum(1 for x in self.sessions if "camera" in x.subs)
+
+    async def _watching(self) -> None:
+        """The marker on screen while anyone watches the camera, as the phone shows it."""
+        with contextlib.suppress(FaceError):
+            await self.face.set_watching(self.camera_viewers())
+
+    async def _camera(self, s: Session) -> dict | None:
+        if self.mode == "idle":
+            return None
+        t = time.monotonic() - self.mode_started
+        jpeg, width, height = await asyncio.to_thread(scene.camera_jpeg, t, self.mode, self.faces, s.camera_px)
+        s.camera_frame += 1
+        return {"jpeg": base64.b64encode(jpeg).decode(), "width": width, "height": height,
+                "source": "sim", "frame": s.camera_frame - 1,
+                "sensor_time_s": round(time.monotonic() - self.started, 4)}
+
+    def _mesh(self):
+        sent = False
+
+        async def payload(_s: Session) -> dict | None:
+            nonlocal sent
+            if self.mode != "sensing":
+                sent = False  # ARKit starts a new map when sensing starts again
+                return None
+            anchors = [] if sent else scene.room_mesh()
+            sent = True
+            return {"anchors": anchors, "removed": [],
+                    "sensor_time_s": round(time.monotonic() - self.started, 4)}
+
+        return payload
+
+    def _depth(self, d: dict) -> dict:
+        if not self.config.pro:
+            raise SimError("unsupported", "depth.sample needs a device with LiDAR (capability lidar)")
+        if self.mode != "sensing":
+            raise SimError("unsupported", "depth.sample needs mode sensing")
+        t = time.monotonic() - self.mode_started
+        return {"depths_m": [scene.depth_at(t, p["x"], p["y"]) for p in d["points"]],
+                "confidence": ["high"] * len(d["points"]),
+                "sensor_time_s": round(time.monotonic() - self.started, 4)}
 
     async def _imu(self, s: Session) -> dict:
         return imu.sample(time.monotonic() - self.started)
@@ -673,6 +740,7 @@ class SimServer:
             status["subtitle"] = state["subtitle"][-4000:]
         if self.mode != "idle":
             status["faces"] = len(self.faces)
+        status["camera_viewers"] = self.camera_viewers()
         if s.ws.latency:
             status["rtt_ms"] = round(s.ws.latency * 1000, 1)
         return status

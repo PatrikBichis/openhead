@@ -196,6 +196,10 @@ class BrowserFace:
     async def hud_extras(self, extras: dict) -> None:
         await self._call("(x) => window.openhead.hudExtras(x)", extras)
 
+    async def set_watching(self, viewers: int) -> None:
+        """The "camera shared" marker while clients watch the `camera` topic."""
+        await self._call("(n) => window.openhead.setWatching(n)", viewers)
+
     async def list_huds(self) -> list[dict]:
         return await self._call("() => window.openhead.listHuds()")
 

@@ -11,6 +11,9 @@ final class Session {
     var token: String?
     /// topic -> (fields filter, timer for periodic topics)
     var subscriptions: [String: (fields: [String]?, timer: Timer?)] = [:]
+    /// Topic `camera`: frames sent on this subscription, and whether one is being encoded.
+    var cameraFrame = 0
+    var cameraBusy = false
 
     init(connection: NWConnection) { self.connection = connection }
 
@@ -181,28 +184,40 @@ final class LinkServer {
 
     private func close(_ session: Session) {
         guard sessions[session.id] != nil else { return }
+        sessions[session.id] = nil  // first, so the counts in endSubscription leave it out
         stopSubscriptions(session)
-        sessions[session.id] = nil
         session.connection.cancel()
         log.log("info", "link", "\(session.client ?? "client") disconnected")
         publish(ready: listening)
     }
 
     func stopSubscriptions(_ session: Session) {
-        for (topic, sub) in session.subscriptions {
-            sub.timer?.invalidate()
-            if topic == "imu" { model.motion.unsubscribe(session.id) }
-            if topic == "log" { model.logs.listeners[session.id] = nil }
-            if topic == "speech" { model.speech.listeners[session.id] = nil }
-            model.stopSensor(topic, session.id)
+        for topic in Array(session.subscriptions.keys) { endSubscription(session, topic) }
+    }
+
+    /// Stop one stream of a session and whatever it kept running.
+    func endSubscription(_ session: Session, _ topic: String) {
+        guard let sub = session.subscriptions.removeValue(forKey: topic) else { return }
+        sub.timer?.invalidate()
+        switch topic {
+        case "imu": model.motion.unsubscribe(session.id)
+        case "log": model.logs.listeners[session.id] = nil
+        case "speech": model.speech.listeners[session.id] = nil
+        case "camera": model.cameraViewersChanged(subscriberCount("camera"))
+        case "mesh": model.ar.wantsMesh = subscriberCount("mesh") > 0
+        default: model.stopSensor(topic, session.id)
         }
-        session.subscriptions.removeAll()
+    }
+
+    func subscriberCount(_ topic: String) -> Int {
+        sessions.values.filter { $0.subscriptions[topic] != nil }.count
     }
 
     // MARK: - messages
 
     private static let deviceMessages: Set<String> = ["ack", "error", "welcome", "pair_required",
-                                                      "imu", "status", "log", "faces", "pose", "gps", "env", "speech"]
+                                                      "imu", "status", "log", "faces", "pose", "gps", "env", "speech",
+                                                      "camera", "mesh"]
 
     private func handle(_ session: Session, _ data: Data) {
         guard let message = (try? JSONSerialization.jsonObject(with: data)) as? JSONObject else {
@@ -306,6 +321,14 @@ final class LinkServer {
 
     private func welcome(_ session: Session) {
         let screen = UIScreenInfo.current
+        var capabilities = ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
+                            "status", "log", "screenshot", "camera", "faces", "gps", "env", "speech", "camera.stream"]
+        if model.supportsSensing {
+            capabilities.append("pose")
+            // Pro models only (LiDAR), never required: an iPhone 12 simply leaves them out.
+            if ARService.supportsDepth { capabilities.append("lidar") }
+            if ARService.supportsMesh { capabilities.append("scene_mesh") }
+        }
         session.send("welcome", [
             "token": session.token ?? "",
             "protocol_version": protocolVersion,
@@ -318,9 +341,7 @@ final class LinkServer {
                 "screen": ["width": screen.width, "height": screen.height, "scale": screen.scale,
                            "safe_area": screen.safeArea],
             ],
-            "capabilities": ["face", "display.image", "display.video", "display.web", "display.subtitle", "imu",
-                             "status", "log", "screenshot", "camera", "faces", "gps", "env", "speech"]
-                + (model.supportsSensing ? ["pose"] : []),
+            "capabilities": capabilities,
             "themes": model.themeNames,
             "dev_mode": model.settings.devMode,
         ])

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Camera",
+  "description": "What the head's camera sees, as small JPEG frames for a viewer (0.5): the front camera in mode `capture`, the back camera in `sensing`, nothing in `idle`. Up to 10 Hz; `subscribe.max_px` sets the longest side (default 320, 80-640). Frames go only to paired clients that subscribe, are never stored, and the phone shows that someone is watching while any subscription is open. Every payload field is present unless the subscription named `fields`.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "camera"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "fields": {
+      "type": "object",
+      "properties": {
+        "jpeg": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "contentMediaType": "image/jpeg",
+          "maxLength": 200000,
+          "description": "The frame, base64 JPEG, upright as the head is mounted (landscape)."
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 640
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 640
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "front",
+            "back",
+            "sim"
+          ],
+          "description": "`front` in `capture`, `back` (ARKit's camera) in `sensing`."
+        },
+        "frame": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Counts frames sent on this subscription."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "When the camera took it, seconds since device boot (the clock of `imu`)."
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
+      "required": [
+        "jpeg",
+        "width",
+        "height",
+        "source",
+        "frame",
+        "sensor_time_s"
+      ]
+    }
+  }
+}

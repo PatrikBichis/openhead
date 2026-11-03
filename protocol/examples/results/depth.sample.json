@@ -1,0 +1,11 @@
+{
+  "depths_m": [
+    1.84,
+    null
+  ],
+  "confidence": [
+    "high",
+    "low"
+  ],
+  "sensor_time_s": 81241.2
+}

@@ -5,10 +5,12 @@ from pydantic import BaseModel
 
 from . import models
 
-PROTOCOL_VERSION = "0.4.0"
+PROTOCOL_VERSION = "0.5.0"
 
 MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "ack": models.Ack,
+    "camera": models.Camera,
+    "depth.sample": models.DepthSample,
     "display.clear": models.DisplayClear,
     "display.hud": models.DisplayHud,
     "display.show": models.DisplayShow,
@@ -26,6 +28,7 @@ MESSAGE_TYPES: dict[str, type[BaseModel]] = {
     "hello": models.Hello,
     "imu": models.Imu,
     "log": models.Log,
+    "mesh": models.Mesh,
     "mode.get": models.ModeGet,
     "mode.set": models.ModeSet,
     "pair": models.Pair,

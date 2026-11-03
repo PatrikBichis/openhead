@@ -10,7 +10,73 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
 class OpenHeadProtocol(RootModel[Any]):
     root: Any = Field(..., title="OpenHeadProtocol")
     """
-    All OpenHead protocol 0.4.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
+    All OpenHead protocol 0.5.0 schemas in one document. Generated from protocol/schema by tools/protocol.py; do not edit.
+    """
+
+
+class CameraFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    jpeg: str | None = Field(
+        None,
+        json_schema_extra={
+            "contentEncoding": "base64",
+            "contentMediaType": "image/jpeg",
+        },
+        max_length=200000,
+    )
+    """
+    The frame, base64 JPEG, upright as the head is mounted (landscape).
+    """
+    width: int | None = Field(None, ge=1, le=640)
+    height: int | None = Field(None, ge=1, le=640)
+    source: Literal["front", "back", "sim"] | None = None
+    """
+    `front` in `capture`, `back` (ARKit's camera) in `sensing`.
+    """
+    frame: int | None = Field(None, ge=0)
+    """
+    Counts frames sent on this subscription.
+    """
+    sensor_time_s: float | None = Field(None, ge=0.0)
+    """
+    When the camera took it, seconds since device boot (the clock of `imu`).
+    """
+
+
+class CameraPayload(CameraFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    jpeg: str = Field(
+        ...,
+        json_schema_extra={
+            "contentEncoding": "base64",
+            "contentMediaType": "image/jpeg",
+        },
+        max_length=200000,
+    )
+    """
+    The frame, base64 JPEG, upright as the head is mounted (landscape).
+    """
+    width: int = Field(..., ge=1, le=640)
+    height: int = Field(..., ge=1, le=640)
+    source: Literal["front", "back", "sim"]
+    """
+    `front` in `capture`, `back` (ARKit's camera) in `sensing`.
+    """
+    frame: int = Field(..., ge=0)
+    """
+    Counts frames sent on this subscription.
+    """
+    sensor_time_s: float = Field(..., ge=0.0)
+    """
+    When the camera took it, seconds since device boot (the clock of `imu`).
     """
 
 
@@ -19,6 +85,33 @@ class CommonName(RootModel[str]):
     """
     Lower-case identifier used for themes and emotions.
     """
+
+
+class DepthSamplePoint(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    x: float = Field(..., ge=0.0, le=1.0)
+    y: float = Field(..., ge=0.0, le=1.0)
+
+
+class DepthsMItem(RootModel[float | None]):
+    root: float | None = Field(..., ge=0.0)
+
+
+class DepthSampleResult(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    depths_m: list[DepthsMItem | None]
+    """
+    Metres, one per point in order; null where there is no reading.
+    """
+    confidence: list[Literal["low", "medium", "high"]] | None = None
+    """
+    ARKit's confidence for each reading.
+    """
+    sensor_time_s: float = Field(..., ge=0.0)
 
 
 class EnvFields(BaseModel):
@@ -500,6 +593,63 @@ class LogPayload(LogFields):
     message: str = Field(..., max_length=4096)
 
 
+class MeshAnchor(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    id: str = Field(..., max_length=64, min_length=1)
+    position: list[float] = Field(..., max_length=3, min_length=3)
+    """
+    Anchor origin in the `pose` world frame, metres.
+    """
+    q: list[float] = Field(..., max_length=4, min_length=4)
+    """
+    Anchor orientation in the world frame, unit quaternion [x, y, z, w] (as `pose`).
+    """
+    vertices: str = Field(..., json_schema_extra={"contentEncoding": "base64"})
+    """
+    Little-endian float32 x, y, z per vertex, in the anchor frame, metres.
+    """
+    faces: str = Field(..., json_schema_extra={"contentEncoding": "base64"})
+    """
+    Little-endian uint32 vertex indices, three per triangle.
+    """
+
+
+class MeshFields(BaseModel):
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    anchors: list[MeshAnchor] | None = Field(None, max_length=64)
+    """
+    New or changed anchors.
+    """
+    removed: list[str] | None = None
+    """
+    Ids of anchors ARKit dropped.
+    """
+    sensor_time_s: float | None = Field(None, ge=0.0)
+
+
+class MeshPayload(MeshFields):
+    """
+    Complete payload, as sent when the subscription names no `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    anchors: list[MeshAnchor] = Field(..., max_length=64)
+    """
+    New or changed anchors.
+    """
+    removed: list[str]
+    """
+    Ids of anchors ARKit dropped.
+    """
+    sensor_time_s: float = Field(..., ge=0.0)
+
+
 class ModeGetResult(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
@@ -837,6 +987,10 @@ class StatusFields(BaseModel):
     Faces seen now (modes `capture` and `sensing`). Omitted in `idle`.
     """
     dev_mode: bool | None = None
+    camera_viewers: int | None = Field(None, ge=0)
+    """
+    Clients subscribed to `camera` now; the phone shows a marker while this is above 0 (0.5). Omitted by older devices.
+    """
     clients: int | None = Field(None, ge=0)
     """
     Connected, authenticated clients.
@@ -891,11 +1045,20 @@ class SubscribeResult(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
-    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env", "speech"] = (
-        Field(..., title="CommonTopic")
-    )
+    topic: Literal[
+        "imu",
+        "status",
+        "log",
+        "faces",
+        "pose",
+        "gps",
+        "env",
+        "speech",
+        "camera",
+        "mesh",
+    ] = Field(..., title="CommonTopic")
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4); `camera` sends small JPEG frames in `capture` and `sensing` and `mesh` the room's mesh on LiDAR devices in `sensing` (0.5).
     """
     rate_hz: float = Field(..., ge=0.0)
     """
@@ -950,6 +1113,14 @@ class DiagnosticsArkit(BaseModel):
     face_tracking: bool
     """
     Front-camera face tracking concurrent with world tracking.
+    """
+    scene_depth: bool | None = None
+    """
+    LiDAR depth (capability `lidar`, 0.5). Omitted by older devices.
+    """
+    scene_mesh: bool | None = None
+    """
+    Scene reconstruction (capability `scene_mesh`, 0.5). Omitted by older devices.
     """
 
 
@@ -1186,6 +1357,20 @@ class Ack(Envelope):
     result: dict[str, Any] | None = None
 
 
+class Camera(Envelope, CameraFields):
+    """
+    What the head's camera sees, as small JPEG frames for a viewer (0.5): the front camera in mode `capture`, the back camera in `sensing`, nothing in `idle`. Up to 10 Hz; `subscribe.max_px` sets the longest side (default 320, 80-640). Frames go only to paired clients that subscribe, are never stored, and the phone shows that someone is watching while any subscription is open. Every payload field is present unless the subscription named `fields`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["camera"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
 class Command(Envelope):
     """
     Base for commands. Every command is answered with `ack` or `error` carrying the same `id`.
@@ -1198,6 +1383,23 @@ class Command(Envelope):
     """
     Client-chosen id, echoed in the reply.
     """
+
+
+class DepthSample(Command):
+    """
+    Distance from the back camera to what is at given points of its view, from the LiDAR depth map (0.5, optional). Needs capability `lidar` and mode `sensing`; otherwise `unsupported`. Points are normalised 0-1 in the `camera` frame from the back camera (origin top-left).
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["depth.sample"] = Field(
+        ..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$"
+    )
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+    points: list[DepthSamplePoint] = Field(..., max_length=16, min_length=1)
 
 
 class DisplayClear(Command):
@@ -1606,6 +1808,20 @@ class Log(Envelope, LogFields):
     """
 
 
+class Mesh(Envelope, MeshFields):
+    """
+    The room as triangle meshes from ARKit scene reconstruction (0.5, optional): only on devices with capability `scene_mesh` (LiDAR, Pro models) and only in mode `sensing`. Up to 1 Hz; each message carries the anchors that are new or changed since the last one and the ids of removed ones, so a client keeps a map by `id`. A device without LiDAR answers the subscription with `unsupported`.
+    """
+
+    model_config = ConfigDict(
+        extra="ignore",
+    )
+    type: Literal["mesh"] = Field(..., pattern="^[a-z][a-z_]*(\\.[a-z][a-z_]*)?$")
+    """
+    Message type, e.g. `hello`, `face.set_emotion`, `imu`.
+    """
+
+
 class ModeGet(Command):
     """
     Current camera ownership mode.
@@ -1774,11 +1990,20 @@ class Subscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env", "speech"] = (
-        Field(..., title="CommonTopic")
-    )
+    topic: Literal[
+        "imu",
+        "status",
+        "log",
+        "faces",
+        "pose",
+        "gps",
+        "env",
+        "speech",
+        "camera",
+        "mesh",
+    ] = Field(..., title="CommonTopic")
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4); `camera` sends small JPEG frames in `capture` and `sensing` and `mesh` the room's mesh on LiDAR devices in `sensing` (0.5).
     """
     rate_hz: float | None = Field(None, gt=0.0, le=1000.0)
     """
@@ -1787,6 +2012,10 @@ class Subscribe(Command):
     fields: list[str] | None = None
     """
     Only send these payload fields. Omit for all.
+    """
+    max_px: int | None = Field(None, ge=80, le=640)
+    """
+    `camera` only: longest side of a frame in pixels (default 320).
     """
 
 
@@ -2038,11 +2267,20 @@ class Unsubscribe(Command):
     """
     Message type, e.g. `hello`, `face.set_emotion`, `imu`.
     """
-    topic: Literal["imu", "status", "log", "faces", "pose", "gps", "env", "speech"] = (
-        Field(..., title="CommonTopic")
-    )
+    topic: Literal[
+        "imu",
+        "status",
+        "log",
+        "faces",
+        "pose",
+        "gps",
+        "env",
+        "speech",
+        "camera",
+        "mesh",
+    ] = Field(..., title="CommonTopic")
     """
-    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4).
+    Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`; `gps` asks for location access and `env` for Motion & Fitness access on first use; `speech` carries speaking and listening events (0.4); `camera` sends small JPEG frames in `capture` and `sensing` and `mesh` the room's mesh on LiDAR devices in `sensing` (0.5).
     """
 
 
@@ -2183,7 +2421,7 @@ class Welcome(Envelope):
     device: WelcomeDevice
     capabilities: list[str]
     """
-    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`. Clients ignore unknown values.
+    Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`; 0.5 `camera.stream`, and on devices with LiDAR (Pro models, optional) `lidar` (`depth.sample`, face distance from the depth map) and `scene_mesh` (topic `mesh`). Clients ignore unknown values.
     """
     themes: list[str]
     dev_mode: bool

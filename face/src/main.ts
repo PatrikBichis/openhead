@@ -28,6 +28,8 @@ export interface OpenHead extends FaceEngine {
   setHudValues(values: HudValues): void;
   /** `display.hud`: the host's own values, text blocks and widgets on the HUD. */
   hudExtras(extras: HudExtras): void;
+  /** Clients watching the `camera` topic: a marker on screen while there are any. */
+  setWatching(viewers: number): void;
 }
 
 declare global {
@@ -69,6 +71,11 @@ window.openhead = Object.assign(engine, {
   listHuds: () => hudNames().map(hudInfo),
   setHudValues: (values: HudValues) => screen.setHudValues(values),
   hudExtras: (extras: HudExtras) => screen.hudExtras(extras),
+  setWatching: (viewers: number) => {
+    const el = document.querySelector<HTMLElement>("#watching")!;
+    el.hidden = viewers <= 0;
+    el.textContent = viewers > 1 ? `Camera shared · ${viewers}` : "Camera shared";
+  },
 });
 
 await engine.setTheme(query.get("theme") ?? "cartoon", 0);

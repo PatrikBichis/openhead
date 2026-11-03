@@ -162,6 +162,11 @@ final class FaceController: NSObject, ObservableObject, WKScriptMessageHandler, 
         try await call("window.openhead.setHudValues(values); return true", ["values": values])
     }
 
+    /// "Camera shared" on screen while `viewers` clients watch topic `camera` (protocol 0.5).
+    func setWatching(_ viewers: Int) async throws {
+        try await call("window.openhead.setWatching(viewers); return true", ["viewers": viewers])
+    }
+
     func hudExtras(_ extras: JSONObject) async throws {
         try await call("window.openhead.hudExtras(extras); return true", ["extras": extras])
     }

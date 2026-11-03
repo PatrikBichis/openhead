@@ -25,6 +25,8 @@ final class AppModel: ObservableObject {
     var faces: [SeenFace] = []
     var facesSource = "vision"
     var lastFacesToPage = 0.0
+    /// Clients subscribed to topic `camera` (protocol 0.5); see CameraStream.swift.
+    var cameraViewers = 0
     var tilt: (pitch: Double, roll: Double)?
     var hudTimer: Timer?
     let hudMotionId = UUID()
@@ -173,6 +175,7 @@ final class AppModel: ObservableObject {
             "mode": mode,
             "dev_mode": settings.devMode,
             "clients": clients,
+            "camera_viewers": cameraViewers,
             "uptime_s": (Date().timeIntervalSince(started) * 10).rounded() / 10,
         ]
         if !state.subtitle.isEmpty { status["subtitle"] = String(state.subtitle.suffix(4000)) }
@@ -200,6 +203,8 @@ final class AppModel: ObservableObject {
             "arkit": [
                 "world_tracking": ARWorldTrackingConfiguration.isSupported,
                 "face_tracking": ARWorldTrackingConfiguration.supportsUserFaceTracking,
+                "scene_depth": ARService.supportsDepth,
+                "scene_mesh": ARService.supportsMesh,
             ],
         ]
     }

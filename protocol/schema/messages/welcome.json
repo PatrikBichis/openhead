@@ -30,7 +30,7 @@
         "type": "string",
         "pattern": "^[a-z][a-z0-9_.-]*$"
       },
-      "description": "Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`. Clients ignore unknown values."
+      "description": "Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`, `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose` (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`; 0.5 `camera.stream`, and on devices with LiDAR (Pro models, optional) `lidar` (`depth.sample`, face distance from the depth map) and `scene_mesh` (topic `mesh`). Clients ignore unknown values."
     },
     "themes": {
       "type": "array",

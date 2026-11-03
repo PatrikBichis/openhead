@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DepthSample",
+  "description": "Distance from the back camera to what is at given points of its view, from the LiDAR depth map (0.5, optional). Needs capability `lidar` and mode `sensing`; otherwise `unsupported`. Points are normalised 0-1 in the `camera` frame from the back camera (origin top-left).",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../command.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "depth.sample"
+    },
+    "points": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/point"
+      }
+    }
+  },
+  "required": [
+    "type",
+    "points"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "depths_m": {
+          "type": "array",
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "description": "Metres, one per point in order; null where there is no reading."
+        },
+        "confidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "description": "ARKit's confidence for each reading."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "depths_m",
+        "sensor_time_s"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

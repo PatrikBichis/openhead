@@ -1,10 +1,12 @@
 // Generated from protocol/schema by tools/protocol.py (quicktype). Do not edit.
 
-public let protocolVersion = "0.4.0"
+public let protocolVersion = "0.5.0"
 
 /// Message `type` to its generated model.
 public let messageTypes: [String: any Codable.Type] = [
     "ack": ACK.self,
+    "camera": Camera.self,
+    "depth.sample": DepthSample.self,
     "display.clear": DisplayClear.self,
     "display.hud": DisplayHud.self,
     "display.show": DisplayShow.self,
@@ -22,6 +24,7 @@ public let messageTypes: [String: any Codable.Type] = [
     "hello": Hello.self,
     "imu": Imu.self,
     "log": Log.self,
+    "mesh": Mesh.self,
     "mode.get": ModeGet.self,
     "mode.set": ModeSet.self,
     "pair": Pair.self,

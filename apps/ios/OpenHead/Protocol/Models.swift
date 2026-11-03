@@ -11,6 +11,12 @@ import Foundation
 // MARK: - OpenHeadProtocol
 public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let ack: ACK?
+    public let camera: Camera?
+    public let cameraFields: CameraFields?
+    public let cameraPayload: CameraPayload?
+    public let depthSample: DepthSample?
+    public let depthSamplePoint: DepthSamplePoint?
+    public let depthSampleResult: DepthSampleResult?
     public let displayClear: DisplayClear?
     public let displayHud: DisplayHud?
     public let displayShow: DisplayShow?
@@ -45,6 +51,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
     public let log: Log?
     public let logFields: LogFields?
     public let logPayload: LogPayload?
+    public let mesh: Mesh?
+    public let meshAnchor: MeshAnchor?
+    public let meshFields: MeshFields?
+    public let meshPayload: MeshPayload?
     public let modeGet: ModeGet?
     public let modeGetResult: ModeGetResult?
     public let modeSet: ModeSet?
@@ -85,6 +95,12 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
 
     public enum CodingKeys: String, CodingKey {
         case ack = "Ack"
+        case camera = "Camera"
+        case cameraFields = "CameraFields"
+        case cameraPayload = "CameraPayload"
+        case depthSample = "DepthSample"
+        case depthSamplePoint = "DepthSamplePoint"
+        case depthSampleResult = "DepthSampleResult"
         case displayClear = "DisplayClear"
         case displayHud = "DisplayHud"
         case displayShow = "DisplayShow"
@@ -119,6 +135,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case log = "Log"
         case logFields = "LogFields"
         case logPayload = "LogPayload"
+        case mesh = "Mesh"
+        case meshAnchor = "MeshAnchor"
+        case meshFields = "MeshFields"
+        case meshPayload = "MeshPayload"
         case modeGet = "ModeGet"
         case modeGetResult = "ModeGetResult"
         case modeSet = "ModeSet"
@@ -158,8 +178,14 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         case welcomeScreen = "WelcomeScreen"
     }
 
-    public init(ack: ACK?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, env: Env?, envFields: EnvFields?, envPayload: EnvPayload?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, gps: Gps?, gpsFields: GpsFields?, gpsPayload: GpsPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, speech: Speech?, speechFields: SpeechFields?, speechListen: SpeechListen?, speechListenResult: SpeechListenResult?, speechPayload: SpeechPayload?, speechSay: SpeechSay?, speechSayResult: SpeechSayResult?, speechSaySegment: SpeechSaySegment?, speechStop: SpeechStop?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
+    public init(ack: ACK?, camera: Camera?, cameraFields: CameraFields?, cameraPayload: CameraPayload?, depthSample: DepthSample?, depthSamplePoint: DepthSamplePoint?, depthSampleResult: DepthSampleResult?, displayClear: DisplayClear?, displayHud: DisplayHud?, displayShow: DisplayShow?, displaySubtitle: DisplaySubtitle?, env: Env?, envFields: EnvFields?, envPayload: EnvPayload?, faceBlink: FaceBlink?, faceEnvelope: FaceEnvelope?, faceList: FaceList?, faceListHudInfo: FaceListHudInfo?, faceListResult: FaceListResult?, faceListThemeInfo: FaceListThemeInfo?, faceLookAt: FaceLookAt?, faces: Faces?, facesBox: FacesBox?, faceSetEmotion: FaceSetEmotion?, faceSetTheme: FaceSetTheme?, facesFace: FacesFace?, facesFields: FacesFields?, facesPayload: FacesPayload?, gps: Gps?, gpsFields: GpsFields?, gpsPayload: GpsPayload?, hello: Hello?, hud: Hud?, hudBlock: HudBlock?, hudWidget: HudWidget?, imu: Imu?, imuFields: ImuFields?, imuPayload: ImuPayload?, log: Log?, logFields: LogFields?, logPayload: LogPayload?, mesh: Mesh?, meshAnchor: MeshAnchor?, meshFields: MeshFields?, meshPayload: MeshPayload?, modeGet: ModeGet?, modeGetResult: ModeGetResult?, modeSet: ModeSet?, pair: Pair?, pairRequired: PairRequired?, pose: Pose?, poseFields: PoseFields?, posePayload: PosePayload?, protocolError: ProtocolError?, speech: Speech?, speechFields: SpeechFields?, speechListen: SpeechListen?, speechListenResult: SpeechListenResult?, speechPayload: SpeechPayload?, speechSay: SpeechSay?, speechSayResult: SpeechSayResult?, speechSaySegment: SpeechSaySegment?, speechStop: SpeechStop?, status: Status?, statusFields: StatusFields?, statusPayload: StatusPayload?, subscribe: Subscribe?, subscribeResult: SubscribeResult?, systemDiagnostics: SystemDiagnostics?, systemDiagnosticsResult: SystemDiagnosticsResult?, systemLogs: SystemLogs?, systemLogsResult: SystemLogsResult?, systemScreenshot: SystemScreenshot?, systemScreenshotResult: SystemScreenshotResult?, systemSettings: SystemSettings?, systemSettingsResult: SystemSettingsResult?, systemStatus: SystemStatus?, unsubscribe: Unsubscribe?, welcome: Welcome?, welcomeDevice: WelcomeDevice?, welcomeInsets: WelcomeInsets?, welcomeScreen: WelcomeScreen?) {
         self.ack = ack
+        self.camera = camera
+        self.cameraFields = cameraFields
+        self.cameraPayload = cameraPayload
+        self.depthSample = depthSample
+        self.depthSamplePoint = depthSamplePoint
+        self.depthSampleResult = depthSampleResult
         self.displayClear = displayClear
         self.displayHud = displayHud
         self.displayShow = displayShow
@@ -194,6 +220,10 @@ public struct OpenHeadProtocol: Codable, Equatable, Sendable {
         self.log = log
         self.logFields = logFields
         self.logPayload = logPayload
+        self.mesh = mesh
+        self.meshAnchor = meshAnchor
+        self.meshFields = meshFields
+        self.meshPayload = meshPayload
         self.modeGet = modeGet
         self.modeGetResult = modeGetResult
         self.modeSet = modeSet
@@ -266,6 +296,216 @@ public struct ACK: Codable, Equatable, Sendable {
 
 public enum ACKType: String, Codable, Equatable, Sendable {
     case ack = "ack"
+}
+
+
+/// What the head's camera sees, as small JPEG frames for a viewer (0.5): the front camera in
+/// mode `capture`, the back camera in `sensing`, nothing in `idle`. Up to 10 Hz;
+/// `subscribe.max_px` sets the longest side (default 320, 80-640). Frames go only to paired
+/// clients that subscribe, are never stored, and the phone shows that someone is watching
+/// while any subscription is open. Every payload field is present unless the subscription
+/// named `fields`.
+// MARK: - Camera
+public struct Camera: Codable, Equatable, Sendable {
+    /// Counts frames sent on this subscription.
+    public let frame: Int?
+    public let height: Int?
+    /// The frame, base64 JPEG, upright as the head is mounted (landscape).
+    public let jpeg: String?
+    /// When the camera took it, seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// `front` in `capture`, `back` (ARKit's camera) in `sensing`.
+    public let source: CameraSource?
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: CameraType
+    public let width: Int?
+
+    public enum CodingKeys: String, CodingKey {
+        case frame = "frame"
+        case height = "height"
+        case jpeg = "jpeg"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case source = "source"
+        case ts = "ts"
+        case type = "type"
+        case width = "width"
+    }
+
+    public init(frame: Int?, height: Int?, jpeg: String?, sensorTimeS: Double?, seq: Int, source: CameraSource?, ts: Int, type: CameraType, width: Int?) {
+        self.frame = frame
+        self.height = height
+        self.jpeg = jpeg
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.source = source
+        self.ts = ts
+        self.type = type
+        self.width = width
+    }
+}
+
+/// `front` in `capture`, `back` (ARKit's camera) in `sensing`.
+public enum CameraSource: String, Codable, Equatable, Sendable {
+    case back = "back"
+    case front = "front"
+    case sim = "sim"
+}
+
+public enum CameraType: String, Codable, Equatable, Sendable {
+    case camera = "camera"
+}
+
+
+// MARK: - CameraFields
+public struct CameraFields: Codable, Equatable, Sendable {
+    /// Counts frames sent on this subscription.
+    public let frame: Int?
+    public let height: Int?
+    /// The frame, base64 JPEG, upright as the head is mounted (landscape).
+    public let jpeg: String?
+    /// When the camera took it, seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double?
+    /// `front` in `capture`, `back` (ARKit's camera) in `sensing`.
+    public let source: CameraSource?
+    public let width: Int?
+
+    public enum CodingKeys: String, CodingKey {
+        case frame = "frame"
+        case height = "height"
+        case jpeg = "jpeg"
+        case sensorTimeS = "sensor_time_s"
+        case source = "source"
+        case width = "width"
+    }
+
+    public init(frame: Int?, height: Int?, jpeg: String?, sensorTimeS: Double?, source: CameraSource?, width: Int?) {
+        self.frame = frame
+        self.height = height
+        self.jpeg = jpeg
+        self.sensorTimeS = sensorTimeS
+        self.source = source
+        self.width = width
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
+// MARK: - CameraPayload
+public struct CameraPayload: Codable, Equatable, Sendable {
+    /// Counts frames sent on this subscription.
+    public let frame: Int
+    public let height: Int
+    /// The frame, base64 JPEG, upright as the head is mounted (landscape).
+    public let jpeg: String
+    /// When the camera took it, seconds since device boot (the clock of `imu`).
+    public let sensorTimeS: Double
+    /// `front` in `capture`, `back` (ARKit's camera) in `sensing`.
+    public let source: CameraSource
+    public let width: Int
+
+    public enum CodingKeys: String, CodingKey {
+        case frame = "frame"
+        case height = "height"
+        case jpeg = "jpeg"
+        case sensorTimeS = "sensor_time_s"
+        case source = "source"
+        case width = "width"
+    }
+
+    public init(frame: Int, height: Int, jpeg: String, sensorTimeS: Double, source: CameraSource, width: Int) {
+        self.frame = frame
+        self.height = height
+        self.jpeg = jpeg
+        self.sensorTimeS = sensorTimeS
+        self.source = source
+        self.width = width
+    }
+}
+
+
+/// Distance from the back camera to what is at given points of its view, from the LiDAR
+/// depth map (0.5, optional). Needs capability `lidar` and mode `sensing`; otherwise
+/// `unsupported`. Points are normalised 0-1 in the `camera` frame from the back camera
+/// (origin top-left).
+// MARK: - DepthSample
+public struct DepthSample: Codable, Equatable, Sendable {
+    /// Client-chosen id, echoed in the reply.
+    public let id: String
+    public let points: [DepthSamplePoint]
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: DepthSampleType
+
+    public enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case points = "points"
+        case seq = "seq"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(id: String, points: [DepthSamplePoint], seq: Int, ts: Int, type: DepthSampleType) {
+        self.id = id
+        self.points = points
+        self.seq = seq
+        self.ts = ts
+        self.type = type
+    }
+}
+
+
+// MARK: - DepthSamplePoint
+public struct DepthSamplePoint: Codable, Equatable, Sendable {
+    public let x: Double
+    public let y: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case x = "x"
+        case y = "y"
+    }
+
+    public init(x: Double, y: Double) {
+        self.x = x
+        self.y = y
+    }
+}
+
+public enum DepthSampleType: String, Codable, Equatable, Sendable {
+    case depthSample = "depth.sample"
+}
+
+
+// MARK: - DepthSampleResult
+public struct DepthSampleResult: Codable, Equatable, Sendable {
+    /// ARKit's confidence for each reading.
+    public let confidence: [Confidence]?
+    /// Metres, one per point in order; null where there is no reading.
+    public let depthsM: [Double?]
+    public let sensorTimeS: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case confidence = "confidence"
+        case depthsM = "depths_m"
+        case sensorTimeS = "sensor_time_s"
+    }
+
+    public init(confidence: [Confidence]?, depthsM: [Double?], sensorTimeS: Double) {
+        self.confidence = confidence
+        self.depthsM = depthsM
+        self.sensorTimeS = sensorTimeS
+    }
+}
+
+public enum Confidence: String, Codable, Equatable, Sendable {
+    case high = "high"
+    case low = "low"
+    case medium = "medium"
 }
 
 
@@ -1099,7 +1339,7 @@ public struct Faces: Codable, Equatable, Sendable {
     public let sensorTimeS: Double?
     /// Per-connection, per-direction counter, starting at 0.
     public let seq: Int
-    public let source: Source?
+    public let source: FacesSource?
     /// Sender clock in milliseconds since the Unix epoch.
     public let ts: Int
     public let type: FacesType
@@ -1113,7 +1353,7 @@ public struct Faces: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(faces: [FacesFace]?, sensorTimeS: Double?, seq: Int, source: Source?, ts: Int, type: FacesType) {
+    public init(faces: [FacesFace]?, sensorTimeS: Double?, seq: Int, source: FacesSource?, ts: Int, type: FacesType) {
         self.faces = faces
         self.sensorTimeS = sensorTimeS
         self.seq = seq
@@ -1188,7 +1428,7 @@ public struct FacesBox: Codable, Equatable, Sendable {
     }
 }
 
-public enum Source: String, Codable, Equatable, Sendable {
+public enum FacesSource: String, Codable, Equatable, Sendable {
     case arkit = "arkit"
     case sim = "sim"
     case vision = "vision"
@@ -1203,7 +1443,7 @@ public enum FacesType: String, Codable, Equatable, Sendable {
 public struct FacesFields: Codable, Equatable, Sendable {
     public let faces: [FacesFace]?
     public let sensorTimeS: Double?
-    public let source: Source?
+    public let source: FacesSource?
 
     public enum CodingKeys: String, CodingKey {
         case faces = "faces"
@@ -1211,7 +1451,7 @@ public struct FacesFields: Codable, Equatable, Sendable {
         case source = "source"
     }
 
-    public init(faces: [FacesFace]?, sensorTimeS: Double?, source: Source?) {
+    public init(faces: [FacesFace]?, sensorTimeS: Double?, source: FacesSource?) {
         self.faces = faces
         self.sensorTimeS = sensorTimeS
         self.source = source
@@ -1224,7 +1464,7 @@ public struct FacesFields: Codable, Equatable, Sendable {
 public struct FacesPayload: Codable, Equatable, Sendable {
     public let faces: [FacesFace]
     public let sensorTimeS: Double
-    public let source: Source
+    public let source: FacesSource
 
     public enum CodingKeys: String, CodingKey {
         case faces = "faces"
@@ -1232,7 +1472,7 @@ public struct FacesPayload: Codable, Equatable, Sendable {
         case source = "source"
     }
 
-    public init(faces: [FacesFace], sensorTimeS: Double, source: Source) {
+    public init(faces: [FacesFace], sensorTimeS: Double, source: FacesSource) {
         self.faces = faces
         self.sensorTimeS = sensorTimeS
         self.source = source
@@ -1855,6 +2095,123 @@ public struct LogPayload: Codable, Equatable, Sendable {
         self.seqRef = seqRef
         self.subsystem = subsystem
         self.timeMS = timeMS
+    }
+}
+
+
+/// The room as triangle meshes from ARKit scene reconstruction (0.5, optional): only on
+/// devices with capability `scene_mesh` (LiDAR, Pro models) and only in mode `sensing`. Up
+/// to 1 Hz; each message carries the anchors that are new or changed since the last one and
+/// the ids of removed ones, so a client keeps a map by `id`. A device without LiDAR answers
+/// the subscription with `unsupported`.
+// MARK: - Mesh
+public struct Mesh: Codable, Equatable, Sendable {
+    /// New or changed anchors.
+    public let anchors: [MeshAnchor]?
+    /// Ids of anchors ARKit dropped.
+    public let removed: [String]?
+    public let sensorTimeS: Double?
+    /// Per-connection, per-direction counter, starting at 0.
+    public let seq: Int
+    /// Sender clock in milliseconds since the Unix epoch.
+    public let ts: Int
+    public let type: MeshType
+
+    public enum CodingKeys: String, CodingKey {
+        case anchors = "anchors"
+        case removed = "removed"
+        case sensorTimeS = "sensor_time_s"
+        case seq = "seq"
+        case ts = "ts"
+        case type = "type"
+    }
+
+    public init(anchors: [MeshAnchor]?, removed: [String]?, sensorTimeS: Double?, seq: Int, ts: Int, type: MeshType) {
+        self.anchors = anchors
+        self.removed = removed
+        self.sensorTimeS = sensorTimeS
+        self.seq = seq
+        self.ts = ts
+        self.type = type
+    }
+}
+
+
+// MARK: - MeshAnchor
+public struct MeshAnchor: Codable, Equatable, Sendable {
+    /// Little-endian uint32 vertex indices, three per triangle.
+    public let faces: String
+    public let id: String
+    /// Anchor origin in the `pose` world frame, metres.
+    public let position: [Double]
+    /// Anchor orientation in the world frame, unit quaternion [x, y, z, w] (as `pose`).
+    public let q: [Double]
+    /// Little-endian float32 x, y, z per vertex, in the anchor frame, metres.
+    public let vertices: String
+
+    public enum CodingKeys: String, CodingKey {
+        case faces = "faces"
+        case id = "id"
+        case position = "position"
+        case q = "q"
+        case vertices = "vertices"
+    }
+
+    public init(faces: String, id: String, position: [Double], q: [Double], vertices: String) {
+        self.faces = faces
+        self.id = id
+        self.position = position
+        self.q = q
+        self.vertices = vertices
+    }
+}
+
+public enum MeshType: String, Codable, Equatable, Sendable {
+    case mesh = "mesh"
+}
+
+
+// MARK: - MeshFields
+public struct MeshFields: Codable, Equatable, Sendable {
+    /// New or changed anchors.
+    public let anchors: [MeshAnchor]?
+    /// Ids of anchors ARKit dropped.
+    public let removed: [String]?
+    public let sensorTimeS: Double?
+
+    public enum CodingKeys: String, CodingKey {
+        case anchors = "anchors"
+        case removed = "removed"
+        case sensorTimeS = "sensor_time_s"
+    }
+
+    public init(anchors: [MeshAnchor]?, removed: [String]?, sensorTimeS: Double?) {
+        self.anchors = anchors
+        self.removed = removed
+        self.sensorTimeS = sensorTimeS
+    }
+}
+
+
+/// Complete payload, as sent when the subscription names no `fields`.
+// MARK: - MeshPayload
+public struct MeshPayload: Codable, Equatable, Sendable {
+    /// New or changed anchors.
+    public let anchors: [MeshAnchor]
+    /// Ids of anchors ARKit dropped.
+    public let removed: [String]
+    public let sensorTimeS: Double
+
+    public enum CodingKeys: String, CodingKey {
+        case anchors = "anchors"
+        case removed = "removed"
+        case sensorTimeS = "sensor_time_s"
+    }
+
+    public init(anchors: [MeshAnchor], removed: [String], sensorTimeS: Double) {
+        self.anchors = anchors
+        self.removed = removed
+        self.sensorTimeS = sensorTimeS
     }
 }
 
@@ -2603,6 +2960,9 @@ public enum SpeechStopType: String, Codable, Equatable, Sendable {
 public struct Status: Codable, Equatable, Sendable {
     /// Omitted when unknown (e.g. simulator).
     public let batteryLevel: Double?
+    /// Clients subscribed to `camera` now; the phone shows a marker while this is above 0 (0.5).
+    /// Omitted by older devices.
+    public let cameraViewers: Int?
     public let charging: Bool?
     /// Connected, authenticated clients.
     public let clients: Int?
@@ -2628,6 +2988,7 @@ public struct Status: Codable, Equatable, Sendable {
 
     public enum CodingKeys: String, CodingKey {
         case batteryLevel = "battery_level"
+        case cameraViewers = "camera_viewers"
         case charging = "charging"
         case clients = "clients"
         case devMode = "dev_mode"
@@ -2646,8 +3007,9 @@ public struct Status: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, faces: Int?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, subtitle: String?, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
+    public init(batteryLevel: Double?, cameraViewers: Int?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, faces: Int?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, seq: Int, subtitle: String?, theme: String?, thermalState: CommonThermalState?, ts: Int, type: StatusType, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
+        self.cameraViewers = cameraViewers
         self.charging = charging
         self.clients = clients
         self.devMode = devMode
@@ -2683,6 +3045,9 @@ public enum StatusType: String, Codable, Equatable, Sendable {
 public struct StatusFields: Codable, Equatable, Sendable {
     /// Omitted when unknown (e.g. simulator).
     public let batteryLevel: Double?
+    /// Clients subscribed to `camera` now; the phone shows a marker while this is above 0 (0.5).
+    /// Omitted by older devices.
+    public let cameraViewers: Int?
     public let charging: Bool?
     /// Connected, authenticated clients.
     public let clients: Int?
@@ -2703,6 +3068,7 @@ public struct StatusFields: Codable, Equatable, Sendable {
 
     public enum CodingKeys: String, CodingKey {
         case batteryLevel = "battery_level"
+        case cameraViewers = "camera_viewers"
         case charging = "charging"
         case clients = "clients"
         case devMode = "dev_mode"
@@ -2718,8 +3084,9 @@ public struct StatusFields: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, faces: Int?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, subtitle: String?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
+    public init(batteryLevel: Double?, cameraViewers: Int?, charging: Bool?, clients: Int?, devMode: Bool?, emotion: String?, faces: Int?, mode: CommonMode?, overlay: Overlay?, rttMS: Double?, subtitle: String?, theme: String?, thermalState: CommonThermalState?, uptimeS: Double?, view: CommonView?) {
         self.batteryLevel = batteryLevel
+        self.cameraViewers = cameraViewers
         self.charging = charging
         self.clients = clients
         self.devMode = devMode
@@ -2742,6 +3109,9 @@ public struct StatusFields: Codable, Equatable, Sendable {
 public struct StatusPayload: Codable, Equatable, Sendable {
     /// Omitted when unknown (e.g. simulator).
     public let batteryLevel: Double?
+    /// Clients subscribed to `camera` now; the phone shows a marker while this is above 0 (0.5).
+    /// Omitted by older devices.
+    public let cameraViewers: Int?
     public let charging: Bool
     /// Connected, authenticated clients.
     public let clients: Int
@@ -2762,6 +3132,7 @@ public struct StatusPayload: Codable, Equatable, Sendable {
 
     public enum CodingKeys: String, CodingKey {
         case batteryLevel = "battery_level"
+        case cameraViewers = "camera_viewers"
         case charging = "charging"
         case clients = "clients"
         case devMode = "dev_mode"
@@ -2777,8 +3148,9 @@ public struct StatusPayload: Codable, Equatable, Sendable {
         case view = "view"
     }
 
-    public init(batteryLevel: Double?, charging: Bool, clients: Int, devMode: Bool, emotion: String, faces: Int?, mode: CommonMode, overlay: Overlay, rttMS: Double?, subtitle: String?, theme: String, thermalState: CommonThermalState, uptimeS: Double, view: CommonView) {
+    public init(batteryLevel: Double?, cameraViewers: Int?, charging: Bool, clients: Int, devMode: Bool, emotion: String, faces: Int?, mode: CommonMode, overlay: Overlay, rttMS: Double?, subtitle: String?, theme: String, thermalState: CommonThermalState, uptimeS: Double, view: CommonView) {
         self.batteryLevel = batteryLevel
+        self.cameraViewers = cameraViewers
         self.charging = charging
         self.clients = clients
         self.devMode = devMode
@@ -2804,6 +3176,8 @@ public struct Subscribe: Codable, Equatable, Sendable {
     public let fields: [String]?
     /// Client-chosen id, echoed in the reply.
     public let id: String
+    /// `camera` only: longest side of a frame in pixels (default 320).
+    public let maxPx: Int?
     /// Requested rate. Ignored for event-driven topics such as `log`.
     public let rateHz: Double?
     /// Per-connection, per-direction counter, starting at 0.
@@ -2816,6 +3190,7 @@ public struct Subscribe: Codable, Equatable, Sendable {
     public enum CodingKeys: String, CodingKey {
         case fields = "fields"
         case id = "id"
+        case maxPx = "max_px"
         case rateHz = "rate_hz"
         case seq = "seq"
         case topic = "topic"
@@ -2823,9 +3198,10 @@ public struct Subscribe: Codable, Equatable, Sendable {
         case type = "type"
     }
 
-    public init(fields: [String]?, id: String, rateHz: Double?, seq: Int, topic: CommonTopic, ts: Int, type: SubscribeType) {
+    public init(fields: [String]?, id: String, maxPx: Int?, rateHz: Double?, seq: Int, topic: CommonTopic, ts: Int, type: SubscribeType) {
         self.fields = fields
         self.id = id
+        self.maxPx = maxPx
         self.rateHz = rateHz
         self.seq = seq
         self.topic = topic
@@ -2836,13 +3212,16 @@ public struct Subscribe: Codable, Equatable, Sendable {
 
 /// Subscribable stream. `faces` needs mode `capture` or `sensing`, `pose` needs `sensing`;
 /// `gps` asks for location access and `env` for Motion & Fitness access on first use;
-/// `speech` carries speaking and listening events (0.4).
+/// `speech` carries speaking and listening events (0.4); `camera` sends small JPEG frames in
+/// `capture` and `sensing` and `mesh` the room's mesh on LiDAR devices in `sensing` (0.5).
 public enum CommonTopic: String, Codable, Equatable, Sendable {
+    case camera = "camera"
     case env = "env"
     case faces = "faces"
     case gps = "gps"
     case imu = "imu"
     case log = "log"
+    case mesh = "mesh"
     case pose = "pose"
     case speech = "speech"
     case status = "status"
@@ -2940,15 +3319,23 @@ public struct SystemDiagnosticsResult: Codable, Equatable, Sendable {
 public struct DiagnosticsArkit: Codable, Equatable, Sendable {
     /// Front-camera face tracking concurrent with world tracking.
     public let faceTracking: Bool
+    /// LiDAR depth (capability `lidar`, 0.5). Omitted by older devices.
+    public let sceneDepth: Bool?
+    /// Scene reconstruction (capability `scene_mesh`, 0.5). Omitted by older devices.
+    public let sceneMesh: Bool?
     public let worldTracking: Bool
 
     public enum CodingKeys: String, CodingKey {
         case faceTracking = "face_tracking"
+        case sceneDepth = "scene_depth"
+        case sceneMesh = "scene_mesh"
         case worldTracking = "world_tracking"
     }
 
-    public init(faceTracking: Bool, worldTracking: Bool) {
+    public init(faceTracking: Bool, sceneDepth: Bool?, sceneMesh: Bool?, worldTracking: Bool) {
         self.faceTracking = faceTracking
+        self.sceneDepth = sceneDepth
+        self.sceneMesh = sceneMesh
         self.worldTracking = worldTracking
     }
 }
@@ -3283,8 +3670,9 @@ public enum UnsubscribeType: String, Codable, Equatable, Sendable {
 public struct Welcome: Codable, Equatable, Sendable {
     /// Feature flags. Known: 0.1 `face`, `display.image`, `display.video`, `display.web`,
     /// `display.subtitle`, `imu`, `status`, `log`, `screenshot`; 0.2 `camera`, `faces`, `pose`
-    /// (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`. Clients ignore unknown
-    /// values.
+    /// (where the device supports them); 0.3 `gps`, `env`; 0.4 `speech`; 0.5 `camera.stream`,
+    /// and on devices with LiDAR (Pro models, optional) `lidar` (`depth.sample`, face distance
+    /// from the depth map) and `scene_mesh` (topic `mesh`). Clients ignore unknown values.
     public let capabilities: [String]
     public let devMode: Bool
     public let device: WelcomeDevice

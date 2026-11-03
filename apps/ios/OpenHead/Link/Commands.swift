@@ -7,16 +7,17 @@ extension LinkServer {
         let face = model.face
         switch type {
         case "subscribe":
-            return subscribe(session, m)
+            return try subscribe(session, m)
 
         case "unsubscribe":
-            if let topic = m.string("topic"), let sub = session.subscriptions.removeValue(forKey: topic) {
-                sub.timer?.invalidate()
-                if topic == "imu" { model.motion.unsubscribe(session.id) }
-                if topic == "log" { model.logs.listeners[session.id] = nil }
-                model.stopSensor(topic, session.id)
-            }
+            if let topic = m.string("topic") { endSubscription(session, topic) }
             return nil
+
+        case "depth.sample":
+            let points = ((m["points"] as? [JSONObject]) ?? []).map {
+                CGPoint(x: $0.double("x") ?? 0.5, y: $0.double("y") ?? 0.5)
+            }
+            return try await model.ar.sampleDepth(points)
 
         case "face.set_theme":
             try await face.setTheme(m.string("name") ?? "", transitionMs: m.int("transition_ms") ?? 300)
@@ -193,13 +194,13 @@ extension LinkServer {
         guard model.settings.devMode else { throw LinkError("dev_mode_required", "\(type) needs dev mode") }
     }
 
-    private func subscribe(_ session: Session, _ m: JSONObject) -> JSONObject {
+    private func subscribe(_ session: Session, _ m: JSONObject) throws -> JSONObject {
         let topic = m.string("topic") ?? ""
         let fields = m["fields"] as? [String]
-        if let old = session.subscriptions.removeValue(forKey: topic) {
-            old.timer?.invalidate()
-            model.stopSensor(topic, session.id)
+        if topic == "mesh", !(model.supportsSensing && ARService.supportsMesh) {
+            throw LinkError("unsupported", "mesh needs a device with LiDAR (capability scene_mesh)")
         }
+        endSubscription(session, topic)
         func filtered(_ payload: JSONObject) -> JSONObject {
             guard let fields else { return payload }
             return payload.filter { fields.contains($0.key) }
@@ -252,6 +253,42 @@ extension LinkServer {
                         let status = await self.model.status(rttMs: nil)
                         session.send("status", filtered(status))
                     }
+                }
+            }
+            session.subscriptions[topic] = (fields, timer)
+            return ["topic": topic, "rate_hz": rate]
+        case "camera":  // protocol 0.5: small JPEG frames while a camera runs
+            let rate = min(m.double("rate_hz") ?? 4, 10)
+            let maxPx = min(640, max(80, m.int("max_px") ?? 320))
+            session.cameraFrame = 0
+            let timer = Timer.scheduledTimer(withTimeInterval: 1 / rate, repeats: true) { [weak self, weak session] _ in
+                MainActor.assumeIsolated {
+                    guard let self, let session, !session.cameraBusy else { return }  // skip, never queue
+                    session.cameraBusy = true
+                    Task {
+                        defer { session.cameraBusy = false }
+                        guard var frame = await self.model.cameraFrame(maxPx: maxPx),
+                              session.subscriptions["camera"] != nil else { return }
+                        frame["frame"] = session.cameraFrame
+                        session.cameraFrame += 1
+                        session.send("camera", filtered(frame))
+                    }
+                }
+            }
+            session.subscriptions[topic] = (fields, timer)
+            model.cameraViewersChanged(subscriberCount("camera"))
+            return ["topic": topic, "rate_hz": rate]
+        case "mesh":  // protocol 0.5, LiDAR only: changed anchors at most once a second
+            let rate = min(m.double("rate_hz") ?? 1, 1)
+            model.ar.wantsMesh = true
+            model.ar.resendMeshes()
+            let timer = Timer.scheduledTimer(withTimeInterval: 1 / rate, repeats: true) { [weak self, weak session] _ in
+                MainActor.assumeIsolated {
+                    guard let self, let session, self.model.mode == "sensing" else { return }
+                    let (anchors, removed) = self.model.ar.takeMeshChanges()
+                    guard !anchors.isEmpty || !removed.isEmpty else { return }
+                    session.send("mesh", filtered(["anchors": anchors, "removed": removed,
+                                                   "sensor_time_s": (ProcessInfo.processInfo.systemUptime * 1000).rounded() / 1000]))
                 }
             }
             session.subscriptions[topic] = (fields, timer)

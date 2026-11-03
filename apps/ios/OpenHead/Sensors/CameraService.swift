@@ -38,11 +38,14 @@ final class FrameBox: @unchecked Sendable {
         lock.unlock()
     }
 
-    func image() -> UIImage? {
+    var current: CVPixelBuffer? {
         lock.lock()
-        let current = buffer
-        lock.unlock()
-        guard let current else { return nil }
+        defer { lock.unlock() }
+        return buffer
+    }
+
+    func image() -> UIImage? {
+        guard let current = self.current else { return nil }
         let ci = CIImage(cvPixelBuffer: current)
         guard let cg = CIContext().createCGImage(ci, from: ci.extent) else { return nil }
         return UIImage(cgImage: cg)

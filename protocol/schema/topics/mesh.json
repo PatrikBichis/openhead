@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mesh",
+  "description": "The room as triangle meshes from ARKit scene reconstruction (0.5, optional): only on devices with capability `scene_mesh` (LiDAR, Pro models) and only in mode `sensing`. Up to 1 Hz; each message carries the anchors that are new or changed since the last one and the ids of removed ones, so a client keeps a map by `id`. A device without LiDAR answers the subscription with `unsupported`.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../envelope.json"
+    },
+    {
+      "$ref": "#/$defs/fields"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "mesh"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "anchor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Anchor origin in the `pose` world frame, metres."
+        },
+        "q": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Anchor orientation in the world frame, unit quaternion [x, y, z, w] (as `pose`)."
+        },
+        "vertices": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "description": "Little-endian float32 x, y, z per vertex, in the anchor frame, metres."
+        },
+        "faces": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "description": "Little-endian uint32 vertex indices, three per triangle."
+        }
+      },
+      "required": [
+        "id",
+        "position",
+        "q",
+        "vertices",
+        "faces"
+      ],
+      "additionalProperties": false
+    },
+    "fields": {
+      "type": "object",
+      "properties": {
+        "anchors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/anchor"
+          },
+          "maxItems": 64,
+          "description": "New or changed anchors."
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ids of anchors ARKit dropped."
+        },
+        "sensor_time_s": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Complete payload, as sent when the subscription names no `fields`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fields"
+        }
+      ],
+      "required": [
+        "anchors",
+        "removed",
+        "sensor_time_s"
+      ]
+    }
+  }
+}

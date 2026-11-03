@@ -1,4 +1,4 @@
-"""Synthetic people, pose, location and environment for the simulator (protocols 0.2, 0.3).
+"""Synthetic people, pose, location, environment and camera for the simulator (protocols 0.2-0.5).
 
 Two people in front of the head: one walks slowly from side to side, the other comes and
 goes. The camera view is mirrored, like a selfie, so a person to the head's left (+bearing)
@@ -106,3 +106,73 @@ def env_at(t: float) -> dict:
 
 def heading_at(t: float) -> float:
     return round((90 + math.degrees(0.35 * math.sin(0.5 * t))) % 360, 1)
+
+
+# --- protocol 0.5: camera frames, and LiDAR for a simulated Pro model -------------------------
+
+
+def camera_jpeg(t: float, mode: str, faces: list[dict], max_px: int) -> tuple[bytes, int, int]:
+    """A small drawing of what the camera would see: the people at their boxes (`capture`,
+    front camera, mirrored) or a room whose horizon follows the pose (`sensing`, back camera)."""
+    from io import BytesIO
+
+    from PIL import Image, ImageDraw
+
+    w, h = max_px, max(1, round(max_px * 390 / 844))
+    img = Image.new("RGB", (w, h), (232, 226, 214))
+    d = ImageDraw.Draw(img)
+    if mode == "capture":
+        d.rectangle((0, round(h * 0.62), w, h), fill=(205, 196, 180))  # desk
+        for f in sorted(faces, key=lambda f: f["size"]):  # the nearest in front
+            b = f.get("box")
+            if not b:
+                continue
+            cx, cy, fw = (b["x"] + b["w"] / 2) * w, (b["y"] + b["h"] / 2) * h, b["w"] * w
+            d.ellipse((cx - fw * 0.9, cy + fw * 0.5, cx + fw * 0.9, cy + fw * 2.4), fill=(31, 58, 95))  # shoulders
+            d.ellipse((cx - fw / 2, cy - fw * 0.62, cx + fw / 2, cy + fw * 0.62), fill=(224, 180, 150))
+            for ex in (-0.18, 0.18):
+                d.ellipse((cx + ex * fw - fw * 0.05, cy - fw * 0.12, cx + ex * fw + fw * 0.05, cy - fw * 0.02),
+                          fill=(40, 30, 30))
+            d.arc((cx - fw * 0.2, cy + fw * 0.05, cx + fw * 0.2, cy + fw * 0.32), 20, 160, fill=(150, 70, 60),
+                  width=max(1, round(fw * 0.04)))
+    else:
+        yaw = math.radians(heading_at(t) - 90)
+        horizon = h * horizon_at(t)
+        d.rectangle((0, round(horizon), w, h), fill=(196, 186, 168))  # floor
+        for i in range(-3, 5):  # door and shelves move as the head turns
+            x = ((i * 0.32 - yaw * 0.9) % 2.56 - 0.4) * w
+            d.rectangle((x, horizon - h * 0.38, x + w * 0.1, horizon), fill=(42, 157, 143) if i % 2 else (31, 58, 95))
+    out = BytesIO()
+    img.save(out, format="JPEG", quality=70)
+    return out.getvalue(), w, h
+
+
+def horizon_at(t: float) -> float:
+    """Where the floor meets the far wall in the back camera's view (0 top, 1 bottom)."""
+    return 0.55 + 0.15 * math.sin(0.31 * t + 1)
+
+
+def depth_at(t: float, x: float, y: float) -> float:
+    """LiDAR distance in a box-shaped room: the floor below the horizon, a wall 2.4 m away above."""
+    horizon = horizon_at(t)
+    if y > horizon:
+        return round(min(5.0, 1.1 / max(0.05, (y - horizon) * 2.2)), 3)
+    return round(2.4 + 0.3 * (x - 0.5) ** 2, 3)
+
+
+def room_mesh() -> list[dict]:
+    """ARKit-like mesh anchors for the same room: the floor and two walls, one quad each."""
+    import base64
+    import struct
+
+    def quad(aid: str, corners: list[tuple[float, float, float]]) -> dict:
+        verts = struct.pack("<12f", *[c for p in corners for c in p])
+        faces = struct.pack("<6I", 0, 1, 2, 0, 2, 3)
+        return {"id": aid, "position": [0.0, 0.0, 0.0], "q": [0.0, 0.0, 0.0, 1.0],
+                "vertices": base64.b64encode(verts).decode(), "faces": base64.b64encode(faces).decode()}
+
+    return [
+        quad("floor", [(-1.5, -1.2, 0.5), (1.5, -1.2, 0.5), (1.5, -1.2, -2.4), (-1.5, -1.2, -2.4)]),
+        quad("wall-front", [(-1.5, -1.2, -2.4), (1.5, -1.2, -2.4), (1.5, 1.2, -2.4), (-1.5, 1.2, -2.4)]),
+        quad("wall-left", [(-1.5, -1.2, 0.5), (-1.5, -1.2, -2.4), (-1.5, 1.2, -2.4), (-1.5, 1.2, 0.5)]),
+    ]

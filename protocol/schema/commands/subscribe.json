@@ -18,6 +18,12 @@
       "uniqueItems": true,
       "items": { "type": "string" },
       "description": "Only send these payload fields. Omit for all."
+    },
+    "max_px": {
+      "type": "integer",
+      "minimum": 80,
+      "maximum": 640,
+      "description": "`camera` only: longest side of a frame in pixels (default 320)."
     }
   },
   "required": ["type", "topic"],

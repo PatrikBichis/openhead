@@ -68,6 +68,11 @@
         "dev_mode": {
           "type": "boolean"
         },
+        "camera_viewers": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Clients subscribed to `camera` now; the phone shows a marker while this is above 0 (0.5). Omitted by older devices."
+        },
         "clients": {
           "type": "integer",
           "minimum": 0,
