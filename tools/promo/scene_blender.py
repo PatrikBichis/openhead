@@ -664,8 +664,10 @@ DUCK_YAW = math.radians(60)
 def duck_material(mesh: str):
     if "iphone" in mesh:
         return principled("iPhone", "#0c0d10", rough=0.22, metal=0.6, coat=0.6)
-    if "servo" in mesh or "motor" in mesh:
+    if "servo" in mesh or "wj-wk00" in mesh:
         return principled("Servo", "#141416", rough=0.55)
+    if "palonier" in mesh:
+        return principled("Horn", (0.62, 0.62, 0.64, 1), rough=0.3, metal=1.0)
     if "lager" in mesh:
         return principled("Steel", (0.62, 0.62, 0.64, 1), rough=0.22, metal=1.0)
     if "tpu" in mesh:
@@ -693,7 +695,9 @@ class Duck:
                 o = empty("duck " + m["mesh"])
             o.parent = self.root
             o.rotation_mode = "QUATERNION"
-            self.objs[m["mesh"]] = (i, o)
+            # Left and right use the same STL (and every servo the same three): key by index too.
+            key = m["mesh"] if m["mesh"] not in self.objs else f"{m['mesh']} {i}"
+            self.objs[key] = (i, o)
         for n in range(self.a, self.b + 1):
             row = self.row(n)
             for i, o in self.objs.values():
